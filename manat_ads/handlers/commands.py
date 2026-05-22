@@ -160,7 +160,10 @@ async def cmd_balance(message: types.Message) -> None:
     tg_user = message.from_user
     if not tg_user:
         return
+    await _show_balance(tg_user, message)
 
+
+async def _show_balance(tg_user: types.User, message: types.Message) -> None:
     async with async_session() as session:
         stmt = select(User).where(User.telegram_id == tg_user.id)
         result = await session.execute(stmt)
@@ -194,7 +197,10 @@ async def cmd_referral(message: types.Message) -> None:
     tg_user = message.from_user
     if not tg_user:
         return
+    await _show_referral(tg_user, message)
 
+
+async def _show_referral(tg_user: types.User, message: types.Message) -> None:
     async with async_session() as session:
         stmt = select(User).where(User.telegram_id == tg_user.id)
         result = await session.execute(stmt)
@@ -229,10 +235,8 @@ async def cmd_referral(message: types.Message) -> None:
 async def cb_balance(callback: types.CallbackQuery) -> None:
     """Inline button shortcut for /balance."""
     await callback.answer()
-    # Reuse the command handler by faking a Message-like call
     if callback.message and isinstance(callback.message, types.Message):
-        callback.message.from_user = callback.from_user
-        await cmd_balance(callback.message)
+        await _show_balance(callback.from_user, callback.message)
 
 
 @router.callback_query(lambda c: c.data == "referral")
@@ -240,8 +244,7 @@ async def cb_referral(callback: types.CallbackQuery) -> None:
     """Inline button shortcut for /referral."""
     await callback.answer()
     if callback.message and isinstance(callback.message, types.Message):
-        callback.message.from_user = callback.from_user
-        await cmd_referral(callback.message)
+        await _show_referral(callback.from_user, callback.message)
 
 
 # ── Helpers ─────────────────────────────────────────────────────────────
