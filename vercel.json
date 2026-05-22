@@ -1,0 +1,5 @@
+{
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/manat_ads/frontend/$1" }
+  ]
+}
