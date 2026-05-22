@@ -1,0 +1,99 @@
+"""
+ManatAds – SQLAlchemy ORM Models
+=================================
+Tables:
+  • users          – Telegram user profiles + referral tracking.
+  • watch_records  – Per-video reward ledger (audit trail).
+"""
+
+from __future__ import annotations
+
+from datetime import datetime, timezone
+
+from sqlalchemy import (
+    BigInteger,
+    Boolean,
+    DateTime,
+    Float,
+    ForeignKey,
+    Integer,
+    String,
+    func,
+)
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from database import Base
+
+
+# ── helpers ─────────────────────────────────────────────────────────────
+def _utcnow() -> datetime:
+    return datetime.now(timezone.utc)
+
+
+# ── Users ───────────────────────────────────────────────────────────────
+class User(Base):
+    __tablename__ = "users"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    telegram_id: Mapped[int] = mapped_column(BigInteger, unique=True, nullable=False, index=True)
+    username: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    first_name: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    last_name: Mapped[str | None] = mapped_column(String(255), nullable=True)
+
+    # ── Economy ──
+    balance_mc: Mapped[float] = mapped_column(Float, default=0.0, server_default="0")
+    total_earned_mc: Mapped[float] = mapped_column(Float, default=0.0, server_default="0")
+    videos_today: Mapped[int] = mapped_column(Integer, default=0, server_default="0")
+    last_watch_date: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+    # ── Referral ──
+    referrer_id: Mapped[int | None] = mapped_column(
+        BigInteger, ForeignKey("users.telegram_id"), nullable=True, index=True
+    )
+    referral_earnings_mc: Mapped[float] = mapped_column(Float, default=0.0, server_default="0")
+    referral_count: Mapped[int] = mapped_column(Integer, default=0, server_default="0")
+
+    # ── Timestamps ──
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True, server_default="1")
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=_utcnow, server_default=func.now()
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=_utcnow, onupdate=_utcnow, server_default=func.now()
+    )
+
+    # ── Relationships ──
+    watch_records: Mapped[list["WatchRecord"]] = relationship(
+        back_populates="user", cascade="all, delete-orphan", lazy="selectin"
+    )
+
+    def __repr__(self) -> str:
+        return f"<User telegram_id={self.telegram_id} balance={self.balance_mc:.2f} MC>"
+
+
+# ── Watch Records ──────────────────────────────────────────────────────
+class WatchRecord(Base):
+    __tablename__ = "watch_records"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    user_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    telegram_id: Mapped[int] = mapped_column(BigInteger, nullable=False, index=True)
+
+    reward_mc: Mapped[float] = mapped_column(Float, nullable=False)
+    referrer_bonus_mc: Mapped[float] = mapped_column(Float, default=0.0, server_default="0")
+    referrer_telegram_id: Mapped[int | None] = mapped_column(BigInteger, nullable=True)
+
+    adsgram_event_id: Mapped[str | None] = mapped_column(String(255), nullable=True, unique=True)
+    ip_address: Mapped[str | None] = mapped_column(String(45), nullable=True)
+
+    watched_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=_utcnow, server_default=func.now()
+    )
+
+    # ── Relationships ──
+    user: Mapped["User"] = relationship(back_populates="watch_records")
+
+    def __repr__(self) -> str:
+        return f"<WatchRecord user={self.telegram_id} reward={self.reward_mc} MC>"

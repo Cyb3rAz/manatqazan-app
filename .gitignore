@@ -1,0 +1,23 @@
+# Environments
+.env
+.env.*
+
+# Python Cache
+**/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.venv/
+venv/
+ENV/
+env/
+
+# Databases
+*.db
+*.sqlite3
+
+# Local/IDE Settings
+.vscode/
+.idea/
+*.log

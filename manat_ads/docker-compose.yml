@@ -1,0 +1,58 @@
+# ── ManatAds Docker Compose ─────────────────────────────────────────
+# Production stack: App + PostgreSQL
+#
+# Usage:
+#   docker-compose up -d --build
+#   docker-compose logs -f app
+
+version: "3.9"
+
+services:
+  # ── PostgreSQL Database ──
+  db:
+    image: postgres:16-alpine
+    container_name: manatads-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: manat_ads
+      POSTGRES_USER: manatads
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-changeme_in_production}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U manatads -d manat_ads"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ── ManatAds Application ──
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: manatads-app
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+    environment:
+      - BOT_TOKEN=${BOT_TOKEN}
+      - WEBHOOK_URL=${WEBHOOK_URL}
+      - ADSGRAM_SECRET=${ADSGRAM_SECRET}
+      - ADSGRAM_BLOCK_ID=${ADSGRAM_BLOCK_ID}
+      - DATABASE_URL=postgresql+asyncpg://manatads:${DB_PASSWORD:-changeme_in_production}@db:5432/manat_ads
+      - ENVIRONMENT=production
+      - MC_PER_VIDEO=50
+      - DAILY_VIDEO_LIMIT=25
+      - MC_TO_AZN_RATE=21000
+      - REFERRAL_BONUS_PERCENT=10
+    env_file:
+      - .env
+
+volumes:
+  pgdata:
+    driver: local
