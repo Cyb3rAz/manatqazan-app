@@ -520,7 +520,7 @@ async def _show_how_it_works(message: types.Message) -> None:
         "3️⃣ Dostlarınızı dəvət edərək onların qazancından da əlavə bonuslar əldə edirsiniz.\n\n"
         "💰 <b>Çıxarış və Balans Mexanizmi:</b>\n"
         "Yığılan MC xalları sistem daxilində real Azərbaycan Manatına (AZN) konvertasiya olunur. "
-        "Minimum çıxarış limiti 7 AZN-dir. Bu limitə çatdıqdan sonra qazancınızı rahatlıqla şəxsi elektron pul kisələrinə (məsələn, m10) "
+        "Minimum çıxarış limiti 5 AZN-dir. Bu limitə çatdıqdan sonra qazancınızı rahatlıqla şəxsi elektron pul kisələrinə (məsələn, m10) "
         "və ya bank kartınıza nağdlaşdıra bilərsiniz!\n\n"
         "Hər hansı bir sualınız yaranarsa, dəstək komandası ilə əlaqə saxlaya bilərsiniz. "
         "İndi ilk videonuzu izləyin və qazanmağa başlayın! 🚀"
@@ -540,9 +540,9 @@ async def _handle_withdraw(tg_user: types.User, message: types.Message) -> None:
 
     azn_value = user.balance_mc / MC_TO_AZN_RATE
     
-    if azn_value < 7:
+    if azn_value < 5:
         await message.answer(
-            f"❌ Çıxarış uğursuz oldu. Minimum çıxarış limiti 7 AZN-dir.\n\n"
+            f"❌ Çıxarış uğursuz oldu. Minimum çıxarış limiti 5 AZN-dir.\n\n"
             f"💰 Sizin hazırkı balansınız: <b>{azn_value:,.4f} AZN</b>\n\n"
             f"🚀 <b>Limiti necə daha sürətli tamamlamaq olar?</b>\n"
             f"Daha çox video izləməklə yanaşı, <b>dostlarınızı dəvət edərək</b> daha böyük məbləğlər qazana bilərsiniz! "
