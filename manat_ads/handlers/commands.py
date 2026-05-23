@@ -89,22 +89,22 @@ async def cmd_start_with_referral(message: types.Message) -> None:
 
     referral_msg = ""
     if referrer_tg_id:
-        referral_msg = "\n\n🤝 <b>You were invited by a friend!</b> They'll earn a 10% lifetime bonus on your rewards."
+        referral_msg = "\n\n🤝 <b>Sizi dostunuz dəvət edib!</b> Onlar sizin qazancınızdan ömürlük 10% bonus qazanacaqlar."
 
     webapp_url = "https://manatqazan.vercel.app"
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="🎬 Watch & Earn", web_app=types.WebAppInfo(url=webapp_url))],
-        [InlineKeyboardButton(text="💰 My Balance", callback_data="balance")],
-        [InlineKeyboardButton(text="👥 Referral Program", callback_data="referral")],
+        [InlineKeyboardButton(text="🎬 Video İzlə & Qazan", web_app=types.WebAppInfo(url=webapp_url))],
+        [InlineKeyboardButton(text="💰 Balansım", callback_data="balance")],
+        [InlineKeyboardButton(text="👥 Referal Proqramı", callback_data="referral")],
     ])
 
     await message.answer(
-        f"🎉 <b>Welcome to ManatAds!</b>\n\n"
-        f"Hello, <b>{tg_user.first_name}</b>! 👋\n\n"
-        f"📺 Watch short videos and earn <b>{MC_PER_VIDEO} MC</b> per video.\n"
-        f"💵 Convert your earnings: <b>{MC_TO_AZN_RATE:,} MC = 1.00 AZN</b>\n"
-        f"📊 Daily limit: <b>{DAILY_LIMIT} videos/day</b>\n"
-        f"👥 Invite friends for <b>10% lifetime bonus!</b>"
+        f"🎉 <b>ManatAds-a xoş gəlmisiniz!</b>\n\n"
+        f"Salam, <b>{tg_user.first_name}</b>! 👋\n\n"
+        f"📺 Qısa videolar izləyin və hər video üçün <b>{MC_PER_VIDEO} MC</b> qazanın.\n"
+        f"💵 Qazancınızı konvertasiya edin: <b>{MC_TO_AZN_RATE:,} MC = 1.00 AZN</b>\n"
+        f"📊 Gündəlik limit: <b>{DAILY_LIMIT} video/gün</b>\n"
+        f"👥 Dostlarınızı dəvət edin və <b>ömürlük 10% bonus</b> qazanın!"
         f"{referral_msg}",
         reply_markup=keyboard,
     )
@@ -137,18 +137,18 @@ async def cmd_start(message: types.Message) -> None:
 
     webapp_url = "https://manatqazan.vercel.app"
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="🎬 Watch & Earn", web_app=types.WebAppInfo(url=webapp_url))],
-        [InlineKeyboardButton(text="💰 My Balance", callback_data="balance")],
-        [InlineKeyboardButton(text="👥 Referral Program", callback_data="referral")],
+        [InlineKeyboardButton(text="🎬 Video İzlə & Qazan", web_app=types.WebAppInfo(url=webapp_url))],
+        [InlineKeyboardButton(text="💰 Balansım", callback_data="balance")],
+        [InlineKeyboardButton(text="👥 Referal Proqramı", callback_data="referral")],
     ])
 
     await message.answer(
-        f"🎉 <b>Welcome to ManatAds!</b>\n\n"
-        f"Hello, <b>{tg_user.first_name}</b>! 👋\n\n"
-        f"📺 Watch short videos and earn <b>{MC_PER_VIDEO} MC</b> per video.\n"
-        f"💵 Convert your earnings: <b>{MC_TO_AZN_RATE:,} MC = 1.00 AZN</b>\n"
-        f"📊 Daily limit: <b>{DAILY_LIMIT} videos/day</b>\n"
-        f"👥 Invite friends for <b>10% lifetime bonus!</b>",
+        f"🎉 <b>ManatAds-a xoş gəlmisiniz!</b>\n\n"
+        f"Salam, <b>{tg_user.first_name}</b>! 👋\n\n"
+        f"📺 Qısa videolar izləyin və hər video üçün <b>{MC_PER_VIDEO} MC</b> qazanın.\n"
+        f"💵 Qazancınızı konvertasiya edin: <b>{MC_TO_AZN_RATE:,} MC = 1.00 AZN</b>\n"
+        f"📊 Gündəlik limit: <b>{DAILY_LIMIT} video/gün</b>\n"
+        f"👥 Dostlarınızı dəvət edin və <b>ömürlük 10% bonus</b> qazanın!",
         reply_markup=keyboard,
     )
 
@@ -170,7 +170,7 @@ async def _show_balance(tg_user: types.User, message: types.Message) -> None:
         user = result.scalar_one_or_none()
 
     if not user:
-        await message.answer("⚠️ You're not registered yet. Send /start first.")
+        await message.answer("⚠️ Siz hələ qeydiyyatdan keçməmisiniz. Zəhmət olmasa əvvəlcə /start göndərin.")
         return
 
     azn_value = user.balance_mc / MC_TO_AZN_RATE
@@ -179,14 +179,14 @@ async def _show_balance(tg_user: types.User, message: types.Message) -> None:
     videos_remaining = DAILY_LIMIT - (user.videos_today if last_date == today else 0)
 
     await message.answer(
-        f"💰 <b>Your Balance</b>\n\n"
+        f"💰 <b>Balansınız</b>\n\n"
         f"┌─────────────────────────\n"
         f"│ 🪙 <b>Manat Coins:</b>  {user.balance_mc:,.0f} MC\n"
-        f"│ 💵 <b>AZN Value:</b>    {azn_value:,.4f} AZN\n"
-        f"│ 📈 <b>Total Earned:</b> {user.total_earned_mc:,.0f} MC\n"
-        f"│ 🎬 <b>Videos Left:</b>  {videos_remaining}/{DAILY_LIMIT}\n"
+        f"│ 💵 <b>AZN Dəyəri:</b>    {azn_value:,.4f} AZN\n"
+        f"│ 📈 <b>Ümumi Qazanc:</b> {user.total_earned_mc:,.0f} MC\n"
+        f"│ 🎬 <b>Qalan Videolar:</b>  {videos_remaining}/{DAILY_LIMIT}\n"
         f"└─────────────────────────\n\n"
-        f"💡 <i>Conversion rate: {MC_TO_AZN_RATE:,} MC = 1.00 AZN</i>",
+        f"💡 <i>Məzənnə: {MC_TO_AZN_RATE:,} MC = 1.00 AZN</i>",
     )
 
 
@@ -207,7 +207,7 @@ async def _show_referral(tg_user: types.User, message: types.Message) -> None:
         user = result.scalar_one_or_none()
 
     if not user:
-        await message.answer("⚠️ You're not registered yet. Send /start first.")
+        await message.answer("⚠️ Siz hələ qeydiyyatdan keçməmisiniz. Zəhmət olmasa əvvəlcə /start göndərin.")
         return
 
     bot_info = await message.bot.me()
@@ -216,17 +216,17 @@ async def _show_referral(tg_user: types.User, message: types.Message) -> None:
     ref_azn = user.referral_earnings_mc / MC_TO_AZN_RATE
 
     await message.answer(
-        f"👥 <b>Referral Program</b>\n\n"
-        f"Share your link and earn <b>10% lifetime bonus</b> on every video your friends watch!\n\n"
-        f"🔗 <b>Your Referral Link:</b>\n"
+        f"👥 <b>Referal Proqramı</b>\n\n"
+        f"Dəvət linkinizi paylaşın və dostlarınızın izlədiyi hər videodan <b>ömürlük 10% bonus</b> qazanın!\n\n"
+        f"🔗 <b>Sizin Referal Linkiniz:</b>\n"
         f"<code>{referral_link}</code>\n\n"
         f"┌─────────────────────────\n"
-        f"│ 👤 <b>Friends Invited:</b>     {user.referral_count}\n"
-        f"│ 🪙 <b>Referral Earnings:</b>   {user.referral_earnings_mc:,.0f} MC\n"
-        f"│ 💵 <b>Referral AZN:</b>        {ref_azn:,.4f} AZN\n"
+        f"│ 👤 <b>Dəvət Olunanlar:</b>   {user.referral_count}\n"
+        f"│ 🪙 <b>Referal Qazancı:</b>   {user.referral_earnings_mc:,.0f} MC\n"
+        f"│ 💵 <b>Referal AZN:</b>      {ref_azn:,.4f} AZN\n"
         f"└─────────────────────────\n\n"
-        f"💡 <i>For each video your referral watches ({MC_PER_VIDEO} MC), "
-        f"you automatically receive {MC_PER_VIDEO * 10 // 100} MC!</i>",
+        f"💡 <i>Dəvət etdiyiniz hər bir şəxsin izlədiyi video üçün ({MC_PER_VIDEO} MC), "
+        f"siz avtomatik olaraq {MC_PER_VIDEO * 10 // 100} MC əldə edirsiniz!</i>",
     )
 
 
@@ -254,15 +254,15 @@ async def _send_welcome_back(message: types.Message, user: User) -> None:
     webapp_url = "https://manatqazan.vercel.app"
 
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="🎬 Watch & Earn", web_app=types.WebAppInfo(url=webapp_url))],
-        [InlineKeyboardButton(text="💰 My Balance", callback_data="balance")],
-        [InlineKeyboardButton(text="👥 Referral Program", callback_data="referral")],
+        [InlineKeyboardButton(text="🎬 Video İzlə & Qazan", web_app=types.WebAppInfo(url=webapp_url))],
+        [InlineKeyboardButton(text="💰 Balansım", callback_data="balance")],
+        [InlineKeyboardButton(text="👥 Referal Proqramı", callback_data="referral")],
     ])
 
     await message.answer(
-        f"👋 <b>Welcome back, {user.first_name or 'friend'}!</b>\n\n"
-        f"🪙 Balance: <b>{user.balance_mc:,.0f} MC</b> ({azn_value:,.4f} AZN)\n"
-        f"📈 Total earned: <b>{user.total_earned_mc:,.0f} MC</b>\n\n"
-        f"Ready to earn more? Tap the button below! 👇",
+        f"👋 <b>Yenidən xoş gəldiniz, {user.first_name or 'dost'}!</b>\n\n"
+        f"🪙 Balans: <b>{user.balance_mc:,.0f} MC</b> ({azn_value:,.4f} AZN)\n"
+        f"📈 Ümumi qazanc: <b>{user.total_earned_mc:,.0f} MC</b>\n\n"
+        f"Daha çox qazanmağa hazırsınız? Aşağıdakı düyməyə toxunun! 👇",
         reply_markup=keyboard,
     )
