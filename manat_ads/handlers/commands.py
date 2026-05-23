@@ -336,18 +336,55 @@ async def _show_balance(tg_user: types.User, message: types.Message) -> None:
         await message.answer("⚠️ Siz hələ qeydiyyatdan keçməmisiniz. Zəhmət olmasa əvvəlcə /start göndərin.")
         return
 
-    azn_value = user.balance_mc / MC_TO_AZN_RATE
-    today = datetime.now(timezone.utc).date()
-    last_date = user.last_watch_date.date() if user.last_watch_date else None
-    videos_remaining = DAILY_LIMIT - (user.videos_today if last_date == today else 0)
+    now = datetime.now(timezone.utc)
+    today = now.date()
+
+    # Dynamic daily reset
+    if user.last_watch_date and user.last_watch_date.date() != today:
+        async with async_session() as reset_session:
+            stmt = select(User).where(User.telegram_id == tg_user.id)
+            res = await reset_session.execute(stmt)
+            db_user = res.scalar_one()
+            db_user.session_1_count = 0
+            db_user.session_2_count = 0
+            db_user.session_1_completion_time = None
+            db_user.videos_today = 0
+            await reset_session.commit()
+            user = db_user
+
+    session_1_count = user.session_1_count
+    session_2_count = user.session_2_count
+    session_1_completion_time = user.session_1_completion_time
+    balance_mc = user.balance_mc
+    total_earned_mc = user.total_earned_mc
+
+    azn_value = balance_mc / MC_TO_AZN_RATE
+    
+    # Calculate lock text
+    s2_status = "Kilidli 🔒"
+    if session_1_count >= 25:
+        if session_1_completion_time is None:
+            s2_status = "Aktiv 🟢"
+        else:
+            from datetime import timedelta
+            unlock_time = session_1_completion_time + timedelta(hours=7)
+            if now < unlock_time:
+                remaining = unlock_time - now
+                hours, remainder = divmod(int(remaining.total_seconds()), 3600)
+                minutes, _ = divmod(remainder, 60)
+                s2_status = f"🔒 Kilidli ({hours:02d}s {minutes:02d}d qalıb)"
+            else:
+                s2_status = "Aktiv 🟢"
 
     await message.answer(
         f"💰 <b>Balansınız</b>\n\n"
         f"┌─────────────────────────\n"
-        f"│ 🪙 <b>Manat Coins:</b>  {user.balance_mc:,.0f} MC\n"
+        f"│ 🪙 <b>Manat Coins:</b>  {balance_mc:,.0f} MC\n"
         f"│ 💵 <b>AZN Dəyəri:</b>    {azn_value:,.4f} AZN\n"
-        f"│ 📈 <b>Ümumi Qazanc:</b> {user.total_earned_mc:,.0f} MC\n"
-        f"│ 🎬 <b>Qalan Videolar:</b>  {videos_remaining}/{DAILY_LIMIT}\n"
+        f"│ 📈 <b>Ümumi Qazanc:</b> {total_earned_mc:,.0f} MC\n"
+        f"├─────────────────────────\n"
+        f"│ 1️⃣ <b>Səans 1:</b>  {session_1_count}/25 video\n"
+        f"│ 2️⃣ <b>Səans 2:</b>  {session_2_count}/25 video ({s2_status})\n"
         f"└─────────────────────────\n\n"
         f"💡 <i>Məzənnə: {MC_TO_AZN_RATE:,} MC = 1.00 AZN</i>",
     )
@@ -633,7 +670,10 @@ async def cmd_info(message: types.Message) -> None:
     
     today = datetime.now(timezone.utc).date()
     last_date = user.last_watch_date.date() if user.last_watch_date else None
-    videos_today_count = user.videos_today if last_date == today else 0
+    
+    session_1 = user.session_1_count if last_date == today else 0
+    session_2 = user.session_2_count if last_date == today else 0
+    total_videos = session_1 + session_2
     
     await message.answer(
         f"ℹ️ <b>İstifadəçi Məlumatı:</b>\n"
@@ -641,7 +681,7 @@ async def cmd_info(message: types.Message) -> None:
         f"• <b>Username:</b> {username_display}\n"
         f"• <b>Hazırkı Balans:</b> {user.balance_mc:,.0f} MC\n"
         f"• <b>Ümumi Qazanc:</b> {user.total_earned_mc:,.0f} MC\n"
-        f"• <b>Bugünkü Videolar:</b> {videos_today_count}/{DAILY_LIMIT}\n"
+        f"• <b>Bugünkü Videolar:</b> {total_videos}/50 (S1: {session_1}/25 | S2: {session_2}/25)\n"
         f"• <b>Dəvət Etdiyi Şəxslər:</b> {user.referral_count} nəfər\n"
         f"• <b>Status:</b> {status_str}"
     )

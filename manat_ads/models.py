@@ -48,6 +48,11 @@ class User(Base):
     videos_today: Mapped[int] = mapped_column(Integer, default=0, server_default="0")
     last_watch_date: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
+    # ── Sequential Cooldown Session Columns ──
+    session_1_count: Mapped[int] = mapped_column(Integer, default=0, server_default="0")
+    session_2_count: Mapped[int] = mapped_column(Integer, default=0, server_default="0")
+    session_1_completion_time: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
     # ── Referral ──
     referrer_id: Mapped[int | None] = mapped_column(
         BigInteger, ForeignKey("users.telegram_id"), nullable=True, index=True

@@ -582,23 +582,35 @@
                 </div>
             </div>
 
-            <!-- Daily Progress -->
-            <div class="progress-section animate-in delay-3">
+            <!-- Session 1 Card -->
+            <div class="progress-section animate-in delay-3" id="session-1-card">
                 <div class="progress-header">
-                    <span class="progress-title">📊 Gündəlik Tərəqqi</span>
-                    <span class="progress-count" id="progress-text">0/25 video</span>
+                    <span class="progress-title">🌅 1️⃣ Səans 1</span>
+                    <span class="progress-count" id="session-1-progress-text">0/25 video</span>
                 </div>
-                <div class="progress-bar">
-                    <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+                <div class="progress-bar" style="margin-bottom: 12px;">
+                    <div class="progress-fill" id="session-1-progress-fill" style="width: 0%"></div>
                 </div>
-            </div>
-
-            <!-- Watch Button -->
-            <div class="watch-section animate-in delay-4">
-                <button class="watch-btn" id="watch-btn" onclick="watchAd()">
+                <button class="watch-btn" id="session-1-btn" onclick="watchAd(1)">
                     🎬 Video İzlə & 50 MC Qazan
                 </button>
-                <div class="watch-reward-hint">Mükafat almaq üçün videonu tam izləyin</div>
+            </div>
+
+            <!-- Session 2 Card -->
+            <div class="progress-section animate-in delay-4" id="session-2-card">
+                <div class="progress-header">
+                    <span class="progress-title">🌌 2️⃣ Səans 2</span>
+                    <span class="progress-count" id="session-2-progress-text">0/25 video</span>
+                </div>
+                <div class="progress-bar" style="margin-bottom: 12px;">
+                    <div class="progress-fill" id="session-2-progress-fill" style="width: 0%; background: linear-gradient(135deg, #10b981, #059669);"></div>
+                </div>
+                <button class="watch-btn" id="session-2-btn" onclick="watchAd(2)" style="background: linear-gradient(135deg, #10b981, #059669); box-shadow: 0 4px 20px rgba(16, 185, 129, 0.25);">
+                    🎬 Video İzlə & 50 MC Qazan
+                </button>
+                <div class="watch-reward-hint" id="session-2-cooldown-hint" style="margin-top: 8px; font-weight: 600; color: #f43f5e; display: none;">
+                    Kilid açılmasına: 07:00:00
+                </div>
             </div>
 
             <!-- Referral Section -->

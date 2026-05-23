@@ -340,36 +340,69 @@ async def _credit_user(user_id_val: int | str, event_id: str, source: str = "unk
                 logger.info("[CREDIT] Duplicate event_id=%s - skipping.", event_id)
                 return JSONResponse({"ok": True, "message": "Artiq kreditlenib.", "balance": existing_balance})
 
-        # -- Gundelik limit yoxla --
+        # -- Gundelik limit ve ardicil seans yoxla --
         now = datetime.now(timezone.utc)
         today = now.date()
-        if user.last_watch_date and user.last_watch_date.date() == today:
-            if user.videos_today >= DAILY_VIDEO_LIMIT:
-                print(f"[CREDIT] User {user_telegram_id} hit daily limit ({user.videos_today}/{DAILY_VIDEO_LIMIT})")
-                logger.warning("[CREDIT] User %s hit daily limit (%s/%s)", user_telegram_id, user.videos_today, DAILY_VIDEO_LIMIT)
-                return JSONResponse({"ok": False, "message": "Gundelik limit bitdi."}, status_code=429)
-        else:
-            # Yeni gun -> sifirla
-            print(f"[CREDIT] New day for user {user_telegram_id} - resetting videos_today")
-            logger.info("[CREDIT] New day for user %s - resetting videos_today", user_telegram_id)
+        from datetime import timedelta
+
+        # Dynamic daily reset
+        if user.last_watch_date and user.last_watch_date.date() != today:
+            print(f"[CREDIT] New day for user {user_telegram_id} - resetting session stats")
+            logger.info("[CREDIT] New day for user %s - resetting session stats", user_telegram_id)
+            user.session_1_count = 0
+            user.session_2_count = 0
+            user.session_1_completion_time = None
             user.videos_today = 0
+
+        # Determine target session & enforce limits/cooldown
+        if user.session_1_count < 25:
+            # Active in Session 1
+            user.session_1_count += 1
+            if user.session_1_count == 25:
+                user.session_1_completion_time = now
+                print(f"[CREDIT] User {user_telegram_id} COMPLETED Session 1 at {now.isoformat()}")
+                logger.info("[CREDIT] User %s COMPLETED Session 1 at %s", user_telegram_id, now.isoformat())
+        else:
+            # Session 1 is completed. Check Session 2 status.
+            if user.session_1_completion_time is None:
+                # Fallback: completed Session 1 but completion time was null, set now (though should not happen)
+                user.session_1_completion_time = now - timedelta(hours=8) # unlock immediately
+
+            unlock_time = user.session_1_completion_time + timedelta(hours=7)
+            if now < unlock_time:
+                # Session 2 is currently locked
+                print(f"[CREDIT] Session 2 is LOCKED for user {user_telegram_id} until {unlock_time.isoformat()}")
+                logger.warning("[CREDIT] Session 2 is LOCKED for user %s until %s", user_telegram_id, unlock_time.isoformat())
+                return JSONResponse(
+                    {"ok": False, "message": "Növbəti seans hələ kilidlidir.", "unlock_at": unlock_time.isoformat()},
+                    status_code=403
+                )
+
+            # Session 2 is unlocked. Check if already completed Session 2.
+            if user.session_2_count >= 25:
+                print(f"[CREDIT] User {user_telegram_id} completed both sessions today (50 videos). Limit hit.")
+                logger.warning("[CREDIT] User %s completed both sessions today (50 videos). Limit hit.", user_telegram_id)
+                return JSONResponse({"ok": False, "message": "Gündəlik limitiniz bitdi."}, status_code=429)
+
+            # Increment Session 2 count
+            user.session_2_count += 1
 
         # -- Balansi artir --
         final_reward = float(MC_PER_VIDEO)
         old_balance = user.balance_mc
         user.balance_mc = old_balance + final_reward
         user.total_earned_mc = user.total_earned_mc + final_reward
-        user.videos_today = user.videos_today + 1
+        user.videos_today = user.session_1_count + user.session_2_count
         user.last_watch_date = now
 
-        # Deyerleri session-dan cixmadan yadda saxla
+        # Deyerleri cixmadan yadda saxla
         final_new_balance = user.balance_mc
         final_videos_today = user.videos_today
 
-        print(f"[CREDIT] Balance update: {old_balance:.2f} -> {final_new_balance:.2f} (+{final_reward:.2f}) | videos_today={final_videos_today}")
+        print(f"[CREDIT] Balance update: {old_balance:.2f} -> {final_new_balance:.2f} (+{final_reward:.2f}) | videos_today={final_videos_today} (S1={user.session_1_count}, S2={user.session_2_count})")
         logger.info(
-            "[CREDIT] balance: %.2f -> %.2f (+%.2f) | videos_today=%s",
-            old_balance, final_new_balance, final_reward, final_videos_today
+            "[CREDIT] balance: %.2f -> %.2f (+%.2f) | videos_today=%s (S1=%s, S2=%s)",
+            old_balance, final_new_balance, final_reward, final_videos_today, user.session_1_count, user.session_2_count
         )
 
         # -- Referal bonusu --
@@ -448,30 +481,70 @@ async def get_user_info(telegram_id: str) -> JSONResponse:
             result = await session.execute(stmt)
             user = result.scalar_one_or_none()
 
-    if not user:
-        logger.error("[USER-INFO] User %s NOT FOUND in database!", telegram_id)
-        raise HTTPException(status_code=404, detail="User not found.")
+        if not user:
+            logger.error("[USER-INFO] User %s NOT FOUND in database!", telegram_id)
+            raise HTTPException(status_code=404, detail="User not found.")
 
-    if not user.is_active:
-        logger.warning("[USER-INFO] Banned user %s tried to fetch user info!", telegram_id)
-        raise HTTPException(status_code=403, detail="Hesabınız dondurulub.")
+        if not user.is_active:
+            logger.warning("[USER-INFO] Banned user %s tried to fetch user info!", telegram_id)
+            raise HTTPException(status_code=403, detail="Hesabınız dondurulub.")
 
-    now = datetime.now(timezone.utc)
-    today = now.date()
-    videos_today = user.videos_today if (
-        user.last_watch_date and user.last_watch_date.date() == today
-    ) else 0
+        now = datetime.now(timezone.utc)
+        today = now.date()
+
+        # Dynamic reset on-the-fly if last watch date is not today
+        if user.last_watch_date and user.last_watch_date.date() != today:
+            user.session_1_count = 0
+            user.session_2_count = 0
+            user.session_1_completion_time = None
+            user.videos_today = 0
+            session.add(user)
+            await session.commit()
+            await session.refresh(user)
+
+        session_1_count = user.session_1_count
+        session_2_count = user.session_2_count
+        session_1_completion_time = user.session_1_completion_time
+        videos_today = session_1_count + session_2_count
+        balance_mc = user.balance_mc
+        total_earned_mc = user.total_earned_mc
+        referral_count = user.referral_count
+        referral_earnings_mc = user.referral_earnings_mc
+        first_name = user.first_name
+        telegram_id_val = user.telegram_id
+
+    # Compute Session 2 lock state
+    session_2_locked = True
+    unlock_at = None
+
+    if session_1_count >= 25:
+        if session_1_completion_time is None:
+            # Legacy or fallback: if completed but no timestamp, unlock immediately
+            session_2_locked = False
+        else:
+            from datetime import timedelta
+            unlock_time = session_1_completion_time + timedelta(hours=7)
+            if now < unlock_time:
+                session_2_locked = True
+                unlock_at = unlock_time.isoformat()
+            else:
+                session_2_locked = False
 
     return JSONResponse({
-        "telegram_id": user.telegram_id,
-        "first_name": user.first_name,
-        "balance_mc": user.balance_mc,
-        "balance_azn": round(user.balance_mc / MC_TO_AZN_RATE, 4),
-        "total_earned_mc": user.total_earned_mc,
+        "telegram_id": telegram_id_val,
+        "first_name": first_name,
+        "balance_mc": balance_mc,
+        "balance_azn": round(balance_mc / MC_TO_AZN_RATE, 4),
+        "total_earned_mc": total_earned_mc,
         "videos_today": videos_today,
-        "daily_limit": DAILY_VIDEO_LIMIT,
-        "referral_count": user.referral_count,
-        "referral_earnings_mc": user.referral_earnings_mc,
+        "daily_limit": 50,
+        "session_1_count": session_1_count,
+        "session_2_count": session_2_count,
+        "session_2_locked": session_2_locked,
+        "session_1_completion_time": session_1_completion_time.isoformat() if session_1_completion_time else None,
+        "unlock_at": unlock_at,
+        "referral_count": referral_count,
+        "referral_earnings_mc": referral_earnings_mc,
         "mc_per_video": MC_PER_VIDEO,
         "mc_to_azn_rate": MC_TO_AZN_RATE,
     })

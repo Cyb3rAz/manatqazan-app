@@ -152,6 +152,56 @@ function createDefaultUserData() {
     };
 }
 
+// ── Cooldown Timer State ──────────────────────────────────────────────
+let cooldownInterval = null;
+
+function startCooldownTimer(unlockAt) {
+    if (!unlockAt) return;
+    
+    // Clear any existing timer
+    stopCooldownTimer();
+    
+    const targetTime = new Date(unlockAt).getTime();
+    const hintEl = document.getElementById("session-2-cooldown-hint");
+    
+    function updateTimer() {
+        const now = new Date().getTime();
+        const difference = targetTime - now;
+        
+        if (difference <= 0) {
+            stopCooldownTimer();
+            hintEl.style.display = "none";
+            
+            // Set local lock state to false and re-render instantly without refresh!
+            if (userData) {
+                userData.session_2_locked = false;
+                userData.unlock_at = null;
+                renderDashboard();
+            }
+            return;
+        }
+        
+        // Format countdown: HH:MM:SS
+        const hours = Math.floor(difference / (1000 * 60 * 60));
+        const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((difference % (1000 * 60)) / 1000);
+        
+        const pad = (n) => n.toString().padStart(2, '0');
+        hintEl.textContent = `Kilid açılmasına: ${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+        hintEl.style.display = "block";
+    }
+    
+    updateTimer();
+    cooldownInterval = setInterval(updateTimer, 1000);
+}
+
+function stopCooldownTimer() {
+    if (cooldownInterval) {
+        clearInterval(cooldownInterval);
+        cooldownInterval = null;
+    }
+}
+
 // ── Dashboard Render ─────────────────────────────────────────────────
 function renderDashboard() {
     if (!userData) return;
@@ -168,23 +218,52 @@ function renderDashboard() {
 
     // Statistika
     document.getElementById("total-earned").textContent = formatNumber(userData.total_earned_mc);
-    document.getElementById("videos-count").textContent = `${userData.videos_today}/${userData.daily_limit}`;
+    document.getElementById("videos-count").textContent = `${userData.videos_today}/${userData.daily_limit || 50}`;
     document.getElementById("referral-count").textContent = userData.referral_count;
     document.getElementById("referral-earnings").textContent = formatNumber(userData.referral_earnings_mc);
 
-    // Tərəqqi
-    const progress = (userData.videos_today / userData.daily_limit) * 100;
-    document.getElementById("progress-fill").style.width = `${Math.min(progress, 100)}%`;
-    document.getElementById("progress-text").textContent = `${userData.videos_today}/${userData.daily_limit} video`;
+    // Səans 1 Card Render
+    const s1Count = userData.session_1_count || 0;
+    document.getElementById("session-1-progress-text").textContent = `${s1Count}/25 video`;
+    document.getElementById("session-1-progress-fill").style.width = `${(s1Count / 25) * 100}%`;
+    const s1Btn = document.getElementById("session-1-btn");
 
-    // İzlə düyməsinin vəziyyəti
-    const watchBtn = document.getElementById("watch-btn");
-    if (userData.videos_today >= userData.daily_limit) {
-        watchBtn.disabled = true;
-        watchBtn.textContent = "📛 Gündəlik limit bitdi";
+    if (s1Count >= 25) {
+        s1Btn.disabled = true;
+        s1Btn.textContent = "🌅 Tamamlandı";
     } else {
-        watchBtn.disabled = false;
-        watchBtn.textContent = `🎬 Video İzlə & ${userData.mc_per_video} MC Qazan`;
+        s1Btn.disabled = false;
+        s1Btn.textContent = `🎬 Video İzlə & ${userData.mc_per_video || 50} MC Qazan`;
+    }
+
+    // Səans 2 Card Render
+    const s2Count = userData.session_2_count || 0;
+    document.getElementById("session-2-progress-text").textContent = `${s2Count}/25 video`;
+    document.getElementById("session-2-progress-fill").style.width = `${(s2Count / 25) * 100}%`;
+    const s2Btn = document.getElementById("session-2-btn");
+    const s2Hint = document.getElementById("session-2-cooldown-hint");
+
+    if (userData.session_2_locked) {
+        s2Btn.disabled = true;
+        s2Btn.textContent = "🔒 Səans 2 Kilidlidir";
+        s2Hint.style.display = "block";
+        startCooldownTimer(userData.unlock_at);
+    } else {
+        s2Hint.style.display = "none";
+        stopCooldownTimer();
+        if (s2Count >= 25) {
+            s2Btn.disabled = true;
+            s2Btn.textContent = "🌌 Tamamlandı";
+        } else {
+            // Səans 2 is unlocked and can be watched ONLY if Səans 1 is already completed!
+            if (s1Count < 25) {
+                s2Btn.disabled = true;
+                s2Btn.textContent = "⏳ Əvvəlcə Səans 1-i bitirin";
+            } else {
+                s2Btn.disabled = false;
+                s2Btn.textContent = `🎬 Video İzlə & ${userData.mc_per_video || 50} MC Qazan`;
+            }
+        }
     }
 
     // Referal bölməsi
@@ -209,18 +288,30 @@ function initAdsgram() {
 
 /**
  * Adsgram vasitəsilə mükafatlı video reklamı göstər.
- * Axın:
- *   1. adController.show()   → reklamı təqdim edir
- *   2. .then(result)         → reklam tamamlandı → mükafatı kreditlə
- *   3. .catch(result)        → reklam atlandı / xəta → müvafiq mesaj göstər
  */
-async function watchAd() {
-    const watchBtn = document.getElementById("watch-btn");
+let currentWatchingSession = 1;
 
-    // Client tərəfdə gündəlik limit yoxla
-    if (userData && userData.videos_today >= userData.daily_limit) {
-        showToast("📛 Gündəlik limit bitdi! Sabah yenidən gəlin.", "error");
+async function watchAd(sessionNum = 1) {
+    currentWatchingSession = sessionNum;
+    const watchBtn = document.getElementById(`session-${sessionNum}-btn`);
+    const otherBtn = document.getElementById(`session-${sessionNum === 1 ? 2 : 1}-btn`);
+
+    // Client-side limits
+    if (!userData) return;
+    
+    if (sessionNum === 1 && userData.session_1_count >= 25) {
+        showToast("🌅 Səans 1 tamamlanıb!", "error");
         return;
+    }
+    if (sessionNum === 2) {
+        if (userData.session_2_locked) {
+            showToast("🔒 Səans 2 hələ kilidlidir!", "error");
+            return;
+        }
+        if (userData.session_2_count >= 25) {
+            showToast("🌌 Səans 2 tamamlanıb!", "error");
+            return;
+        }
     }
 
     // Lazım olduqda Adsgram-ı başlat
@@ -231,20 +322,20 @@ async function watchAd() {
         }
     }
 
-    // Reklam zamanı düyməni söndür
+    // Reklam zamanı düymələri söndür
     watchBtn.disabled = true;
+    const oldText = watchBtn.textContent;
     watchBtn.textContent = "⏳ Reklam yüklənir...";
+    if (otherBtn) otherBtn.disabled = true;
 
     try {
-        // Reklamı göstər və tamamlanmasını gözlə
         const result = await adController.show();
 
-        // Reklam uğurla tamamlandı
         if (result.done) {
             watchBtn.textContent = "✅ Mükafat hesablanır...";
 
             // Mükafatı kreditlə və balansı yenilə
-            await creditReward();
+            await creditReward(sessionNum);
 
             // Coin partlayış animasiyası
             spawnCoinBurst();
@@ -253,45 +344,45 @@ async function watchAd() {
         }
 
     } catch (result) {
-        // Reklam atlandı, erkən bağlandı və ya xəta baş verdi
         if (result.error) {
             console.error("Adsgram xətası:", result.description);
             showToast("⚠️ Reklam yüklənmədi. Yenidən cəhd edin.", "error");
         } else {
-            // İstifadəçi əl ilə bağladı / atladı
             showToast("⏭️ Mükafat almaq üçün videonu tam izləyin.", "error");
         }
     } finally {
-        // Düyməni yenidən aktiv et
-        if (userData && userData.videos_today < userData.daily_limit) {
-            watchBtn.disabled = false;
-            watchBtn.textContent = `🎬 Video İzlə & ${userData.mc_per_video} MC Qazan`;
-        } else {
-            watchBtn.disabled = true;
-            watchBtn.textContent = "📛 Gündəlik limit bitdi";
-        }
+        renderDashboard();
     }
 }
 
 // ── Mükafat Kreditləmə (optimistik + arxa fonda sinxronlaşdırma) ────
-async function creditReward() {
-    // 1. Optimistik lokal yeniləmə – dərhal UI-da göstərmək üçün
+async function creditReward(sessionNum) {
     if (userData) {
         userData.balance_mc += userData.mc_per_video;
         userData.total_earned_mc += userData.mc_per_video;
         userData.videos_today += 1;
-        renderDashboard(); // Dərhal ekranda göstər
+        
+        if (sessionNum === 1) {
+            userData.session_1_count += 1;
+            if (userData.session_1_count === 25) {
+                userData.session_2_locked = true;
+                const unlockDate = new Date();
+                unlockDate.setHours(unlockDate.getHours() + 7);
+                userData.unlock_at = unlockDate.toISOString();
+            }
+        } else if (sessionNum === 2) {
+            userData.session_2_count += 1;
+        }
+        
+        renderDashboard();
     }
 
-    // 2. Arxa fonda server ilə sinxronlaşdır (Adsgram S2S gecikmə 2-5 san.)
-    //    Bir neçə cəhd edirik: S2S callback servere çatmamış ola bilər.
-    scheduleServerSync(3, 2000);
+    // Arxa fonda server ilə sinxronlaşdır
+    scheduleServerSync(4, 2500);
 }
 
 /**
  * Server ilə sinxronlaşdırma — gecikmə ilə bir neçə cəhd.
- * Adsgram S2S callback servere 2-5 saniyə gecikmə ilə çatır,
- * ona görə dərhal fetch etsək köhnə balansı alırıq.
  */
 function scheduleServerSync(maxRetries, delayMs) {
     let attempt = 0;
@@ -319,7 +410,7 @@ function scheduleServerSync(maxRetries, delayMs) {
                     trySync();
                 }
             }
-        }, delayMs * attempt); // 2s, 4s, 6s artan gecikmə
+        }, delayMs * attempt);
     }
 
     trySync();
