@@ -65,7 +65,7 @@ async function initApp() {
 // ── Fetch User Data ──────────────────────────────────────────────────
 async function fetchUserData() {
     try {
-        const resp = await fetch(`${API_BASE}/api/user/${currentUser.id}`);
+        const resp = await fetch(`${API_BASE}/api/user/${currentUser.id}`, { headers: { "ngrok-skip-browser-warning": "true" } });
         if (!resp.ok) {
             if (resp.status === 404) {
                 console.warn("User not found – they may need to /start the bot first.");
