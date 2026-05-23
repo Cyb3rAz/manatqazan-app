@@ -14,7 +14,7 @@ from datetime import datetime, timezone
 
 from aiogram import Router, types
 from aiogram.filters import Command, CommandStart
-from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup, KeyboardButton
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup, KeyboardButton, MenuButtonWebApp
 from aiogram import F
 from sqlalchemy import select
 
@@ -109,6 +109,14 @@ async def cmd_start_with_referral(message: types.Message) -> None:
         is_persistent=True
     )
 
+    await message.bot.set_chat_menu_button(
+        chat_id=message.chat.id,
+        menu_button=MenuButtonWebApp(
+            text="🚀 Başlat",
+            web_app=types.WebAppInfo(url=webapp_url)
+        )
+    )
+
     await message.answer(
         f"🎉 <b>ManatAds-a xoş gəlmisiniz!</b>\n\n"
         f"Salam, <b>{tg_user.first_name}</b>! 👋\n\n"
@@ -161,6 +169,14 @@ async def cmd_start(message: types.Message) -> None:
         ],
         resize_keyboard=True,
         is_persistent=True
+    )
+
+    await message.bot.set_chat_menu_button(
+        chat_id=message.chat.id,
+        menu_button=MenuButtonWebApp(
+            text="🚀 Başlat",
+            web_app=types.WebAppInfo(url=webapp_url)
+        )
     )
 
     await message.answer(
