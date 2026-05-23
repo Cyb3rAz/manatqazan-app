@@ -93,21 +93,17 @@ async def cmd_start_with_referral(message: types.Message) -> None:
         referral_msg = "\n\n🤝 <b>Sizi dostunuz dəvət edib!</b> Onlar sizin qazancınızdan ömürlük 10% bonus qazanacaqlar."
 
     webapp_url = "https://manatqazan.vercel.app"
-    keyboard = ReplyKeyboardMarkup(
-        keyboard=[
-            [KeyboardButton(text="🎬 Video İzlə & Qazan", web_app=types.WebAppInfo(url=webapp_url))],
-            [
-                KeyboardButton(text="💰 Balansım"),
-                KeyboardButton(text="👥 Referal Proqramı")
-            ],
-            [
-                KeyboardButton(text="ℹ️ Necə İşləyir?"),
-                KeyboardButton(text="💰 Çıxarış")
-            ]
+    keyboard = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="🎬 Video İzlə & Qazan", web_app=types.WebAppInfo(url=webapp_url))],
+        [
+            InlineKeyboardButton(text="💰 Balansım", callback_data="balance"),
+            InlineKeyboardButton(text="👥 Referal Proqramı", callback_data="referral")
         ],
-        resize_keyboard=True,
-        is_persistent=True
-    )
+        [
+            InlineKeyboardButton(text="ℹ️ Necə İşləyir?", callback_data="how_it_works"),
+            InlineKeyboardButton(text="💰 Çıxarış", callback_data="withdraw")
+        ]
+    ])
 
     await message.bot.set_chat_menu_button(
         chat_id=message.chat.id,
@@ -155,21 +151,17 @@ async def cmd_start(message: types.Message) -> None:
         await session.commit()
 
     webapp_url = "https://manatqazan.vercel.app"
-    keyboard = ReplyKeyboardMarkup(
-        keyboard=[
-            [KeyboardButton(text="🎬 Video İzlə & Qazan", web_app=types.WebAppInfo(url=webapp_url))],
-            [
-                KeyboardButton(text="💰 Balansım"),
-                KeyboardButton(text="👥 Referal Proqramı")
-            ],
-            [
-                KeyboardButton(text="ℹ️ Necə İşləyir?"),
-                KeyboardButton(text="💰 Çıxarış")
-            ]
+    keyboard = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="🎬 Video İzlə & Qazan", web_app=types.WebAppInfo(url=webapp_url))],
+        [
+            InlineKeyboardButton(text="💰 Balansım", callback_data="balance"),
+            InlineKeyboardButton(text="👥 Referal Proqramı", callback_data="referral")
         ],
-        resize_keyboard=True,
-        is_persistent=True
-    )
+        [
+            InlineKeyboardButton(text="ℹ️ Necə İşləyir?", callback_data="how_it_works"),
+            InlineKeyboardButton(text="💰 Çıxarış", callback_data="withdraw")
+        ]
+    ])
 
     await message.bot.set_chat_menu_button(
         chat_id=message.chat.id,
@@ -326,21 +318,17 @@ async def _send_welcome_back(message: types.Message, user: User) -> None:
     """Greet a returning user with their current stats."""
     azn_value = user.balance_mc / MC_TO_AZN_RATE
     webapp_url = "https://manatqazan.vercel.app"
-    keyboard = ReplyKeyboardMarkup(
-        keyboard=[
-            [KeyboardButton(text="🎬 Video İzlə & Qazan", web_app=types.WebAppInfo(url=webapp_url))],
-            [
-                KeyboardButton(text="💰 Balansım"),
-                KeyboardButton(text="👥 Referal Proqramı")
-            ],
-            [
-                KeyboardButton(text="ℹ️ Necə İşləyir?"),
-                KeyboardButton(text="💰 Çıxarış")
-            ]
+    keyboard = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="🎬 Video İzlə & Qazan", web_app=types.WebAppInfo(url=webapp_url))],
+        [
+            InlineKeyboardButton(text="💰 Balansım", callback_data="balance"),
+            InlineKeyboardButton(text="👥 Referal Proqramı", callback_data="referral")
         ],
-        resize_keyboard=True,
-        is_persistent=True
-    )
+        [
+            InlineKeyboardButton(text="ℹ️ Necə İşləyir?", callback_data="how_it_works"),
+            InlineKeyboardButton(text="💰 Çıxarış", callback_data="withdraw")
+        ]
+    ])
 
     await message.answer(
         f"👋 <b>Yenidən xoş gəldiniz, {user.first_name or 'dost'}!</b>\n\n"
