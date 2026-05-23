@@ -8,7 +8,7 @@
  */
 
 // ── Configuration ─────────────────────────────────────────────────────
-const API_BASE = "https://8157-212-47-146-163.ngrok-free.app";
+const API_BASE = ""; // Proxied via Vercel
 const ADSGRAM_BLOCK_ID = "31453";
 
 // ── Telegram Web App ──────────────────────────────────────────────────
