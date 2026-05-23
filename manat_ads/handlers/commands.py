@@ -20,8 +20,10 @@ from aiogram.filters import BaseFilter, Command, CommandStart
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup, KeyboardButton, MenuButtonWebApp, TelegramObject
 from aiogram import F
 from sqlalchemy import select, func
+from sqlalchemy.dialects.postgresql import insert as pg_insert
+from sqlalchemy.dialects.sqlite import insert as sqlite_insert
 
-from database import async_session
+from database import async_session, DB_IS_POSTGRES
 from models import User
 
 logger = logging.getLogger("manatads.commands")
@@ -72,6 +74,69 @@ else:
     WEBHOOK_URL = raw_webhook_url.rstrip("/")
 
 
+# ── Safe UPSERT helper ─────────────────────────────────────────────────
+async def _upsert_user(
+    session,
+    telegram_id: int,
+    username: str | None,
+    first_name: str | None,
+    last_name: str | None,
+    referrer_id: int | None = None,
+) -> User:
+    """
+    Insert a new user or update an existing one (ON CONFLICT DO UPDATE).
+    Works on both PostgreSQL (asyncpg) and SQLite (aiosqlite).
+    Returns the User ORM object after the upsert.
+    """
+    values = dict(
+        telegram_id=telegram_id,
+        username=username,
+        first_name=first_name,
+        last_name=last_name,
+    )
+    if referrer_id is not None:
+        values["referrer_id"] = referrer_id
+
+    # Fields to refresh on conflict (user reopened bot / changed profile)
+    update_on_conflict = dict(
+        username=username,
+        first_name=first_name,
+        last_name=last_name,
+        updated_at=func.now(),
+    )
+
+    if DB_IS_POSTGRES:
+        stmt = (
+            pg_insert(User)
+            .values(**values)
+            .on_conflict_do_update(
+                constraint="uq_users_telegram_id",
+                set_=update_on_conflict,
+            )
+            .returning(User)
+        )
+        result = await session.execute(stmt)
+        user = result.scalar_one()
+    else:
+        # SQLite dialect
+        stmt = (
+            sqlite_insert(User)
+            .values(**values)
+            .on_conflict_do_update(
+                index_elements=["telegram_id"],
+                set_=update_on_conflict,
+            )
+        )
+        await session.execute(stmt)
+        await session.flush()
+        # Re-fetch the user since SQLite insert doesn't support RETURNING on ORM
+        sel = select(User).where(User.telegram_id == telegram_id)
+        result = await session.execute(sel)
+        user = result.scalar_one()
+
+    return user
+
+
 # ── /start with deep-link referral ─────────────────────────────────────
 @router.message(CommandStart(deep_link=True))
 async def cmd_start_with_referral(message: types.Message) -> None:
@@ -93,37 +158,52 @@ async def cmd_start_with_referral(message: types.Message) -> None:
     if referrer_tg_id == tg_user.id:
         referrer_tg_id = None
 
+    is_new_user = False
     async with async_session() as session:
-        # Check if user already exists
-        stmt = select(User).where(User.telegram_id == tg_user.id)
-        result = await session.execute(stmt)
-        user = result.scalar_one_or_none()
+        try:
+            # Check if user already exists BEFORE upsert (to detect new vs returning)
+            existing_stmt = select(User).where(User.telegram_id == tg_user.id)
+            existing_result = await session.execute(existing_stmt)
+            existing_user = existing_result.scalar_one_or_none()
 
-        if user:
-            await _send_welcome_back(message, user)
+            if existing_user:
+                # Returning user – just update profile fields
+                existing_user.username = tg_user.username
+                existing_user.first_name = tg_user.first_name
+                existing_user.last_name = tg_user.last_name
+                await session.commit()
+                await _send_welcome_back(message, existing_user)
+                return
+
+            # Validate referrer exists
+            if referrer_tg_id:
+                ref_stmt = select(User).where(User.telegram_id == referrer_tg_id)
+                ref_result = await session.execute(ref_stmt)
+                referrer = ref_result.scalar_one_or_none()
+                if referrer:
+                    referrer.referral_count += 1
+                    session.add(referrer)
+                else:
+                    referrer_tg_id = None
+
+            # UPSERT: safe insert or update
+            user = await _upsert_user(
+                session,
+                telegram_id=tg_user.id,
+                username=tg_user.username,
+                first_name=tg_user.first_name,
+                last_name=tg_user.last_name,
+                referrer_id=referrer_tg_id,
+            )
+            await session.commit()
+            is_new_user = True
+            logger.info("[UPSERT] User %s upserted successfully (referrer=%s)", tg_user.id, referrer_tg_id)
+
+        except Exception as e:
+            await session.rollback()
+            logger.exception("[UPSERT] Failed to upsert user %s: %s", tg_user.id, e)
+            await message.answer("⚠️ Xəta baş verdi. Zəhmət olmasa bir az sonra yenidən cəhd edin.")
             return
-
-        # Validate referrer exists
-        if referrer_tg_id:
-            ref_stmt = select(User).where(User.telegram_id == referrer_tg_id)
-            ref_result = await session.execute(ref_stmt)
-            referrer = ref_result.scalar_one_or_none()
-            if referrer:
-                referrer.referral_count += 1
-                session.add(referrer)
-            else:
-                referrer_tg_id = None
-
-        # Create new user
-        new_user = User(
-            telegram_id=tg_user.id,
-            username=tg_user.username,
-            first_name=tg_user.first_name,
-            last_name=tg_user.last_name,
-            referrer_id=referrer_tg_id,
-        )
-        session.add(new_user)
-        await session.commit()
 
     referral_msg = ""
     if referrer_tg_id:
@@ -169,23 +249,40 @@ async def cmd_start(message: types.Message) -> None:
     if not tg_user:
         return
 
+    is_new_user = False
     async with async_session() as session:
-        stmt = select(User).where(User.telegram_id == tg_user.id)
-        result = await session.execute(stmt)
-        user = result.scalar_one_or_none()
+        try:
+            # Check if user already exists
+            existing_stmt = select(User).where(User.telegram_id == tg_user.id)
+            existing_result = await session.execute(existing_stmt)
+            existing_user = existing_result.scalar_one_or_none()
 
-        if user:
-            await _send_welcome_back(message, user)
+            if existing_user:
+                # Returning user – update profile fields
+                existing_user.username = tg_user.username
+                existing_user.first_name = tg_user.first_name
+                existing_user.last_name = tg_user.last_name
+                await session.commit()
+                await _send_welcome_back(message, existing_user)
+                return
+
+            # UPSERT: safe insert or update
+            user = await _upsert_user(
+                session,
+                telegram_id=tg_user.id,
+                username=tg_user.username,
+                first_name=tg_user.first_name,
+                last_name=tg_user.last_name,
+            )
+            await session.commit()
+            is_new_user = True
+            logger.info("[UPSERT] User %s upserted successfully (no referrer)", tg_user.id)
+
+        except Exception as e:
+            await session.rollback()
+            logger.exception("[UPSERT] Failed to upsert user %s: %s", tg_user.id, e)
+            await message.answer("⚠️ Xəta baş verdi. Zəhmət olmasa bir az sonra yenidən cəhd edin.")
             return
-
-        new_user = User(
-            telegram_id=tg_user.id,
-            username=tg_user.username,
-            first_name=tg_user.first_name,
-            last_name=tg_user.last_name,
-        )
-        session.add(new_user)
-        await session.commit()
 
     webapp_url = "https://manatqazan.vercel.app"
     keyboard = InlineKeyboardMarkup(inline_keyboard=[

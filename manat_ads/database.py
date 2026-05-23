@@ -35,6 +35,9 @@ else:
     DATABASE_URL = f"sqlite+aiosqlite:///{_db_path}"
     _connect_args = {"check_same_thread": False}
 
+# ── Dialect flag (used by other modules for UPSERT branching) ───────
+DB_IS_POSTGRES: bool = "postgresql" in DATABASE_URL
+
 # ── Engine & session factory ────────────────────────────────────────────
 engine = create_async_engine(
     DATABASE_URL,
