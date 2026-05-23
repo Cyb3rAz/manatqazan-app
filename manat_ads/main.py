@@ -76,6 +76,18 @@ async def lifespan(application: FastAPI):
     await init_db()
     logger.info("Database initialised.")
 
+    # ── Set Menu Button ──
+    try:
+        await bot.set_chat_menu_button(
+            menu_button=aio_types.MenuButtonWebApp(
+                text="🚀 Aç", 
+                web_app=aio_types.WebAppInfo(url="https://manatqazan.vercel.app")
+            )
+        )
+        logger.info("Chat menu button set.")
+    except Exception as e:
+        logger.error("Failed to set chat menu button: %s", e)
+
     webhook_url = os.getenv("WEBHOOK_URL", "").strip()
     is_placeholder = "your-domain" in webhook_url or not webhook_url
 
