@@ -8,7 +8,7 @@
  */
 
 // ── Configuration ─────────────────────────────────────────────────────
-const API_BASE = "http://127.0.0.1:8000";
+const API_BASE = "https://8157-212-47-146-163.ngrok-free.app";
 const ADSGRAM_BLOCK_ID = "your_adsgram_block_id_here"; // Replace with .env value in production
 
 // ── Telegram Web App ──────────────────────────────────────────────────

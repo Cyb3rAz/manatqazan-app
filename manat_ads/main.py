@@ -122,6 +122,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "https://manatqazan.vercel.app",
+        "https://8157-212-47-146-163.ngrok-free.app",
         "http://localhost",
         "http://localhost:8000",
         "http://127.0.0.1",
