@@ -9,7 +9,7 @@
 
 // ── Configuration ─────────────────────────────────────────────────────
 const API_BASE = "https://8157-212-47-146-163.ngrok-free.app";
-const ADSGRAM_BLOCK_ID = "your_adsgram_block_id_here"; // Replace with .env value in production
+const ADSGRAM_BLOCK_ID = "31453";
 
 // ── Telegram Web App ──────────────────────────────────────────────────
 const tg = window.Telegram?.WebApp;
