@@ -1,14 +1,14 @@
 /**
- * ManatAds – Mini App Frontend Logic
- * ====================================
+ * ManatAds – Mini App Frontend Logic (AZ)
+ * =========================================
  * Integrates with:
- *   • Telegram Web App SDK (user identity + theme)
- *   • Adsgram SDK (video ads – .show(), .then(), .catch())
- *   • ManatAds Backend API (user info + reward callback)
+ *   • Telegram Web App SDK (istifadəçi kimliyi + tema)
+ *   • Adsgram SDK (video reklamlar – .show(), .then(), .catch())
+ *   • ManatAds Backend API (istifadəçi məlumatı + mükafat callback)
  */
 
-// ── Configuration ─────────────────────────────────────────────────────
-const API_BASE = ""; // Proxied via Vercel
+// ── Konfiqurasiya ─────────────────────────────────────────────────────
+const API_BASE = ""; // Vercel vasitəsilə proxy
 const ADSGRAM_BLOCK_ID = "31453";
 
 // ── Telegram Web App ──────────────────────────────────────────────────
@@ -16,14 +16,14 @@ const tg = window.Telegram?.WebApp;
 let currentUser = null;
 let userData = null;
 
-// ── Initialise ────────────────────────────────────────────────────────
+// ── Başlanğıc ─────────────────────────────────────────────────────────
 document.addEventListener("DOMContentLoaded", () => {
     if (tg) {
         tg.ready();
         tg.expand();
-        tg.enableClosingConfirmation();
+        try { tg.enableClosingConfirmation(); } catch (_) { /* SDK v6 uyğunluğu */ }
 
-        // Apply Telegram theme colors if available
+        // Telegram tema rənglərini tətbiq et
         if (tg.themeParams) {
             document.documentElement.style.setProperty(
                 "--tg-bg", tg.themeParams.bg_color || "#0a0e1a"
@@ -34,49 +34,51 @@ document.addEventListener("DOMContentLoaded", () => {
     initApp();
 });
 
-// ── App Initialisation ───────────────────────────────────────────────
+// ── Tətbiqin Başlanğıcı ──────────────────────────────────────────────
 async function initApp() {
     try {
-        // Get user from Telegram Web App
+        // Telegram Web App-dan istifadəçini al
         if (tg?.initDataUnsafe?.user) {
             currentUser = tg.initDataUnsafe.user;
         } else {
-            // Fallback for development / testing outside Telegram
-            console.warn("Not running inside Telegram – using test user.");
+            // Telegram xaricində inkişaf / test üçün
+            console.warn("Telegram daxilində deyil – test istifadəçi istifadə olunur.");
             currentUser = { id: 123456789, first_name: "TestUser" };
         }
 
-        // Fetch user data from backend
+        // Backend-dən istifadəçi məlumatlarını çək
         await fetchUserData();
 
-        // Show main content
+        // Əsas kontenti göstər
         document.getElementById("loader").style.display = "none";
         document.getElementById("main-content").style.display = "block";
 
-        // Update UI
+        // UI-ı yenilə
         renderDashboard();
 
     } catch (err) {
-        console.error("Init error:", err);
-        showToast("Failed to load app. Please try again.", "error");
+        console.error("Başlanğıc xətası:", err);
+        showToast("Tətbiq yüklənmədi. Yenidən cəhd edin.", "error");
     }
 }
 
-// ── Fetch User Data ──────────────────────────────────────────────────
+// ── İstifadəçi Məlumatlarını Çək ─────────────────────────────────────
 async function fetchUserData() {
     try {
-        const resp = await fetch(`${API_BASE}/api/user/${currentUser.id}`, { headers: { "ngrok-skip-browser-warning": "true" } });
+        const resp = await fetch(`${API_BASE}/api/user/${currentUser.id}`, {
+            headers: { "ngrok-skip-browser-warning": "true" }
+        });
         if (!resp.ok) {
             if (resp.status === 404) {
-                console.warn("User not found – they may need to /start the bot first.");
+                console.warn("İstifadəçi tapılmadı – əvvəlcə botda /start göndərin.");
                 userData = createDefaultUserData();
                 return;
             }
-            throw new Error(`API error: ${resp.status}`);
+            throw new Error(`API xətası: ${resp.status}`);
         }
         userData = await resp.json();
     } catch (err) {
-        console.error("Failed to fetch user data:", err);
+        console.error("İstifadəçi məlumatları çəkilmədi:", err);
         userData = createDefaultUserData();
     }
 }
@@ -84,7 +86,7 @@ async function fetchUserData() {
 function createDefaultUserData() {
     return {
         telegram_id: currentUser.id,
-        first_name: currentUser.first_name || "User",
+        first_name: currentUser.first_name || "İstifadəçi",
         balance_mc: 0,
         balance_azn: 0,
         total_earned_mc: 0,
@@ -97,47 +99,49 @@ function createDefaultUserData() {
     };
 }
 
-// ── Render Dashboard ─────────────────────────────────────────────────
+// ── Dashboard Render ─────────────────────────────────────────────────
 function renderDashboard() {
     if (!userData) return;
 
-    // Header
-    document.getElementById("user-name").textContent = userData.first_name || currentUser.first_name || "User";
+    // Başlıq
+    document.getElementById("user-name").textContent = userData.first_name || currentUser.first_name || "İstifadəçi";
 
-    // Balance
-    document.getElementById("balance-mc").textContent = formatNumber(userData.balance_mc);
-    document.getElementById("balance-azn").textContent = (userData.balance_mc / userData.mc_to_azn_rate).toFixed(4);
+    // Balans – birbaşa DOM yeniləmə
+    const balanceMcEl = document.getElementById("balance-mc");
+    const balanceAznEl = document.getElementById("balance-azn");
+    balanceMcEl.textContent = formatNumber(userData.balance_mc);
+    balanceAznEl.textContent = (userData.balance_mc / userData.mc_to_azn_rate).toFixed(4);
 
-    // Stats
+    // Statistika
     document.getElementById("total-earned").textContent = formatNumber(userData.total_earned_mc);
     document.getElementById("videos-count").textContent = `${userData.videos_today}/${userData.daily_limit}`;
     document.getElementById("referral-count").textContent = userData.referral_count;
     document.getElementById("referral-earnings").textContent = formatNumber(userData.referral_earnings_mc);
 
-    // Progress
+    // Tərəqqi
     const progress = (userData.videos_today / userData.daily_limit) * 100;
     document.getElementById("progress-fill").style.width = `${Math.min(progress, 100)}%`;
-    document.getElementById("progress-text").textContent = `${userData.videos_today}/${userData.daily_limit} videos`;
+    document.getElementById("progress-text").textContent = `${userData.videos_today}/${userData.daily_limit} video`;
 
-    // Watch button state
+    // İzlə düyməsinin vəziyyəti
     const watchBtn = document.getElementById("watch-btn");
     if (userData.videos_today >= userData.daily_limit) {
         watchBtn.disabled = true;
-        watchBtn.textContent = "📛 Daily Limit Reached";
+        watchBtn.textContent = "📛 Gündəlik limit bitdi";
     } else {
         watchBtn.disabled = false;
-        watchBtn.textContent = `🎬 Watch Video & Earn ${userData.mc_per_video} MC`;
+        watchBtn.textContent = `🎬 Video İzlə & ${userData.mc_per_video} MC Qazan`;
     }
 
-    // Referral section
-    const botUsername = "ManatAdsBot"; // Replace with actual bot username
+    // Referal bölməsi
+    const botUsername = "QazanAz_bot";
     const refLink = `https://t.me/${botUsername}?start=${currentUser.id}`;
     document.getElementById("referral-link").textContent = refLink;
     document.getElementById("ref-friends").textContent = userData.referral_count;
     document.getElementById("ref-earned").textContent = formatNumber(userData.referral_earnings_mc);
 }
 
-// ── Adsgram Integration ──────────────────────────────────────────────
+// ── Adsgram İnteqrasiyası ────────────────────────────────────────────
 let adController = null;
 
 function initAdsgram() {
@@ -145,126 +149,156 @@ function initAdsgram() {
         adController = window.Adsgram.init({ blockId: ADSGRAM_BLOCK_ID });
         return true;
     }
-    console.warn("Adsgram SDK not loaded.");
+    console.warn("Adsgram SDK yüklənmədi.");
     return false;
 }
 
 /**
- * Show a rewarded video ad via Adsgram.
- * Flow:
- *   1. adController.show()   → presents the ad
- *   2. .then(result)         → ad completed → call backend to credit reward
- *   3. .catch(result)        → ad skipped / errored → show appropriate message
+ * Adsgram vasitəsilə mükafatlı video reklamı göstər.
+ * Axın:
+ *   1. adController.show()   → reklamı təqdim edir
+ *   2. .then(result)         → reklam tamamlandı → mükafatı kreditlə
+ *   3. .catch(result)        → reklam atlandı / xəta → müvafiq mesaj göstər
  */
 async function watchAd() {
     const watchBtn = document.getElementById("watch-btn");
 
-    // Check daily limit client-side
+    // Client tərəfdə gündəlik limit yoxla
     if (userData && userData.videos_today >= userData.daily_limit) {
-        showToast("📛 Daily limit reached! Come back tomorrow.", "error");
+        showToast("📛 Gündəlik limit bitdi! Sabah yenidən gəlin.", "error");
         return;
     }
 
-    // Initialise Adsgram if needed
+    // Lazım olduqda Adsgram-ı başlat
     if (!adController) {
         if (!initAdsgram()) {
-            showToast("⚠️ Ad service unavailable. Try again later.", "error");
+            showToast("⚠️ Reklam xidməti mövcud deyil. Sonra cəhd edin.", "error");
             return;
         }
     }
 
-    // Disable button during ad
+    // Reklam zamanı düyməni söndür
     watchBtn.disabled = true;
-    watchBtn.textContent = "⏳ Loading ad...";
+    watchBtn.textContent = "⏳ Reklam yüklənir...";
 
     try {
-        // Show the ad and wait for completion
+        // Reklamı göstər və tamamlanmasını gözlə
         const result = await adController.show();
 
-        // Ad completed successfully
+        // Reklam uğurla tamamlandı
         if (result.done) {
-            watchBtn.textContent = "✅ Crediting reward...";
+            watchBtn.textContent = "✅ Mükafat hesablanır...";
 
-            // The backend will be called by Adsgram's S2S callback automatically.
-            // We also call our own endpoint for immediate UI feedback.
+            // Mükafatı kreditlə və balansı yenilə
             await creditReward();
 
-            // Coin burst animation
+            // Coin partlayış animasiyası
             spawnCoinBurst();
 
-            showToast(`🎉 +${userData.mc_per_video} MC earned!`, "success");
+            showToast(`🎉 +${userData.mc_per_video} MC qazandınız!`, "success");
         }
 
     } catch (result) {
-        // Ad was skipped, closed early, or errored
+        // Reklam atlandı, erkən bağlandı və ya xəta baş verdi
         if (result.error) {
-            console.error("Adsgram error:", result.description);
-            showToast("⚠️ Ad failed to load. Please try again.", "error");
+            console.error("Adsgram xətası:", result.description);
+            showToast("⚠️ Reklam yüklənmədi. Yenidən cəhd edin.", "error");
         } else {
-            // User manually closed / skipped
-            showToast("⏭️ Watch the full video to earn your reward.", "error");
+            // İstifadəçi əl ilə bağladı / atladı
+            showToast("⏭️ Mükafat almaq üçün videonu tam izləyin.", "error");
         }
     } finally {
-        // Re-enable button
+        // Düyməni yenidən aktiv et
         if (userData && userData.videos_today < userData.daily_limit) {
             watchBtn.disabled = false;
-            watchBtn.textContent = `🎬 Watch Video & Earn ${userData.mc_per_video} MC`;
+            watchBtn.textContent = `🎬 Video İzlə & ${userData.mc_per_video} MC Qazan`;
         } else {
             watchBtn.disabled = true;
-            watchBtn.textContent = "📛 Daily Limit Reached";
+            watchBtn.textContent = "📛 Gündəlik limit bitdi";
         }
     }
 }
 
-// ── Credit Reward (client-side update) ───────────────────────────────
+// ── Mükafat Kreditləmə (balans yeniləmə ilə) ───────────────────────
 async function creditReward() {
-    // Optimistic local update for instant UI feedback
+    // 1. Optimistik lokal yeniləmə – dərhal UI-da göstərmək üçün
     if (userData) {
         userData.balance_mc += userData.mc_per_video;
         userData.total_earned_mc += userData.mc_per_video;
         userData.videos_today += 1;
-        renderDashboard();
+        renderDashboard(); // Dərhal ekranda göstər
     }
 
-    // Refresh from server to get authoritative data
+    // 2. Server-dən həqiqi balansı gətir və yenidən render et
     try {
+        // Kiçik gecikmə – backend-in yazma əməliyyatını tamamlaması üçün
+        await new Promise(resolve => setTimeout(resolve, 500));
         await fetchUserData();
-        renderDashboard();
+        renderDashboard(); // Server cavabı ilə yenilə
     } catch (err) {
-        console.error("Failed to refresh user data:", err);
+        console.error("Serverdən yeniləmə uğursuz oldu:", err);
+        // Optimistik yeniləmə artıq tətbiq edilib, istifadəçi balansı görür
     }
 }
 
-// ── Copy Referral Link ───────────────────────────────────────────────
+// ── Referal Linkini Kopyala (Telegram SDK uyğunluğu ilə) ────────────
 async function copyReferralLink() {
     const linkEl = document.getElementById("referral-link");
     const link = linkEl.textContent;
+    const btn = document.getElementById("copy-btn");
 
-    try {
-        await navigator.clipboard.writeText(link);
-        showToast("📋 Referral link copied!", "success");
+    let copied = false;
 
-        const btn = document.getElementById("copy-btn");
-        btn.textContent = "✅ Copied!";
+    // Üsul 1: Telegram WebApp SDK – ən etibarlı yol Telegram daxilində
+    if (tg && typeof tg.openLink === "function") {
+        try {
+            // Telegram daxilində clipboard birbaşa çalışmaya bilər,
+            // ona görə shareUrl ilə paylaşmağı təklif edirik
+            if (typeof tg.shareUrl === "function") {
+                tg.shareUrl(link);
+                copied = true;
+            }
+        } catch (_) { /* növbəti üsula keç */ }
+    }
+
+    // Üsul 2: Modern Clipboard API
+    if (!copied && navigator.clipboard && navigator.clipboard.writeText) {
+        try {
+            await navigator.clipboard.writeText(link);
+            copied = true;
+        } catch (_) { /* növbəti üsula keç */ }
+    }
+
+    // Üsul 3: Köhnə execCommand fallback
+    if (!copied) {
+        try {
+            const textArea = document.createElement("textarea");
+            textArea.value = link;
+            textArea.style.position = "fixed";
+            textArea.style.left = "-9999px";
+            textArea.style.top = "-9999px";
+            textArea.style.opacity = "0";
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            copied = document.execCommand("copy");
+            document.body.removeChild(textArea);
+        } catch (_) { copied = false; }
+    }
+
+    // Nəticə göstər
+    if (copied) {
+        showToast("📋 Referal linki kopyalandı!", "success");
+        btn.textContent = "✅ Kopyalandı!";
         setTimeout(() => {
-            btn.textContent = "📋 Copy Referral Link";
+            btn.textContent = "📋 Linki Kopyala";
         }, 2000);
-    } catch {
-        // Fallback for environments without clipboard API
-        const textArea = document.createElement("textarea");
-        textArea.value = link;
-        textArea.style.position = "fixed";
-        textArea.style.left = "-9999px";
-        document.body.appendChild(textArea);
-        textArea.select();
-        document.execCommand("copy");
-        document.body.removeChild(textArea);
-
-        showToast("📋 Referral link copied!", "success");
+    } else {
+        showToast("⚠️ Kopyalana bilmədi. Linki əl ilə kopyalayın.", "error");
     }
 }
 
-// ── Coin Burst Animation ─────────────────────────────────────────────
+// ── Coin Partlayış Animasiyası ───────────────────────────────────────
 function spawnCoinBurst() {
     const emojis = ["🪙", "✨", "💰", "⭐"];
     const count = 8;
@@ -278,12 +312,12 @@ function spawnCoinBurst() {
         coin.style.animationDelay = `${i * 0.08}s`;
         document.body.appendChild(coin);
 
-        // Clean up after animation
+        // Animasiyadan sonra təmizlə
         setTimeout(() => coin.remove(), 1500);
     }
 }
 
-// ── Toast Notifications ──────────────────────────────────────────────
+// ── Toast Bildirişlər ────────────────────────────────────────────────
 let toastTimer = null;
 
 function showToast(message, type = "success") {
@@ -297,8 +331,8 @@ function showToast(message, type = "success") {
     }, 3000);
 }
 
-// ── Utility ──────────────────────────────────────────────────────────
+// ── Yardımçı ─────────────────────────────────────────────────────────
 function formatNumber(num) {
     if (num === undefined || num === null) return "0";
-    return Math.floor(num).toLocaleString("en-US");
+    return Math.floor(num).toLocaleString("az-AZ");
 }
