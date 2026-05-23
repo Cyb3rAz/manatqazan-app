@@ -1,5 +1,6 @@
 {
   "rewrites": [
+    { "source": "/static/(.*)", "destination": "/manat_ads/frontend/$1" },
     { "source": "/(.*)", "destination": "/manat_ads/frontend/$1" }
   ]
 }
