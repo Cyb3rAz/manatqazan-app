@@ -98,7 +98,10 @@ async def cmd_start_with_referral(message: types.Message) -> None:
             InlineKeyboardButton(text="💰 Balansım", callback_data="balance"),
             InlineKeyboardButton(text="👥 Referal Proqramı", callback_data="referral")
         ],
-        [InlineKeyboardButton(text="ℹ️ Necə İşləyir?", callback_data="how_it_works")]
+        [
+            InlineKeyboardButton(text="ℹ️ Necə İşləyir?", callback_data="how_it_works"),
+            InlineKeyboardButton(text="💰 Çıxarış", callback_data="withdraw")
+        ]
     ])
 
     await message.answer(
@@ -145,7 +148,10 @@ async def cmd_start(message: types.Message) -> None:
             InlineKeyboardButton(text="💰 Balansım", callback_data="balance"),
             InlineKeyboardButton(text="👥 Referal Proqramı", callback_data="referral")
         ],
-        [InlineKeyboardButton(text="ℹ️ Necə İşləyir?", callback_data="how_it_works")]
+        [
+            InlineKeyboardButton(text="ℹ️ Necə İşləyir?", callback_data="how_it_works"),
+            InlineKeyboardButton(text="💰 Çıxarış", callback_data="withdraw")
+        ]
     ])
 
     await message.answer(
@@ -261,6 +267,14 @@ async def cb_how_it_works(callback: types.CallbackQuery) -> None:
         await _show_how_it_works(callback.message)
 
 
+@router.callback_query(lambda c: c.data == "withdraw")
+async def cb_withdraw(callback: types.CallbackQuery) -> None:
+    """Inline button shortcut for withdrawal."""
+    await callback.answer()
+    if callback.message and isinstance(callback.message, types.Message):
+        await _handle_withdraw(callback.from_user, callback.message)
+
+
 # ── Helpers ─────────────────────────────────────────────────────────────
 async def _send_welcome_back(message: types.Message, user: User) -> None:
     """Greet a returning user with their current stats."""
@@ -273,7 +287,10 @@ async def _send_welcome_back(message: types.Message, user: User) -> None:
             InlineKeyboardButton(text="💰 Balansım", callback_data="balance"),
             InlineKeyboardButton(text="👥 Referal Proqramı", callback_data="referral")
         ],
-        [InlineKeyboardButton(text="ℹ️ Necə İşləyir?", callback_data="how_it_works")]
+        [
+            InlineKeyboardButton(text="ℹ️ Necə İşləyir?", callback_data="how_it_works"),
+            InlineKeyboardButton(text="💰 Çıxarış", callback_data="withdraw")
+        ]
     ])
 
     await message.answer(
@@ -295,9 +312,34 @@ async def _show_how_it_works(message: types.Message) -> None:
         "3️⃣ Dostlarınızı dəvət edərək onların qazancından da əlavə bonuslar əldə edirsiniz.\n\n"
         "💰 <b>Çıxarış və Balans Mexanizmi:</b>\n"
         "Yığılan MC xalları sistem daxilində real Azərbaycan Manatına (AZN) konvertasiya olunur. "
-        "Minimum çıxarış limitinə çatdıqdan sonra qazancınızı rahatlıqla şəxsi elektron pul kisələrinə (məsələn, m10) "
+        "Minimum çıxarış limiti 7 AZN-dir. Bu limitə çatdıqdan sonra qazancınızı rahatlıqla şəxsi elektron pul kisələrinə (məsələn, m10) "
         "və ya bank kartınıza nağdlaşdıra bilərsiniz!\n\n"
         "Hər hansı bir sualınız yaranarsa, dəstək komandası ilə əlaqə saxlaya bilərsiniz. "
         "İndi ilk videonuzu izləyin və qazanmağa başlayın! 🚀"
     )
     await message.answer(text)
+
+
+async def _handle_withdraw(tg_user: types.User, message: types.Message) -> None:
+    async with async_session() as session:
+        stmt = select(User).where(User.telegram_id == tg_user.id)
+        result = await session.execute(stmt)
+        user = result.scalar_one_or_none()
+
+    if not user:
+        await message.answer("⚠️ Siz hələ qeydiyyatdan keçməmisiniz. Zəhmət olmasa əvvəlcə /start göndərin.")
+        return
+
+    azn_value = user.balance_mc / MC_TO_AZN_RATE
+    
+    if azn_value < 7:
+        await message.answer(
+            f"❌ Çıxarış uğursuz oldu. Minimum çıxarış limiti 7 AZN-dir. "
+            f"Sizin hazırkı balansınız: {azn_value:,.4f} AZN. "
+            f"Daha çox video izləyərək limiti tamamlaya bilərsiniz! 🚀"
+        )
+    else:
+        await message.answer(
+            "✅ Təbriklər! Çıxarış limitini keçmisiniz. Zəhmət olmasa pulu köçürmək "
+            "istədiyiniz m10 nömrənizi və ya Bank Kartı məlumatlarınızı (Ad, Soyad, 16 rəqəmli kod) bura yazın:"
+        )
