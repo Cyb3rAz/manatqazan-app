@@ -64,7 +64,7 @@ class User(Base):
 
     # ── Relationships ──
     watch_records: Mapped[list["WatchRecord"]] = relationship(
-        back_populates="user", cascade="all, delete-orphan", lazy="selectin"
+        back_populates="user", cascade="all, delete-orphan", lazy="select"
     )
 
     def __repr__(self) -> str:

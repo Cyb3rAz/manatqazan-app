@@ -62,24 +62,46 @@ async function initApp() {
     }
 }
 
-// ── İstifadəçi Məlumatlarını Çək ─────────────────────────────────────
+// ── İstifadəçi Məlumatlarını Çək ─────────────────────────────
 async function fetchUserData() {
+    const url = `${API_BASE}/api/user/${currentUser.id}`;
+    console.log(`[fetchUserData] Sorgu göndərilir: ${url} | currentUser.id=${currentUser.id}`);
+
     try {
-        const resp = await fetch(`${API_BASE}/api/user/${currentUser.id}`, {
+        const resp = await fetch(url, {
             headers: { "ngrok-skip-browser-warning": "true" }
         });
+
+        console.log(`[fetchUserData] Cavab alındı: status=${resp.status}`);
+
         if (!resp.ok) {
             if (resp.status === 404) {
-                console.warn("İstifadəçi tapılmadı – əvvəlcə botda /start göndərin.");
-                userData = createDefaultUserData();
+                console.warn(`[fetchUserData] 404 - İstifadəçi ID=${currentUser.id} tapilmadı. Bot-da /start göndərin.`);
+                // Mövcud userData-nı sıfırlamadan qoru, yoxdursa default yarat
+                if (!userData) {
+                    userData = createDefaultUserData();
+                }
                 return;
             }
-            throw new Error(`API xətası: ${resp.status}`);
+            const errText = await resp.text();
+            console.error(`[fetchUserData] API xətası: ${resp.status} | ${errText}`);
+            // Xəta halinda da mövcud userData-nı qoru
+            if (!userData) {
+                userData = createDefaultUserData();
+            }
+            return;
         }
-        userData = await resp.json();
+
+        const newData = await resp.json();
+        console.log(`[fetchUserData] Yeni data alındı: balance_mc=${newData.balance_mc}, videos_today=${newData.videos_today}`);
+        userData = newData;
+
     } catch (err) {
-        console.error("İstifadəçi məlumatları çəkilmədi:", err);
-        userData = createDefaultUserData();
+        console.error("[İstifadəçi məlumatları çəkilmədi]:", err);
+        // Tormöz halinda mövcud userData-nı qoru
+        if (!userData) {
+            userData = createDefaultUserData();
+        }
     }
 }
 

@@ -164,16 +164,36 @@ async def adsgram_reward_get(
         https://<ngrok>/api/reward?userId=[userId]&blockId=31453
     """
     params = dict(request.query_params)
+
+    # ── DEBUG: Terminal-da canlı görünən log ──
+    print(f"\n{'='*60}")
+    print(f"ALINAN ADSGRAM GET SORĞUSU")
+    print(f"Tam parametrlər: {params}")
+    print(f"IP: {request.client.host if request.client else 'unknown'}")
+    print(f"{'='*60}\n")
+
     logger.info("[ADSGRAM-GET] Raw query params: %s | IP=%s", params, request.client.host if request.client else "unknown")
 
-    # Get userId or user_id or username
-    user_id_val = params.get("userId") or params.get("user_id") or params.get("user")
+    # userId, user_id, user, tgId, tg_id kimi bütün mümkün adları yoxla
+    user_id_val = (
+        params.get("userId")
+        or params.get("user_id")
+        or params.get("user")
+        or params.get("tgId")
+        or params.get("tg_id")
+        or params.get("telegram_id")
+        or params.get("telegramId")
+        or params.get("uid")
+    )
     block_id = params.get("blockId") or params.get("block_id")
+
+    print(f"[ADSGRAM-GET] userId dəyəri: {user_id_val!r} | blockId: {block_id!r}")
 
     # Log and bypass signature/secret verification
     sig_keys = ["hash", "signature", "sign", "secret_key", "secret"]
     received_sigs = {k: params.get(k) for k in sig_keys if k in params}
-    
+
+    print(f"[ADSGRAM-GET] Təhlükəsizlik parametrləri: {received_sigs}")
     logger.warning(
         "[SIGNATURE-DEBUG-GET] Received security parameters: %s | Local SECRET=%r (bypass active)",
         received_sigs,
@@ -181,8 +201,9 @@ async def adsgram_reward_get(
     )
 
     if not user_id_val:
-        logger.error("[ADSGRAM-GET] Missing userId or user_id in request query parameters!")
-        raise HTTPException(status_code=400, detail="userId və ya user_id parametri tapılmadı.")
+        print(f"[ADSGRAM-GET] ❌ userId tapılmadı! Bütün params: {params}")
+        logger.error("[ADSGRAM-GET] Missing userId or user_id in request query parameters! All params: %s", params)
+        raise HTTPException(status_code=400, detail=f"userId parametri tapılmadı. Alınan parametrlər: {list(params.keys())}")
 
     event_id = params.get("event_id") or params.get("eventId") or str(uuid.uuid4())
     return await _credit_user(user_id_val, event_id=event_id, source="adsgram_get")
@@ -194,17 +215,38 @@ async def adsgram_callback(request: Request) -> JSONResponse:
     """
     POST format callback – HMAC yoxlanışı bypass edildi (debug rejimi).
     """
+    # Ham body-ni oxu (həm JSON, həm form-data üçün)
+    raw_body = await request.body()
+    print(f"\n{'='*60}")
+    print(f"ALINAN ADSGRAM POST SORĞUSU")
+    print(f"Raw body: {raw_body[:500]}")
+    print(f"IP: {request.client.host if request.client else 'unknown'}")
+    print(f"{'='*60}\n")
+
     try:
         payload = await request.json()
     except Exception:
-        payload = {}
+        # JSON deyilsə, query parametrlərini yoxla
+        payload = dict(request.query_params)
+        print(f"[ADSGRAM-POST] JSON parse uğursuz, query params istifadə edilir: {payload}")
 
+    print(f"[ADSGRAM-POST] Parsed payload: {payload}")
     logger.info("[ADSGRAM-POST] Raw body payload: %s", payload)
 
-    user_id_val = payload.get("user_id") or payload.get("userId") or payload.get("user")
+    user_id_val = (
+        payload.get("user_id")
+        or payload.get("userId")
+        or payload.get("user")
+        or payload.get("tgId")
+        or payload.get("tg_id")
+        or payload.get("telegram_id")
+        or payload.get("telegramId")
+        or payload.get("uid")
+    )
     event_id = payload.get("event_id") or payload.get("eventId") or str(uuid.uuid4())
     signature = payload.get("signature") or payload.get("hash") or payload.get("sign") or ""
 
+    print(f"[ADSGRAM-POST] userId dəyəri: {user_id_val!r} | signature: {signature!r}")
     logger.warning(
         "[SIGNATURE-DEBUG-POST] SECRET=%r | user_id=%s | event_id=%s | received_sig=%s (bypass active)",
         ADSGRAM_SECRET[:10] + "..." if ADSGRAM_SECRET else "(boş)",
@@ -212,8 +254,9 @@ async def adsgram_callback(request: Request) -> JSONResponse:
     )
 
     if not user_id_val:
-        logger.error("[ADSGRAM-POST] Missing user_id in payload!")
-        raise HTTPException(status_code=400, detail="user_id parametri tapılmadı.")
+        print(f"[ADSGRAM-POST] ❌ userId tapılmadı! Bütün keys: {list(payload.keys())}")
+        logger.error("[ADSGRAM-POST] Missing user_id in payload! Keys: %s", list(payload.keys()))
+        raise HTTPException(status_code=400, detail=f"user_id parametri tapılmadı. Alınan açarlar: {list(payload.keys())}")
 
     return await _credit_user(user_id_val, event_id=event_id, source="adsgram_post")
 
@@ -221,13 +264,19 @@ async def adsgram_callback(request: Request) -> JSONResponse:
 # ── Ortaq kredit məntiqi ─────────────────────────────────────────────────
 async def _credit_user(user_id_val: int | str, event_id: str, source: str = "unknown") -> JSONResponse:
     """Bazada istifadəçini tap, balansı artır, commit et."""
+    print(f"[CREDIT] Kredit cəhdi: user={user_id_val!r} | event_id={event_id} | source={source}")
     logger.info("[CREDIT] Attempting to credit user %s | event_id=%s | source=%s", user_id_val, event_id, source)
 
     user_str = str(user_id_val).strip()
     is_numeric = user_str.isdigit()
 
+    # ── Dəyişənləri session scope-undan əvvəl elan et (DetachedInstanceError-i önlə) ──
+    final_new_balance: float = 0.0
+    final_videos_today: int = 0
+    final_reward: float = float(MC_PER_VIDEO)
+
     async with async_session() as session:
-        # ── İstifadəçini tap ──
+        # ── İstifadəçini tap (relasiya olmadan, yalnız users cədvəlindən) ──
         if is_numeric:
             tg_id = int(user_str)
             stmt = select(User).where(User.telegram_id == tg_id)
@@ -238,51 +287,64 @@ async def _credit_user(user_id_val: int | str, event_id: str, source: str = "unk
         result = await session.execute(stmt)
         user = result.scalar_one_or_none()
 
-        # Fallback: if it was numeric but not found, check if it exists as a username string
+        # Fallback: rəqəmsal idi amma tapılmadı → username kimi yoxla
         if not user and is_numeric:
+            print(f"[CREDIT] telegram_id={user_str} ilə tapılmadı, username kimi yoxlanır...")
             logger.info("[CREDIT] User not found by numeric telegram_id %s, checking username field as fallback...", user_str)
             stmt = select(User).where(User.username == user_str)
             result = await session.execute(stmt)
             user = result.scalar_one_or_none()
 
         if not user:
+            print(f"[CREDIT] ❌ İstifadəçi {user_id_val!r} bazada TAPILMADI!")
             logger.error("[CREDIT] User %s NOT FOUND in database after all lookup strategies!", user_id_val)
             raise HTTPException(status_code=404, detail=f"User {user_id_val} tapılmadı.")
 
         user_telegram_id = user.telegram_id
+        print(f"[CREDIT] ✓ İstifadəçi tapıldı: telegram_id={user_telegram_id}, balance={user.balance_mc:.2f} MC")
         logger.info("[CREDIT] Found user: id=%s, telegram_id=%s, current_balance=%.2f", user.id, user.telegram_id, user.balance_mc)
 
         # ── event_id ilə dublikat yoxla ──
         if event_id:
             dup_stmt = select(WatchRecord).where(WatchRecord.adsgram_event_id == event_id)
             dup_result = await session.execute(dup_stmt)
-            if dup_result.scalar_one_or_none():
+            dup_record = dup_result.scalar_one_or_none()
+            if dup_record:
+                existing_balance = user.balance_mc
+                print(f"[CREDIT] Dublikat event_id={event_id} – ötürülür.")
                 logger.info("[CREDIT] Duplicate event_id=%s – skipping.", event_id)
-                return JSONResponse({"ok": True, "message": "Artıq kreditlənib.", "balance": user.balance_mc})
+                return JSONResponse({"ok": True, "message": "Artıq kreditlənib.", "balance": existing_balance})
 
         # ── Gündəlik limit yoxla ──
         now = datetime.now(timezone.utc)
         today = now.date()
         if user.last_watch_date and user.last_watch_date.date() == today:
             if user.videos_today >= DAILY_VIDEO_LIMIT:
+                print(f"[CREDIT] İstifadəçi {user_telegram_id} gündəlik limitə çatdı ({user.videos_today}/{DAILY_VIDEO_LIMIT})")
                 logger.warning("[CREDIT] User %s hit daily limit (%s/%s)", user_telegram_id, user.videos_today, DAILY_VIDEO_LIMIT)
                 return JSONResponse({"ok": False, "message": "Gündəlik limit bitdi."}, status_code=429)
         else:
             # Yeni gün → sıfırla
+            print(f"[CREDIT] İstifadəçi {user_telegram_id} üçün yeni gün – videos_today sıfırlanır")
             logger.info("[CREDIT] New day for user %s – resetting videos_today", user_telegram_id)
             user.videos_today = 0
 
         # ── Balansı artır ──
-        reward = float(MC_PER_VIDEO)
+        final_reward = float(MC_PER_VIDEO)
         old_balance = user.balance_mc
-        user.balance_mc += reward
-        user.total_earned_mc += reward
-        user.videos_today += 1
+        user.balance_mc = old_balance + final_reward
+        user.total_earned_mc = user.total_earned_mc + final_reward
+        user.videos_today = user.videos_today + 1
         user.last_watch_date = now
 
+        # Dəyərləri session-dan çıxmadan yadda saxla
+        final_new_balance = user.balance_mc
+        final_videos_today = user.videos_today
+
+        print(f"[CREDIT] Balans yenilənir: {old_balance:.2f} → {final_new_balance:.2f} (+{final_reward:.2f}) | videos_today={final_videos_today}")
         logger.info(
             "[CREDIT] balance: %.2f → %.2f (+%.2f) | videos_today=%s",
-            old_balance, user.balance_mc, reward, user.videos_today
+            old_balance, final_new_balance, final_reward, final_videos_today
         )
 
         # ── Referal bonusu ──
@@ -290,22 +352,23 @@ async def _credit_user(user_id_val: int | str, event_id: str, source: str = "unk
         referrer_tg_id: int | None = user.referrer_id
 
         if referrer_tg_id:
-            referrer_bonus = reward * REFERRAL_BONUS_PERCENT / 100.0
+            referrer_bonus = final_reward * REFERRAL_BONUS_PERCENT / 100.0
             ref_stmt = select(User).where(User.telegram_id == referrer_tg_id)
             ref_result = await session.execute(ref_stmt)
             referrer = ref_result.scalar_one_or_none()
             if referrer:
-                referrer.balance_mc += referrer_bonus
-                referrer.total_earned_mc += referrer_bonus
-                referrer.referral_earnings_mc += referrer_bonus
+                referrer.balance_mc = referrer.balance_mc + referrer_bonus
+                referrer.total_earned_mc = referrer.total_earned_mc + referrer_bonus
+                referrer.referral_earnings_mc = referrer.referral_earnings_mc + referrer_bonus
                 session.add(referrer)
+                print(f"[CREDIT] Referal bonusu {referrer_bonus:.2f} MC → user {referrer_tg_id}")
                 logger.info("[CREDIT] Referral bonus %.2f MC → user %s", referrer_bonus, referrer_tg_id)
 
         # ── Audit record ──
         record = WatchRecord(
             user_id=user.id,
             telegram_id=user_telegram_id,
-            reward_mc=reward,
+            reward_mc=final_reward,
             referrer_bonus_mc=referrer_bonus,
             referrer_telegram_id=referrer_tg_id,
             adsgram_event_id=event_id,
@@ -314,16 +377,24 @@ async def _credit_user(user_id_val: int | str, event_id: str, source: str = "unk
         session.add(user)
 
         # ── COMMIT – balansı yaddaşa yaz ──
-        await session.flush()
-        await session.commit()
-        logger.info("[CREDIT] ✅ COMMITTED DATABASE TRANS! user=%s new_balance=%.2f", user_telegram_id, user.balance_mc)
+        try:
+            await session.flush()   # SQL-i bazaya göndər
+            await session.commit()  # Əməliyyatı qəti möhürlə
+            print(f"[CREDIT] ✅ VERİLƏNLƏR BAZASINA YAZILDI! user={user_telegram_id} | yeni balans={final_new_balance:.2f} MC")
+            logger.info("[CREDIT] ✅ COMMITTED DATABASE TRANS! user=%s new_balance=%.2f", user_telegram_id, final_new_balance)
+        except Exception as db_err:
+            await session.rollback()
+            print(f"[CREDIT] ❌ COMMIT UĞURSUZ OLDU! Xəta: {db_err}")
+            logger.exception("[CREDIT] Database commit failed for user %s", user_telegram_id)
+            raise HTTPException(status_code=500, detail=f"Verilənlər bazasına yazma xətası: {db_err}")
 
+    # Session bağlandı – yadda saxlanmış dəyərləri istifadə et
     return JSONResponse({
         "ok": True,
         "source": source,
-        "reward": reward,
-        "new_balance": user.balance_mc,
-        "videos_today": user.videos_today,
+        "reward": final_reward,
+        "new_balance": final_new_balance,
+        "videos_today": final_videos_today,
         "daily_limit": DAILY_VIDEO_LIMIT,
     })
 
