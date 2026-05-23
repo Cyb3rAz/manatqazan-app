@@ -323,6 +323,12 @@ async def _credit_user(user_id_val: int | str, event_id: str, source: str = "unk
         print(f"[CREDIT] OK: Found user telegram_id={user_telegram_id}, balance={user.balance_mc:.2f} MC")
         logger.info("[CREDIT] Found user: id=%s, telegram_id=%s, current_balance=%.2f", user.id, user.telegram_id, user.balance_mc)
 
+        # -- Check if user is active (not banned) --
+        if not user.is_active:
+            print(f"[CREDIT] ERROR: User {user_telegram_id} is banned / inactive!")
+            logger.warning("[CREDIT] Inactive/banned user %s tried to watch video", user_telegram_id)
+            return JSONResponse({"ok": False, "message": "Hesab dondurulub."}, status_code=403)
+
         # -- event_id ile dublikat yoxla --
         if event_id:
             dup_stmt = select(WatchRecord).where(WatchRecord.adsgram_event_id == event_id)
@@ -445,6 +451,10 @@ async def get_user_info(telegram_id: str) -> JSONResponse:
     if not user:
         logger.error("[USER-INFO] User %s NOT FOUND in database!", telegram_id)
         raise HTTPException(status_code=404, detail="User not found.")
+
+    if not user.is_active:
+        logger.warning("[USER-INFO] Banned user %s tried to fetch user info!", telegram_id)
+        raise HTTPException(status_code=403, detail="Hesabınız dondurulub.")
 
     now = datetime.now(timezone.utc)
     today = now.date()

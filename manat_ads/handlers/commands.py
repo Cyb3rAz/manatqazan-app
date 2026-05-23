@@ -10,18 +10,55 @@ Commands:
 from __future__ import annotations
 
 import os
+import asyncio
+import logging
 from datetime import datetime, timezone
+from typing import Callable, Dict, Any, Awaitable
 
-from aiogram import Router, types
-from aiogram.filters import Command, CommandStart
-from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup, KeyboardButton, MenuButtonWebApp
+from aiogram import Router, types, BaseMiddleware
+from aiogram.filters import BaseFilter, Command, CommandStart
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup, KeyboardButton, MenuButtonWebApp, TelegramObject
 from aiogram import F
-from sqlalchemy import select
+from sqlalchemy import select, func
 
 from database import async_session
 from models import User
 
+logger = logging.getLogger("manatads.commands")
+
+# ── Admin Config ──
+ADMIN_IDS_RAW = os.getenv("ADMIN_IDS", "1970477419")
+ADMIN_IDS = [int(x.strip()) for x in ADMIN_IDS_RAW.split(",") if x.strip().isdigit()]
+
+class IsAdminFilter(BaseFilter):
+    async def __call__(self, message: types.Message) -> bool:
+        return message.from_user is not None and message.from_user.id in ADMIN_IDS
+
+# ── Ban Check Middleware ──
+class BanCheckMiddleware(BaseMiddleware):
+    async def __call__(
+        self,
+        handler: Callable[[TelegramObject, Dict[str, Any]], Awaitable[Any]],
+        event: TelegramObject,
+        data: Dict[str, Any]
+    ) -> Any:
+        user: types.User = data.get("event_from_user")
+        if user:
+            async with async_session() as session:
+                stmt = select(User).where(User.telegram_id == user.id)
+                res = await session.execute(stmt)
+                db_user = res.scalar_one_or_none()
+                if db_user and not db_user.is_active:
+                    if isinstance(event, types.Message):
+                        await event.answer("❌ Hesabınız dondurulub (banlanıb). Dəstək komandası ilə əlaqə saxlayın.")
+                    elif isinstance(event, types.CallbackQuery):
+                        await event.answer("❌ Hesabınız dondurulub.", show_alert=True)
+                    return None
+        return await handler(event, data)
+
 router = Router(name="commands")
+router.message.outer_middleware(BanCheckMiddleware())
+router.callback_query.outer_middleware(BanCheckMiddleware())
 
 # ── Config ──────────────────────────────────────────────────────────────
 MC_TO_AZN_RATE = int(os.getenv("MC_TO_AZN_RATE", "21000"))
@@ -382,3 +419,236 @@ async def _handle_withdraw(tg_user: types.User, message: types.Message) -> None:
             "✅ Təbriklər! Çıxarış limitini keçmisiniz. Zəhmət olmasa pulu köçürmək "
             "istədiyiniz m10 nömrənizi və ya Bank Kartı məlumatlarınızı (Ad, Soyad, 16 rəqəmli kod) bura yazın:"
         )
+
+
+# ── Admin Commands ──────────────────────────────────────────────────────
+
+@router.message(Command("admin"), IsAdminFilter())
+async def cmd_admin(message: types.Message) -> None:
+    async with async_session() as session:
+        total_users_stmt = select(func.count(User.id))
+        total_users_res = await session.execute(total_users_stmt)
+        total_users = total_users_res.scalar() or 0
+        
+        total_mc_stmt = select(func.sum(User.balance_mc))
+        total_mc_res = await session.execute(total_mc_stmt)
+        total_mc = total_mc_res.scalar() or 0.0
+        
+    await message.answer(
+        f"📊 <b>Sistem Statistikası (Admin):</b>\n\n"
+        f"👥 <b>Ümumi İstifadəçi Sayı:</b> {total_users}\n"
+        f"🪙 <b>Dövriyyədəki Cəmi MC:</b> {total_mc:,.0f} MC"
+    )
+
+
+@router.message(Command("users"), IsAdminFilter())
+async def cmd_users(message: types.Message) -> None:
+    async with async_session() as session:
+        stmt = select(User).order_by(User.id.desc()).limit(20)
+        res = await session.execute(stmt)
+        users = res.scalars().all()
+        
+    if not users:
+        await message.answer("👥 Heç bir istifadəçi tapılmadı.")
+        return
+        
+    lines = ["👥 Son Aktiv İstifadəçilər:"]
+    for i, u in enumerate(users, 1):
+        username_str = f"@{u.username}" if u.username else "Yoxdur"
+        lines.append(f"{i}. ID: {u.telegram_id} | {username_str} | Balans: {u.balance_mc:,.0f} MC")
+        
+    await message.answer("\n".join(lines))
+
+
+@router.message(Command("info"), IsAdminFilter())
+async def cmd_info(message: types.Message) -> None:
+    parts = message.text.split(maxsplit=1)
+    if len(parts) < 2:
+        await message.answer("⚠️ Zəhmət olmasa istifadəçi ID və ya username daxil edin.\nNümunə: <code>/info 1970477419</code> və ya <code>/info CVb3rAz</code>")
+        return
+        
+    target = parts[1].strip()
+    target_clean = target.lstrip('@')
+    
+    async with async_session() as session:
+        if target.isdigit():
+            tg_id = int(target)
+            stmt = select(User).where((User.telegram_id == tg_id) | (User.username == target_clean))
+        else:
+            stmt = select(User).where(User.username == target_clean)
+            
+        res = await session.execute(stmt)
+        user = res.scalar_one_or_none()
+        
+    if not user:
+        await message.answer("❌ İstifadəçi tapılmadı!")
+        return
+        
+    status_str = "Aktiv" if user.is_active else "Banlı"
+    username_display = f"@{user.username}" if user.username else "Yoxdur"
+    
+    today = datetime.now(timezone.utc).date()
+    last_date = user.last_watch_date.date() if user.last_watch_date else None
+    videos_today_count = user.videos_today if last_date == today else 0
+    
+    await message.answer(
+        f"ℹ️ <b>İstifadəçi Məlumatı:</b>\n"
+        f"• <b>Telegram ID:</b> <code>{user.telegram_id}</code>\n"
+        f"• <b>Username:</b> {username_display}\n"
+        f"• <b>Hazırkı Balans:</b> {user.balance_mc:,.0f} MC\n"
+        f"• <b>Ümumi Qazanc:</b> {user.total_earned_mc:,.0f} MC\n"
+        f"• <b>Bugünkü Videolar:</b> {videos_today_count}/{DAILY_LIMIT}\n"
+        f"• <b>Dəvət Etdiyi Şəxslər:</b> {user.referral_count} nəfər\n"
+        f"• <b>Status:</b> {status_str}"
+    )
+
+
+@router.message(Command("give"), IsAdminFilter())
+async def cmd_give(message: types.Message) -> None:
+    parts = message.text.split()
+    if len(parts) < 3:
+        await message.answer("⚠️ Yanlış format. Nümunə: <code>/give 1970477419 500</code> və ya <code>/give CVb3rAz -200</code>")
+        return
+        
+    target = parts[1].strip()
+    try:
+         amount = float(parts[2])
+    except ValueError:
+         await message.answer("⚠️ Miqdar rəqəm olmalıdır.")
+         return
+         
+    target_clean = target.lstrip('@')
+    
+    async with async_session() as session:
+        if target.isdigit():
+            tg_id = int(target)
+            stmt = select(User).where((User.telegram_id == tg_id) | (User.username == target_clean))
+        else:
+            stmt = select(User).where(User.username == target_clean)
+            
+        res = await session.execute(stmt)
+        user = res.scalar_one_or_none()
+        
+        if not user:
+            await message.answer("❌ İstifadəçi tapılmadı!")
+            return
+            
+        old_bal = user.balance_mc
+        user.balance_mc += amount
+        if amount > 0:
+            user.total_earned_mc += amount
+            
+        await session.commit()
+        
+        await message.answer(
+            f"✅ <b>Balans yeniləndi!</b>\n\n"
+            f"👤 İstifadəçi: <code>{user.telegram_id}</code>\n"
+            f"🪙 Əvvəlki balans: {old_bal:,.0f} MC\n"
+            f"➕ Dəyişiklik: {amount:+,.0f} MC\n"
+            f"💰 Yeni balans: {user.balance_mc:,.0f} MC"
+        )
+
+
+@router.message(Command("ban"), IsAdminFilter())
+async def cmd_ban(message: types.Message) -> None:
+    parts = message.text.split()
+    if len(parts) < 2:
+        await message.answer("⚠️ Nümunə: <code>/ban 1970477419</code> və ya <code>/ban CVb3rAz</code>")
+        return
+        
+    target = parts[1].strip()
+    target_clean = target.lstrip('@')
+    
+    async with async_session() as session:
+        if target.isdigit():
+            tg_id = int(target)
+            stmt = select(User).where((User.telegram_id == tg_id) | (User.username == target_clean))
+        else:
+            stmt = select(User).where(User.username == target_clean)
+            
+        res = await session.execute(stmt)
+        user = res.scalar_one_or_none()
+        
+        if not user:
+            await message.answer("❌ İstifadəçi tapılmadı!")
+            return
+            
+        user.is_active = False
+        await session.commit()
+        
+        await message.answer(
+            f"🔒 <b>İstifadəçi donduruldu (Banlandı):</b>\n"
+            f"ID: <code>{user.telegram_id}</code> | @{user.username or 'Yoxdur'}"
+        )
+
+
+@router.message(Command("unban"), IsAdminFilter())
+async def cmd_unban(message: types.Message) -> None:
+    parts = message.text.split()
+    if len(parts) < 2:
+        await message.answer("⚠️ Nümunə: <code>/unban 1970477419</code> və ya <code>/unban CVb3rAz</code>")
+        return
+        
+    target = parts[1].strip()
+    target_clean = target.lstrip('@')
+    
+    async with async_session() as session:
+        if target.isdigit():
+            tg_id = int(target)
+            stmt = select(User).where((User.telegram_id == tg_id) | (User.username == target_clean))
+        else:
+            stmt = select(User).where(User.username == target_clean)
+            
+        res = await session.execute(stmt)
+        user = res.scalar_one_or_none()
+        
+        if not user:
+            await message.answer("❌ İstifadəçi tapılmadı!")
+            return
+            
+        user.is_active = True
+        await session.commit()
+        
+        await message.answer(
+            f"🔓 <b>İstifadəçi aktivləşdirildi (Unban):</b>\n"
+            f"ID: <code>{user.telegram_id}</code> | @{user.username or 'Yoxdur'}"
+        )
+
+
+@router.message(Command("broadcast"), IsAdminFilter())
+async def cmd_broadcast(message: types.Message) -> None:
+    parts = message.text.split(maxsplit=1)
+    if len(parts) < 2:
+        await message.answer("⚠️ Nümunə: <code>/broadcast Salam, yeni videolar əlavə olundu! 🚀</code>")
+        return
+        
+    broadcast_msg = parts[1].strip()
+    
+    async with async_session() as session:
+        stmt = select(User.telegram_id).where(User.is_active == True)
+        res = await session.execute(stmt)
+        active_ids = res.scalars().all()
+        
+    if not active_ids:
+        await message.answer("⚠️ Yayım üçün heç bir aktiv istifadəçi tapılmadı.")
+        return
+        
+    await message.answer(f"📢 <b>Yayım başladı...</b>\nHədəf: {len(active_ids)} istifadəçi.")
+    
+    success_count = 0
+    fail_count = 0
+    
+    for tg_id in active_ids:
+        try:
+            await message.bot.send_message(chat_id=tg_id, text=broadcast_msg)
+            success_count += 1
+            await asyncio.sleep(0.05)
+        except Exception as e:
+            logger.error("Failed to broadcast to %s: %s", tg_id, e)
+            fail_count += 1
+            
+    await message.answer(
+        f"📢 <b>Yayım tamamlandı!</b>\n\n"
+        f"✅ Uğurlu: {success_count}\n"
+        f"❌ Uğursuz: {fail_count}"
+    )
