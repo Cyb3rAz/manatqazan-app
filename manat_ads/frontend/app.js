@@ -243,7 +243,7 @@ async function watchAd() {
 
 // ── Mükafat Kreditləmə (balans yeniləmə ilə) ───────────────────────
 async function creditReward() {
-    // 1. Optimistik lokal yeniləmə – dərhal UI-da göstərmək üçün
+    // Optimistik lokal yeniləmə – dərhal UI-da göstərmək üçün
     if (userData) {
         userData.balance_mc += userData.mc_per_video;
         userData.total_earned_mc += userData.mc_per_video;
@@ -251,16 +251,10 @@ async function creditReward() {
         renderDashboard(); // Dərhal ekranda göstər
     }
 
-    // 2. Server-dən həqiqi balansı gətir və yenidən render et
-    try {
-        // Kiçik gecikmə – backend-in yazma əməliyyatını tamamlaması üçün
-        await new Promise(resolve => setTimeout(resolve, 500));
-        await fetchUserData();
-        renderDashboard(); // Server cavabı ilə yenilə
-    } catch (err) {
-        console.error("Serverdən yeniləmə uğursuz oldu:", err);
-        // Optimistik yeniləmə artıq tətbiq edilib, istifadəçi balansı görür
-    }
+    // Qeyd: Serverdən (fetchUserData) dərhal yeniləməni ləğv etdik,
+    // çünki Adsgram S2S (Server-to-Server) callback-i 2-5 saniyə gecikə bilər.
+    // Əgər dərhal serverdən məlumat çəksək, hələ bazaya yazılmadığı üçün köhnə balansı qaytarır 
+    // və UI-da balans geri qayıdır. Optimistik yeniləmə sessiya üçün kifayətdir.
 }
 
 // ── Referal Linkini Kopyala (Telegram SDK uyğunluğu ilə) ────────────
