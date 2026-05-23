@@ -423,22 +423,69 @@ async def _handle_withdraw(tg_user: types.User, message: types.Message) -> None:
 
 # ── Admin Commands ──────────────────────────────────────────────────────
 
-@router.message(Command("admin"), IsAdminFilter())
-async def cmd_admin(message: types.Message) -> None:
+async def _get_admin_stats_text() -> str:
+    """Build the admin stats text."""
     async with async_session() as session:
         total_users_stmt = select(func.count(User.id))
         total_users_res = await session.execute(total_users_stmt)
         total_users = total_users_res.scalar() or 0
-        
+
         total_mc_stmt = select(func.sum(User.balance_mc))
         total_mc_res = await session.execute(total_mc_stmt)
         total_mc = total_mc_res.scalar() or 0.0
-        
-    await message.answer(
+
+    return (
         f"📊 <b>Sistem Statistikası (Admin):</b>\n\n"
         f"👥 <b>Ümumi İstifadəçi Sayı:</b> {total_users}\n"
         f"🪙 <b>Dövriyyədəki Cəmi MC:</b> {total_mc:,.0f} MC"
     )
+
+
+ADMIN_HELP_TEXT = (
+    "🛠️ <b>ManatAds — Aktiv Admin Əmrləri:</b>\n\n"
+    "• /admin — Ümumi sistem statistikası və idarəetmə paneli.\n"
+    "• /users — Bota son qoşulan 20 istifadəçi və balansları.\n"
+    "• /info [ID/Username] — İstifadəçinin bütün detallı profili (Məs: /info CVb3rAz).\n"
+    "• /give [ID/Username] [Miqdar] — Balansa manual MC əlavə edir/silir (Məs: /give CVb3rAz 500).\n"
+    "• /ban [ID] — Şübhəli şəxsi dondurur, botu və Mini App-i onun üçün bağlayır.\n"
+    "• /unban [ID] — Ban olunmuş şəxsin blokunu qaldırır.\n"
+    "• /broadcast [Mesaj] — Bazardakı BÜTÜN istifadəçilərə kütləvi bildiriş göndərir."
+)
+
+ADMIN_PANEL_KB = InlineKeyboardMarkup(inline_keyboard=[
+    [InlineKeyboardButton(text="📜 Əmrlər və İzahları", callback_data="admin_show_help")]
+])
+
+ADMIN_BACK_KB = InlineKeyboardMarkup(inline_keyboard=[
+    [InlineKeyboardButton(text="⬅️ İdarəetmə Panelinə Qayıt", callback_data="admin_main_menu")]
+])
+
+
+@router.message(Command("admin"), IsAdminFilter())
+async def cmd_admin(message: types.Message) -> None:
+    text = await _get_admin_stats_text()
+    await message.answer(text, reply_markup=ADMIN_PANEL_KB)
+
+
+@router.callback_query(lambda c: c.data == "admin_show_help")
+async def cb_admin_show_help(callback: types.CallbackQuery) -> None:
+    if callback.from_user.id not in ADMIN_IDS:
+        await callback.answer("⛔ İcazəniz yoxdur.", show_alert=True)
+        return
+    await callback.answer()
+    if callback.message and isinstance(callback.message, types.Message):
+        await callback.message.edit_text(ADMIN_HELP_TEXT, reply_markup=ADMIN_BACK_KB)
+
+
+@router.callback_query(lambda c: c.data == "admin_main_menu")
+async def cb_admin_main_menu(callback: types.CallbackQuery) -> None:
+    if callback.from_user.id not in ADMIN_IDS:
+        await callback.answer("⛔ İcazəniz yoxdur.", show_alert=True)
+        return
+    await callback.answer()
+    if callback.message and isinstance(callback.message, types.Message):
+        text = await _get_admin_stats_text()
+        await callback.message.edit_text(text, reply_markup=ADMIN_PANEL_KB)
 
 
 @router.message(Command("users"), IsAdminFilter())
