@@ -14,7 +14,8 @@ from datetime import datetime, timezone
 
 from aiogram import Router, types
 from aiogram.filters import Command, CommandStart
-from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup, KeyboardButton
+from aiogram import F
 from sqlalchemy import select
 
 from database import async_session
@@ -92,17 +93,21 @@ async def cmd_start_with_referral(message: types.Message) -> None:
         referral_msg = "\n\n🤝 <b>Sizi dostunuz dəvət edib!</b> Onlar sizin qazancınızdan ömürlük 10% bonus qazanacaqlar."
 
     webapp_url = "https://manatqazan.vercel.app"
-    keyboard = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="🎬 Video İzlə & Qazan", web_app=types.WebAppInfo(url=webapp_url))],
-        [
-            InlineKeyboardButton(text="💰 Balansım", callback_data="balance"),
-            InlineKeyboardButton(text="👥 Referal Proqramı", callback_data="referral")
+    keyboard = ReplyKeyboardMarkup(
+        keyboard=[
+            [KeyboardButton(text="🎬 Video İzlə & Qazan", web_app=types.WebAppInfo(url=webapp_url))],
+            [
+                KeyboardButton(text="💰 Balansım"),
+                KeyboardButton(text="👥 Referal Proqramı")
+            ],
+            [
+                KeyboardButton(text="ℹ️ Necə İşləyir?"),
+                KeyboardButton(text="💰 Çıxarış")
+            ]
         ],
-        [
-            InlineKeyboardButton(text="ℹ️ Necə İşləyir?", callback_data="how_it_works"),
-            InlineKeyboardButton(text="💰 Çıxarış", callback_data="withdraw")
-        ]
-    ])
+        resize_keyboard=True,
+        is_persistent=True
+    )
 
     await message.answer(
         f"🎉 <b>ManatAds-a xoş gəlmisiniz!</b>\n\n"
@@ -142,17 +147,21 @@ async def cmd_start(message: types.Message) -> None:
         await session.commit()
 
     webapp_url = "https://manatqazan.vercel.app"
-    keyboard = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="🎬 Video İzlə & Qazan", web_app=types.WebAppInfo(url=webapp_url))],
-        [
-            InlineKeyboardButton(text="💰 Balansım", callback_data="balance"),
-            InlineKeyboardButton(text="👥 Referal Proqramı", callback_data="referral")
+    keyboard = ReplyKeyboardMarkup(
+        keyboard=[
+            [KeyboardButton(text="🎬 Video İzlə & Qazan", web_app=types.WebAppInfo(url=webapp_url))],
+            [
+                KeyboardButton(text="💰 Balansım"),
+                KeyboardButton(text="👥 Referal Proqramı")
+            ],
+            [
+                KeyboardButton(text="ℹ️ Necə İşləyir?"),
+                KeyboardButton(text="💰 Çıxarış")
+            ]
         ],
-        [
-            InlineKeyboardButton(text="ℹ️ Necə İşləyir?", callback_data="how_it_works"),
-            InlineKeyboardButton(text="💰 Çıxarış", callback_data="withdraw")
-        ]
-    ])
+        resize_keyboard=True,
+        is_persistent=True
+    )
 
     await message.answer(
         f"🎉 <b>ManatAds-a xoş gəlmisiniz!</b>\n\n"
@@ -275,23 +284,47 @@ async def cb_withdraw(callback: types.CallbackQuery) -> None:
         await _handle_withdraw(callback.from_user, callback.message)
 
 
+# ── Text Message Handlers (Reply Keyboard) ──────────────────────────────
+@router.message(F.text == "💰 Balansım")
+async def txt_balance(message: types.Message) -> None:
+    if message.from_user:
+        await _show_balance(message.from_user, message)
+
+@router.message(F.text == "👥 Referal Proqramı")
+async def txt_referral(message: types.Message) -> None:
+    if message.from_user:
+        await _show_referral(message.from_user, message)
+
+@router.message(F.text == "ℹ️ Necə İşləyir?")
+async def txt_how_it_works(message: types.Message) -> None:
+    await _show_how_it_works(message)
+
+@router.message(F.text == "💰 Çıxarış")
+async def txt_withdraw(message: types.Message) -> None:
+    if message.from_user:
+        await _handle_withdraw(message.from_user, message)
+
+
 # ── Helpers ─────────────────────────────────────────────────────────────
 async def _send_welcome_back(message: types.Message, user: User) -> None:
     """Greet a returning user with their current stats."""
     azn_value = user.balance_mc / MC_TO_AZN_RATE
     webapp_url = "https://manatqazan.vercel.app"
-
-    keyboard = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="🎬 Video İzlə & Qazan", web_app=types.WebAppInfo(url=webapp_url))],
-        [
-            InlineKeyboardButton(text="💰 Balansım", callback_data="balance"),
-            InlineKeyboardButton(text="👥 Referal Proqramı", callback_data="referral")
+    keyboard = ReplyKeyboardMarkup(
+        keyboard=[
+            [KeyboardButton(text="🎬 Video İzlə & Qazan", web_app=types.WebAppInfo(url=webapp_url))],
+            [
+                KeyboardButton(text="💰 Balansım"),
+                KeyboardButton(text="👥 Referal Proqramı")
+            ],
+            [
+                KeyboardButton(text="ℹ️ Necə İşləyir?"),
+                KeyboardButton(text="💰 Çıxarış")
+            ]
         ],
-        [
-            InlineKeyboardButton(text="ℹ️ Necə İşləyir?", callback_data="how_it_works"),
-            InlineKeyboardButton(text="💰 Çıxarış", callback_data="withdraw")
-        ]
-    ])
+        resize_keyboard=True,
+        is_persistent=True
+    )
 
     await message.answer(
         f"👋 <b>Yenidən xoş gəldiniz, {user.first_name or 'dost'}!</b>\n\n"
