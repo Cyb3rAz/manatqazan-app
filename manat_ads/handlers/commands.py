@@ -14,7 +14,7 @@ from datetime import datetime, timezone
 
 from aiogram import Router, types
 from aiogram.filters import Command, CommandStart
-from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup, KeyboardButton
 from sqlalchemy import select
 
 from database import async_session
@@ -32,6 +32,22 @@ if not raw_webhook_url or "your-domain" in raw_webhook_url:
     WEBHOOK_URL = "https://manatqazan.vercel.app"
 else:
     WEBHOOK_URL = raw_webhook_url.rstrip("/")
+
+
+def get_main_keyboard(webapp_url: str) -> ReplyKeyboardMarkup:
+    """Generate the main reply keyboard for the bot."""
+    return ReplyKeyboardMarkup(
+        keyboard=[
+            [KeyboardButton(text="🎬 Video İzlə & Qazan", web_app=types.WebAppInfo(url=webapp_url))],
+            [
+                KeyboardButton(text="💰 Balansım"),
+                KeyboardButton(text="👥 Referal Proqramı")
+            ],
+            [KeyboardButton(text="ℹ️ Necə İşləyir?")]
+        ],
+        resize_keyboard=True,
+        persistent=True
+    )
 
 
 # ── /start with deep-link referral ─────────────────────────────────────
@@ -92,11 +108,7 @@ async def cmd_start_with_referral(message: types.Message) -> None:
         referral_msg = "\n\n🤝 <b>Sizi dostunuz dəvət edib!</b> Onlar sizin qazancınızdan ömürlük 10% bonus qazanacaqlar."
 
     webapp_url = "https://manatqazan.vercel.app"
-    keyboard = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="🎬 Video İzlə & Qazan", web_app=types.WebAppInfo(url=webapp_url))],
-        [InlineKeyboardButton(text="💰 Balansım", callback_data="balance")],
-        [InlineKeyboardButton(text="👥 Referal Proqramı", callback_data="referral")],
-    ])
+    keyboard = get_main_keyboard(webapp_url)
 
     await message.answer(
         f"🎉 <b>ManatAds-a xoş gəlmisiniz!</b>\n\n"
@@ -136,11 +148,7 @@ async def cmd_start(message: types.Message) -> None:
         await session.commit()
 
     webapp_url = "https://manatqazan.vercel.app"
-    keyboard = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="🎬 Video İzlə & Qazan", web_app=types.WebAppInfo(url=webapp_url))],
-        [InlineKeyboardButton(text="💰 Balansım", callback_data="balance")],
-        [InlineKeyboardButton(text="👥 Referal Proqramı", callback_data="referral")],
-    ])
+    keyboard = get_main_keyboard(webapp_url)
 
     await message.answer(
         f"🎉 <b>ManatAds-a xoş gəlmisiniz!</b>\n\n"
@@ -252,12 +260,7 @@ async def _send_welcome_back(message: types.Message, user: User) -> None:
     """Greet a returning user with their current stats."""
     azn_value = user.balance_mc / MC_TO_AZN_RATE
     webapp_url = "https://manatqazan.vercel.app"
-
-    keyboard = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="🎬 Video İzlə & Qazan", web_app=types.WebAppInfo(url=webapp_url))],
-        [InlineKeyboardButton(text="💰 Balansım", callback_data="balance")],
-        [InlineKeyboardButton(text="👥 Referal Proqramı", callback_data="referral")],
-    ])
+    keyboard = get_main_keyboard(webapp_url)
 
     await message.answer(
         f"👋 <b>Yenidən xoş gəldiniz, {user.first_name or 'dost'}!</b>\n\n"
@@ -266,3 +269,50 @@ async def _send_welcome_back(message: types.Message, user: User) -> None:
         f"Daha çox qazanmağa hazırsınız? Aşağıdakı düyməyə toxunun! 👇",
         reply_markup=keyboard,
     )
+
+
+async def _show_how_it_works(message: types.Message) -> None:
+    """Show how it works info message to the user."""
+    text = (
+        "ℹ️ <b>ManatAds Layihəsi Haqqında Məlumat</b>\n\n"
+        "Platformamızın işləmə məntiqi çox bəsitdir:\n"
+        "1️⃣ '<b>🎬 Video İzlə & Qazan</b>' düyməsinə toxunaraq qısa video reklamlar izləyirsiniz.\n"
+        "2️⃣ Hər uğurlu izləmə üçün balansınıza anında <b>50 MC</b> (Manat Coin) əlavə olunur.\n"
+        "3️⃣ Dostlarınızı dəvət edərək onların qazancından da əlavə bonuslar əldə edirsiniz.\n\n"
+        "💰 <b>Çıxarış və Balans Mexanizmi:</b>\n"
+        "Yığılan MC xalları sistem daxilində real Azərbaycan Manatına (AZN) konvertasiya olunur. "
+        "Minimum çıxarış limitinə çatdıqdan sonra qazancınızı rahatlıqla şəxsi elektron pul kisələrinə (məsələn, m10) "
+        "və ya bank kartınıza nağdlaşdıra bilərsiniz!\n\n"
+        "Hər hansı bir sualınız yaranarsa, dəstək komandası ilə əlaqə saxlaya bilərsiniz. "
+        "İndi ilk videonuzu izləyin və qazanmağa başlayın! 🚀"
+    )
+    await message.answer(text)
+
+
+# ── Text Keyboard Handlers ────────────────────────────────────────────
+@router.message(lambda m: m.text == "💰 Balansım")
+async def text_balance(message: types.Message) -> None:
+    tg_user = message.from_user
+    if tg_user:
+        await _show_balance(tg_user, message)
+
+
+@router.message(lambda m: m.text == "👥 Referal Proqramı")
+async def text_referral(message: types.Message) -> None:
+    tg_user = message.from_user
+    if tg_user:
+        await _show_referral(tg_user, message)
+
+
+@router.message(lambda m: m.text == "ℹ️ Necə İşləyir?")
+async def text_how_it_works(message: types.Message) -> None:
+    await _show_how_it_works(message)
+
+
+# ── Callback-query shortcuts for how_it_works ──────────────────────────
+@router.callback_query(lambda c: c.data == "how_it_works")
+async def cb_how_it_works(callback: types.CallbackQuery) -> None:
+    """Inline button shortcut for /how_it_works."""
+    await callback.answer()
+    if callback.message and isinstance(callback.message, types.Message):
+        await _show_how_it_works(callback.message)
