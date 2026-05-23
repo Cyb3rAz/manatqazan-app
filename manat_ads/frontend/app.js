@@ -8,7 +8,7 @@
  */
 
 // ── Configuration ─────────────────────────────────────────────────────
-const API_BASE = window.location.origin;
+const API_BASE = "http://127.0.0.1:8000";
 const ADSGRAM_BLOCK_ID = "your_adsgram_block_id_here"; // Replace with .env value in production
 
 // ── Telegram Web App ──────────────────────────────────────────────────
