@@ -334,9 +334,11 @@ async def _handle_withdraw(tg_user: types.User, message: types.Message) -> None:
     
     if azn_value < 7:
         await message.answer(
-            f"❌ Çıxarış uğursuz oldu. Minimum çıxarış limiti 7 AZN-dir. "
-            f"Sizin hazırkı balansınız: {azn_value:,.4f} AZN. "
-            f"Daha çox video izləyərək limiti tamamlaya bilərsiniz! 🚀"
+            f"❌ Çıxarış uğursuz oldu. Minimum çıxarış limiti 7 AZN-dir.\n\n"
+            f"💰 Sizin hazırkı balansınız: <b>{azn_value:,.4f} AZN</b>\n\n"
+            f"🚀 <b>Limiti necə daha sürətli tamamlamaq olar?</b>\n"
+            f"Daha çox video izləməklə yanaşı, <b>dostlarınızı dəvət edərək</b> daha böyük məbləğlər qazana bilərsiniz! "
+            f"Dəvət etdiyiniz hər dostunuzun izlədiyi reklamlardan sizə avtomatik <b>ömürlük 10% bonus</b> gələcək. Linkinizi paylaşın və hədəfə sürətlə çatın! 👥💸"
         )
     else:
         await message.answer(
