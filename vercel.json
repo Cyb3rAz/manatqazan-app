@@ -1,6 +1,6 @@
 {
   "rewrites": [
-    { "source": "/api/(.*)", "destination": "https://8157-212-47-146-163.ngrok-free.app/api/$1" },
+    { "source": "/api/(.*)", "destination": "https://a7f5-212-47-146-163.ngrok-free.app/api/$1" },
     { "source": "/static/(.*)", "destination": "/manat_ads/frontend/$1" },
     { "source": "/(.*)", "destination": "/manat_ads/frontend/$1" }
   ]
