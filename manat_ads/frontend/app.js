@@ -8,7 +8,10 @@
  */
 
 // ── Konfiqurasiya ─────────────────────────────────────────────────────
-const API_BASE = ""; // Vercel vasitəsilə proxy
+// API_BASE boş saxlanılır — Vercel rewrites vasitəsilə /api/* sorğuları
+// avtomatik olaraq backend serverinə yönləndirilir.
+// VPS-ə köçdükdən sonra vercel.json-da yeni URL-i dəyişmək kifayətdir.
+const API_BASE = "";
 const ADSGRAM_BLOCK_ID = "31453";
 
 // ── Telegram Web App ──────────────────────────────────────────────────
@@ -31,6 +34,14 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
+    // Mini App arxa plandan qayıtdıqda balansı yenilə
+    document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === "visible" && currentUser) {
+            console.log("[VISIBILITY] Mini App yenidən görünür — balans yenilənir...");
+            fetchUserData().then(() => renderDashboard());
+        }
+    });
+
     initApp();
 });
 
@@ -46,38 +57,48 @@ async function initApp() {
             currentUser = { id: 123456789, first_name: "TestUser" };
         }
 
-        // Backend-dən istifadəçi məlumatlarını çək
+        // Backend-dən istifadəçi məlumatlarını çək (yüklənmə ekranı qalır)
         await fetchUserData();
-
-        // Əsas kontenti göstər
-        document.getElementById("loader").style.display = "none";
-        document.getElementById("main-content").style.display = "block";
 
         // UI-ı yenilə
         renderDashboard();
 
+        // Əsas kontenti göstər, loaderi gizlə
+        document.getElementById("loader").style.display = "none";
+        document.getElementById("main-content").style.display = "block";
+
     } catch (err) {
         console.error("Başlanğıc xətası:", err);
-        showToast("Tətbiq yüklənmədi. Yenidən cəhd edin.", "error");
+        // Xəta olsa belə loaderi gizlə və default göstər
+        document.getElementById("loader").style.display = "none";
+        document.getElementById("main-content").style.display = "block";
+        renderDashboard();
+        showToast("⚠️ Məlumatlar yüklənə bilmədi. Yenidən cəhd edin.", "error");
     }
 }
 
-// ── İstifadəçi Məlumatlarını Çək ─────────────────────────────
+// ── İstifadəçi Məlumatlarını Çək (cache-busting ilə) ─────────────────
 async function fetchUserData() {
-    const url = `${API_BASE}/api/user/${currentUser.id}`;
-    console.log(`[fetchUserData] Sorgu göndərilir: ${url} | currentUser.id=${currentUser.id}`);
+    // Cache-busting: hər sorğuya unikal timestamp əlavə et
+    const cacheBuster = Date.now();
+    const url = `${API_BASE}/api/user/${currentUser.id}?_t=${cacheBuster}`;
+    console.log(`[fetchUserData] Sorgu göndərilir: ${url}`);
 
     try {
         const resp = await fetch(url, {
-            headers: { "ngrok-skip-browser-warning": "true" }
+            method: "GET",
+            headers: {
+                "Cache-Control": "no-cache, no-store, must-revalidate",
+                "Pragma": "no-cache",
+                "ngrok-skip-browser-warning": "true"
+            }
         });
 
         console.log(`[fetchUserData] Cavab alındı: status=${resp.status}`);
 
         if (!resp.ok) {
             if (resp.status === 404) {
-                console.warn(`[fetchUserData] 404 - İstifadəçi ID=${currentUser.id} tapilmadı. Bot-da /start göndərin.`);
-                // Mövcud userData-nı sıfırlamadan qoru, yoxdursa default yarat
+                console.warn(`[fetchUserData] 404 - İstifadəçi ID=${currentUser.id} tapılmadı. Bot-da /start göndərin.`);
                 if (!userData) {
                     userData = createDefaultUserData();
                 }
@@ -85,7 +106,6 @@ async function fetchUserData() {
             }
             const errText = await resp.text();
             console.error(`[fetchUserData] API xətası: ${resp.status} | ${errText}`);
-            // Xəta halinda da mövcud userData-nı qoru
             if (!userData) {
                 userData = createDefaultUserData();
             }
@@ -93,12 +113,23 @@ async function fetchUserData() {
         }
 
         const newData = await resp.json();
-        console.log(`[fetchUserData] Yeni data alındı: balance_mc=${newData.balance_mc}, videos_today=${newData.videos_today}`);
+        console.log(`[fetchUserData] Backend-dən gələn data: balance_mc=${newData.balance_mc}, videos_today=${newData.videos_today}, total_earned=${newData.total_earned_mc}`);
+
+        // Yalnız server datası optimistik lokal balansdan KİÇİK olarsa,
+        // lokal (optimistik) yenilənmiş versiyasını qoru.
+        // Bu, Adsgram S2S callback gecikmə müddətində UI-nın geri sıçramasını qarşısını alır.
+        if (userData && userData.balance_mc > newData.balance_mc) {
+            console.log(`[fetchUserData] Lokal balans (${userData.balance_mc}) > Server balansi (${newData.balance_mc}). Lokal saxlanılır (S2S gecikmə).`);
+            // Ancaq serverin qaytardığı referral məlumatlarını yenilə
+            userData.referral_count = newData.referral_count;
+            userData.referral_earnings_mc = newData.referral_earnings_mc;
+            return;
+        }
+
         userData = newData;
 
     } catch (err) {
-        console.error("[İstifadəçi məlumatları çəkilmədi]:", err);
-        // Tormöz halinda mövcud userData-nı qoru
+        console.error("[fetchUserData] Şəbəkə xətası:", err);
         if (!userData) {
             userData = createDefaultUserData();
         }
@@ -131,8 +162,9 @@ function renderDashboard() {
     // Balans – birbaşa DOM yeniləmə
     const balanceMcEl = document.getElementById("balance-mc");
     const balanceAznEl = document.getElementById("balance-azn");
+    const rate = userData.mc_to_azn_rate || 21000;
     balanceMcEl.textContent = formatNumber(userData.balance_mc);
-    balanceAznEl.textContent = (userData.balance_mc / userData.mc_to_azn_rate).toFixed(4);
+    balanceAznEl.textContent = (userData.balance_mc / rate).toFixed(4);
 
     // Statistika
     document.getElementById("total-earned").textContent = formatNumber(userData.total_earned_mc);
@@ -241,9 +273,9 @@ async function watchAd() {
     }
 }
 
-// ── Mükafat Kreditləmə (balans yeniləmə ilə) ───────────────────────
+// ── Mükafat Kreditləmə (optimistik + arxa fonda sinxronlaşdırma) ────
 async function creditReward() {
-    // Optimistik lokal yeniləmə – dərhal UI-da göstərmək üçün
+    // 1. Optimistik lokal yeniləmə – dərhal UI-da göstərmək üçün
     if (userData) {
         userData.balance_mc += userData.mc_per_video;
         userData.total_earned_mc += userData.mc_per_video;
@@ -251,10 +283,46 @@ async function creditReward() {
         renderDashboard(); // Dərhal ekranda göstər
     }
 
-    // Qeyd: Serverdən (fetchUserData) dərhal yeniləməni ləğv etdik,
-    // çünki Adsgram S2S (Server-to-Server) callback-i 2-5 saniyə gecikə bilər.
-    // Əgər dərhal serverdən məlumat çəksək, hələ bazaya yazılmadığı üçün köhnə balansı qaytarır 
-    // və UI-da balans geri qayıdır. Optimistik yeniləmə sessiya üçün kifayətdir.
+    // 2. Arxa fonda server ilə sinxronlaşdır (Adsgram S2S gecikmə 2-5 san.)
+    //    Bir neçə cəhd edirik: S2S callback servere çatmamış ola bilər.
+    scheduleServerSync(3, 2000);
+}
+
+/**
+ * Server ilə sinxronlaşdırma — gecikmə ilə bir neçə cəhd.
+ * Adsgram S2S callback servere 2-5 saniyə gecikmə ilə çatır,
+ * ona görə dərhal fetch etsək köhnə balansı alırıq.
+ */
+function scheduleServerSync(maxRetries, delayMs) {
+    let attempt = 0;
+
+    function trySync() {
+        attempt++;
+        console.log(`[SYNC] Cəhd ${attempt}/${maxRetries} — ${delayMs * attempt}ms sonra...`);
+
+        setTimeout(async () => {
+            try {
+                const prevBalance = userData ? userData.balance_mc : 0;
+                await fetchUserData();
+                renderDashboard();
+
+                const newBalance = userData ? userData.balance_mc : 0;
+                console.log(`[SYNC] Cəhd ${attempt} tamamlandı: balans=${newBalance} (əvvəlki=${prevBalance})`);
+
+                // Əgər server balansi hələ köhnədirsə və cəhd qalıbsa, davam et
+                if (newBalance < prevBalance && attempt < maxRetries) {
+                    trySync();
+                }
+            } catch (err) {
+                console.error(`[SYNC] Cəhd ${attempt} xətası:`, err);
+                if (attempt < maxRetries) {
+                    trySync();
+                }
+            }
+        }, delayMs * attempt); // 2s, 4s, 6s artan gecikmə
+    }
+
+    trySync();
 }
 
 // ── Referal Linkini Kopyala (Telegram SDK uyğunluğu ilə) ────────────
