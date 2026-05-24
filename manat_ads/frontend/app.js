@@ -352,7 +352,30 @@ async function watchAd(sessionNum = 1) {
         }
     } finally {
         renderDashboard();
+        startButtonCooldown(sessionNum);
     }
+}
+
+// ── Düymə Cooldown (reklam bitdikdən sonra 5 saniyəlik bloklanma) ────
+function startButtonCooldown(sessionNum, seconds = 5) {
+    const btn = document.getElementById(`session-${sessionNum}-btn`);
+    const otherBtn = document.getElementById(`session-${sessionNum === 1 ? 2 : 1}-btn`);
+
+    btn.disabled = true;
+    if (otherBtn) otherBtn.disabled = true;
+
+    let remaining = seconds;
+    btn.textContent = `⏳ Gözləyin (${remaining}s)...`;
+
+    const interval = setInterval(() => {
+        remaining--;
+        if (remaining > 0) {
+            btn.textContent = `⏳ Gözləyin (${remaining}s)...`;
+        } else {
+            clearInterval(interval);
+            renderDashboard(); // Düymənin əsl mətnini bərpa et
+        }
+    }, 1000);
 }
 
 // ── Mükafat Kreditləmə (optimistik + arxa fonda sinxronlaşdırma) ────
