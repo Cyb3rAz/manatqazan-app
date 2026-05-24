@@ -12,7 +12,7 @@
 // avtomatik olaraq backend serverinə yönləndirilir.
 // VPS-ə köçdükdən sonra vercel.json-da yeni URL-i dəyişmək kifayətdir.
 const API_BASE = "";
-const ADSGRAM_BLOCK_ID = "31453";
+const ADSGRAM_BLOCK_ID = "31923";
 
 // ── Telegram Web App ──────────────────────────────────────────────────
 const tg = window.Telegram?.WebApp;

@@ -180,7 +180,7 @@ async def adsgram_reward_get(
     """
     Adsgram S2S callback – GET sorğusu ilə gəlir.
     Dashboard-da Reward URL:
-        https://<ngrok>/api/reward?userId=[userId]&blockId=31453
+        https://<ngrok>/api/reward?userId=[userId]&blockId=31923
     """
     params = dict(request.query_params)
 
