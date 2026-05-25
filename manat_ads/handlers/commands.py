@@ -63,7 +63,7 @@ router.message.outer_middleware(BanCheckMiddleware())
 router.callback_query.outer_middleware(BanCheckMiddleware())
 
 # ── Config ──────────────────────────────────────────────────────────────
-MC_TO_AZN_RATE = int(os.getenv("MC_TO_AZN_RATE", "21000"))
+MC_TO_AZN_RATE = int(os.getenv("MC_TO_AZN_RATE", "125000"))
 MC_PER_VIDEO = int(os.getenv("MC_PER_VIDEO", "50"))
 DAILY_LIMIT = int(os.getenv("DAILY_VIDEO_LIMIT", "25"))
 
