@@ -525,13 +525,13 @@ function spawnCoinBurst() {
     }
 }
 
-// ── Toast Bildirişlər ────────────────────────────────────────────────
+// -- Toast Notifications --
 let toastTimer = null;
 
-function showToast(message, type = "success") {
+function showToast(message, toastType = "success") {
     const toast = document.getElementById("toast");
     toast.textContent = message;
-    toast.className = `toast ${type} visible`;
+    toast.className = `toast ${toastType} visible`;
 
     if (toastTimer) clearTimeout(toastTimer);
     toastTimer = setTimeout(() => {
