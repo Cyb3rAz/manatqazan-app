@@ -386,7 +386,7 @@ async function creditReward(sessionNum) {
             if (userData.session_1_count === 25) {
                 userData.session_2_locked = true;
                 const unlockDate = new Date();
-                unlockDate.setHours(unlockDate.getHours() + 7);
+                unlockDate.setHours(unlockDate.getHours() + 4);
                 userData.unlock_at = unlockDate.toISOString();
             }
         } else if (sessionNum === 2) {
