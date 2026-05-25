@@ -17,6 +17,9 @@
     <!-- Adsgram SDK -->
     <script src="https://sad.adsgram.ai/js/sad.min.js"></script>
 
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
     <style>
         /* ── CSS Reset & Variables ─────────────────────────────────── */
         *, *::before, *::after {
@@ -583,6 +586,98 @@
             background: rgba(255, 255, 255, 0.1);
             border-radius: 4px;
         }
+
+        /* ── Upgrade Modal (Cyberpunk) ─────────────────────────────── */
+        .upgrade-modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s ease;
+        }
+
+        .upgrade-modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .upgrade-modal-card {
+            background: rgba(17, 24, 39, 0.95);
+            border: 2px solid var(--accent-gold);
+            border-radius: var(--radius-xl);
+            padding: 32px 24px;
+            width: 90%;
+            max-width: 360px;
+            text-align: center;
+            box-shadow: 0 0 40px var(--accent-gold-glow), inset 0 0 20px rgba(245, 158, 11, 0.1);
+            transform: scale(0.9) translateY(20px);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .upgrade-modal-overlay.active .upgrade-modal-card {
+            transform: scale(1) translateY(0);
+        }
+
+        .upgrade-modal-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 50%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            animation: shimmer-modal 3s infinite;
+        }
+        
+        @keyframes shimmer-modal {
+            0% { left: -100%; }
+            100% { left: 200%; }
+        }
+
+        .upgrade-modal-title {
+            font-size: 24px;
+            font-weight: 900;
+            color: #fff;
+            margin-bottom: 12px;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+            letter-spacing: 1px;
+        }
+
+        .upgrade-modal-text {
+            font-size: 15px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+            margin-bottom: 24px;
+            font-weight: 500;
+        }
+
+        .upgrade-modal-btn {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: var(--radius-lg);
+            background: var(--gradient-gold);
+            color: #fff;
+            font-family: 'Inter', sans-serif;
+            font-size: 16px;
+            font-weight: 800;
+            cursor: pointer;
+            box-shadow: 0 4px 20px var(--accent-gold-glow);
+            transition: var(--transition);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .upgrade-modal-btn:active {
+            transform: scale(0.96);
+        }
     </style>
 </head>
 <body>
@@ -701,6 +796,15 @@
 
     <!-- Toast notification -->
     <div class="toast" id="toast"></div>
+
+    <!-- Upgrade Modal -->
+    <div class="upgrade-modal-overlay" id="upgrade-modal">
+        <div class="upgrade-modal-card" id="upgrade-modal-card">
+            <h2 class="upgrade-modal-title" id="upgrade-modal-title">🎉 TƏBRİKLƏR! 🎉</h2>
+            <p class="upgrade-modal-text" id="upgrade-modal-text">Sən rəsmən ⚪ Gümüş Liqasına yüksəldin! Sürətin mükəmməldir, belə də davam et! 🚀</p>
+            <button class="upgrade-modal-btn" onclick="closeUpgradeModal()">Uğurlar! 🚀</button>
+        </div>
+    </div>
 
     <script src="/static/app.js"></script>
 </body>

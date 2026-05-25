@@ -202,6 +202,93 @@ function stopCooldownTimer() {
 }
 
 // ── Dashboard Render ─────────────────────────────────────────────────
+let currentLeagueIndex = -1; // Added for state tracking
+
+function showUpgradeModal(leagueIndex) {
+    const modal = document.getElementById("upgrade-modal");
+    const titleEl = document.getElementById("upgrade-modal-title");
+    const textEl = document.getElementById("upgrade-modal-text");
+    const cardEl = document.getElementById("upgrade-modal-card");
+
+    if (!modal || !titleEl || !textEl || !cardEl) return;
+
+    let title = "";
+    let text = "";
+    let borderColor = "";
+    let shadowColor = "";
+
+    switch (leagueIndex) {
+        case 1: // Gümüş
+            title = "🎉 TƏBRİKLƏR! 🎉";
+            text = "Sən rəsmən ⚪ Gümüş Liqasına yüksəldin! Sürətin mükəmməldir, belə də davam et! 🚀";
+            borderColor = "#e2e8f0"; // Silver-ish
+            shadowColor = "rgba(226, 232, 240, 0.25)";
+            break;
+        case 2: // Qızıl
+            title = "🔥 MÖHTƏŞƏM! 🔥";
+            text = "Sən artıq 🟡 Qızıl Liqasındasan! Kassan getdikcə böyüyür, çıxarışa az qaldı! 💎";
+            borderColor = "#f59e0b"; // Gold
+            shadowColor = "rgba(245, 158, 11, 0.25)";
+            break;
+        case 3: // Platin
+            title = "👑 SENSASİYA! 👑";
+            text = "Böyük oyunçu! Rəsmən 🔵 Platin Liqa statusunu aldın! Səni dayandırmaq qeyri-mümkündür! 😎";
+            borderColor = "#3b82f6"; // Blue/Platinum
+            shadowColor = "rgba(59, 130, 246, 0.25)";
+            break;
+        case 4: // Almaz
+            title = "🌌 ƏFSANƏVİ! 🌌";
+            text = "Vəssalam! Sən 💎 Almaz Liqasındasan! Çıxarış qapısı sənin üçün açıldı, son addımı at! 💰";
+            borderColor = "#06b6d4"; // Cyan/Diamond
+            shadowColor = "rgba(6, 182, 212, 0.25)";
+            break;
+        default:
+            return;
+    }
+
+    titleEl.textContent = title;
+    textEl.textContent = text;
+    
+    // Update border and shadow color dynamically for cyberpunk feel
+    cardEl.style.borderColor = borderColor;
+    cardEl.style.boxShadow = `0 0 40px ${shadowColor}, inset 0 0 20px ${shadowColor}`;
+
+    modal.classList.add("active");
+
+    // Confetti!
+    if (window.confetti) {
+        const duration = 3000;
+        const end = Date.now() + duration;
+
+        (function frame() {
+            confetti({
+                particleCount: 5,
+                angle: 60,
+                spread: 55,
+                origin: { x: 0 },
+                colors: ['#f59e0b', '#3b82f6', '#06b6d4', '#e2e8f0']
+            });
+            confetti({
+                particleCount: 5,
+                angle: 120,
+                spread: 55,
+                origin: { x: 1 },
+                colors: ['#f59e0b', '#3b82f6', '#06b6d4', '#e2e8f0']
+            });
+
+            if (Date.now() < end) {
+                requestAnimationFrame(frame);
+            }
+        }());
+    }
+}
+
+function closeUpgradeModal() {
+    const modal = document.getElementById("upgrade-modal");
+    if (modal) {
+        modal.classList.remove("active");
+    }
+}
 function renderDashboard() {
     if (!userData) return;
 
@@ -216,26 +303,39 @@ function renderDashboard() {
     const currentMc = userData.balance_mc || 0;
     let leagueName = "";
     let progressPct = 0;
+    let newLeagueIndex = 0;
 
     if (currentMc <= 10000) {
         leagueName = "🟤 Bürünc Liqa";
         progressPct = (currentMc / 10000) * 100;
+        newLeagueIndex = 0;
     } else if (currentMc <= 50000) {
         leagueName = "⚪ Gümüş Liqa";
         progressPct = ((currentMc - 10000) / 40000) * 100;
+        newLeagueIndex = 1;
     } else if (currentMc <= 150000) {
         leagueName = "🟡 Qızıl Liqa";
         progressPct = ((currentMc - 50000) / 100000) * 100;
+        newLeagueIndex = 2;
     } else if (currentMc <= 350000) {
         leagueName = "🔵 Platin Liqa";
         progressPct = ((currentMc - 150000) / 200000) * 100;
+        newLeagueIndex = 3;
     } else if (currentMc < 625000) {
         leagueName = "💎 Almaz Liqa";
         progressPct = ((currentMc - 350000) / 275000) * 100;
+        newLeagueIndex = 4;
     } else {
         leagueName = "💎 Almaz Liqa"; // Maximum hədəfə çatıb
         progressPct = 100;
+        newLeagueIndex = 4;
     }
+
+    // Check for league upgrade
+    if (currentLeagueIndex !== -1 && newLeagueIndex > currentLeagueIndex) {
+        showUpgradeModal(newLeagueIndex);
+    }
+    currentLeagueIndex = newLeagueIndex;
 
     const pctStr = progressPct.toFixed(1);
     
