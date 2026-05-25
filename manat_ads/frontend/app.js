@@ -212,6 +212,20 @@ function renderDashboard() {
     const balanceMcEl = document.getElementById("balance-mc");
     balanceMcEl.textContent = formatNumber(userData.balance_mc);
 
+    // Çıxarış Progress Bar yeniləmə (Hədəf: 5.00 AZN * 125,000 MC = 625,000 MC)
+    const currentMc = userData.balance_mc || 0;
+    const progressPct = Math.min((currentMc / 625000) * 100, 100);
+    const pctStr = progressPct.toFixed(1);
+    
+    const withdrawalPctEl = document.getElementById("withdrawal-pct");
+    if (withdrawalPctEl) {
+        withdrawalPctEl.textContent = pctStr;
+    }
+    const withdrawalFillEl = document.getElementById("withdrawal-progress-fill");
+    if (withdrawalFillEl) {
+        withdrawalFillEl.style.width = `${progressPct}%`;
+    }
+
     // Statistika
     document.getElementById("total-earned").textContent = formatNumber(userData.total_earned_mc);
     document.getElementById("videos-count").textContent = `${userData.videos_today}/${userData.daily_limit || 50}`;
