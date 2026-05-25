@@ -21,8 +21,6 @@ let userData = null;
 
 // ── Başlanğıc ─────────────────────────────────────────────────────────
 document.addEventListener("DOMContentLoaded", () => {
-    fixAdsgramTranslations(); // Adsgram tərcümə xətalarını düzəltmək üçün
-
     if (tg) {
         tg.ready();
         tg.expand();
@@ -292,6 +290,20 @@ let adController = null;
 function initAdsgram() {
     if (window.Adsgram) {
         adController = window.Adsgram.init({ blockId: ADSGRAM_BLOCK_ID });
+        
+        // Adsgram standart xəta/xəbərdarlıq pəncərələrini əngəlləmək və öz doğma dilimizdə göstərmək üçün
+        adController.addEventListener("onNonStopShow", () => {
+            showToast("Upps! Reklamlara çox tez-tez baxmağa çalışırsınız. Zəhmət olmasa, bir neçə saniyə gözləyin 🙏", "error");
+        });
+        
+        adController.addEventListener("onBannerNotFound", () => {
+            showToast("Hazırda göstəriləcək reklam tapılmadı. Bir az sonra təkrar yoxlayın.", "error");
+        });
+        
+        adController.addEventListener("onTooLongSession", () => {
+            showToast("Sessiyanız çox uzun çəkdi. Zəhmət olmasa, səhifəni yeniləyin.", "error");
+        });
+
         return true;
     }
     console.warn("Adsgram SDK yüklənmədi.");
@@ -545,45 +557,4 @@ function showToast(message, toastType = "success") {
 function formatNumber(num) {
     if (num === undefined || num === null) return "0";
     return Math.floor(num).toLocaleString("az-AZ");
-}
-
-// ── Adsgram Tərcümə Düzəlişləri (MutationObserver) ───────────────────
-function fixAdsgramTranslations() {
-    const observer = new MutationObserver((mutations) => {
-        for (const mutation of mutations) {
-            for (const node of mutation.addedNodes) {
-                if (node.nodeType === Node.ELEMENT_NODE) {
-                    translateNode(node);
-                } else if (node.nodeType === Node.TEXT_NODE) {
-                    translateTextNode(node);
-                }
-            }
-        }
-    });
-    
-    // Adsgram modalı birbaşa body-yə əlavə olunduğu üçün body-ni dinləyirik
-    observer.observe(document.body, { childList: true, subtree: true });
-}
-
-function translateNode(node) {
-    if (node.childNodes) {
-        for (let child of node.childNodes) {
-            if (child.nodeType === Node.TEXT_NODE) {
-                translateTextNode(child);
-            } else if (child.nodeType === Node.ELEMENT_NODE) {
-                translateNode(child);
-            }
-        }
-    }
-}
-
-function translateTextNode(node) {
-    const text = node.nodeValue;
-    if (!text) return;
-    
-    if (text.includes("Oops! You are trying to watch ads too often")) {
-        node.nodeValue = "Upps! Reklamlara çox tez-tez baxmağa çalışırsınız. Zəhmət olmasa, bir neçə saniyə gözləyin 🙏";
-    } else if (text.trim() === "Yaxın") {
-        node.nodeValue = "Bağla";
-    }
 }
