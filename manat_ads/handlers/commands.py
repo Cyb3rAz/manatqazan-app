@@ -234,7 +234,6 @@ async def cmd_start_with_referral(message: types.Message) -> None:
         f"🎉 <b>ManatAds-a xoş gəlmisiniz!</b>\n\n"
         f"Salam, <b>{tg_user.first_name}</b>! 👋\n\n"
         f"📺 Qısa videolar izləyin və hər video üçün <b>{MC_PER_VIDEO} MC</b> qazanın.\n"
-        f"💵 Qazancınızı konvertasiya edin: <b>{MC_TO_AZN_RATE:,} MC = 1.00 AZN</b>\n"
         f"📊 Gündəlik limit: <b>{DAILY_LIMIT} video/gün</b>\n"
         f"👥 Dostlarınızı dəvət edin və <b>ömürlük 10% bonus</b> qazanın!"
         f"{referral_msg}",
@@ -309,7 +308,6 @@ async def cmd_start(message: types.Message) -> None:
         f"🎉 <b>ManatAds-a xoş gəlmisiniz!</b>\n\n"
         f"Salam, <b>{tg_user.first_name}</b>! 👋\n\n"
         f"📺 Qısa videolar izləyin və hər video üçün <b>{MC_PER_VIDEO} MC</b> qazanın.\n"
-        f"💵 Qazancınızı konvertasiya edin: <b>{MC_TO_AZN_RATE:,} MC = 1.00 AZN</b>\n"
         f"📊 Gündəlik limit: <b>{DAILY_LIMIT} video/gün</b>\n"
         f"👥 Dostlarınızı dəvət edin və <b>ömürlük 10% bonus</b> qazanın!",
         reply_markup=keyboard,
@@ -380,13 +378,11 @@ async def _show_balance(tg_user: types.User, message: types.Message) -> None:
         f"💰 <b>Balansınız</b>\n\n"
         f"┌─────────────────────────\n"
         f"│ 🪙 <b>Manat Coins:</b>  {balance_mc:,.0f} MC\n"
-        f"│ 💵 <b>AZN Dəyəri:</b>    {azn_value:,.4f} AZN\n"
         f"│ 📈 <b>Ümumi Qazanc:</b> {total_earned_mc:,.0f} MC\n"
         f"├─────────────────────────\n"
         f"│ 1️⃣ <b>Səans 1:</b>  {session_1_count}/25 video\n"
         f"│ 2️⃣ <b>Səans 2:</b>  {session_2_count}/25 video ({s2_status})\n"
-        f"└─────────────────────────\n\n"
-        f"💡 <i>Məzənnə: {MC_TO_AZN_RATE:,} MC = 1.00 AZN</i>",
+        f"└─────────────────────────",
     )
 
 
@@ -503,7 +499,7 @@ async def _send_welcome_back(message: types.Message, user: User) -> None:
 
     await message.answer(
         f"👋 <b>Yenidən xoş gəldiniz, {user.first_name or 'dost'}!</b>\n\n"
-        f"🪙 Balans: <b>{user.balance_mc:,.0f} MC</b> ({azn_value:,.4f} AZN)\n"
+        f"🪙 Balans: <b>{user.balance_mc:,.0f} MC</b>\n"
         f"📈 Ümumi qazanc: <b>{user.total_earned_mc:,.0f} MC</b>\n\n"
         f"Daha çox qazanmağa hazırsınız? Aşağıdakı düyməyə toxunun! 👇",
         reply_markup=keyboard,

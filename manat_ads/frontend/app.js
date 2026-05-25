@@ -148,7 +148,6 @@ function createDefaultUserData() {
         referral_count: 0,
         referral_earnings_mc: 0,
         mc_per_video: 50,
-        mc_to_azn_rate: 21000,
     };
 }
 
@@ -211,10 +210,7 @@ function renderDashboard() {
 
     // Balans – birbaşa DOM yeniləmə
     const balanceMcEl = document.getElementById("balance-mc");
-    const balanceAznEl = document.getElementById("balance-azn");
-    const rate = userData.mc_to_azn_rate || 21000;
     balanceMcEl.textContent = formatNumber(userData.balance_mc);
-    balanceAznEl.textContent = (userData.balance_mc / rate).toFixed(4);
 
     // Statistika
     document.getElementById("total-earned").textContent = formatNumber(userData.total_earned_mc);
