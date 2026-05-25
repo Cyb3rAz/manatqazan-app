@@ -539,7 +539,7 @@ function showToast(message, toastType = "success") {
     }, 3000);
 }
 
-// ── Yardımçı ─────────────────────────────────────────────────────────
+// ── Yardımçı (Format) ────────────────────────────────────────────────
 function formatNumber(num) {
     if (num === undefined || num === null) return "0";
     return Math.floor(num).toLocaleString("az-AZ");
