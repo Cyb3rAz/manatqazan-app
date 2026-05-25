@@ -554,20 +554,48 @@ async def _handle_withdraw(tg_user: types.User, message: types.Message) -> None:
 # ── Admin Commands ──────────────────────────────────────────────────────
 
 async def _get_admin_stats_text() -> str:
-    """Build the admin stats text."""
+    """Build the admin stats text including last 5 joined users."""
     async with async_session() as session:
-        total_users_stmt = select(func.count(User.id))
-        total_users_res = await session.execute(total_users_stmt)
+        # ── Ümumi istifadəçi sayı ──
+        total_users_res = await session.execute(select(func.count(User.id)))
         total_users = total_users_res.scalar() or 0
 
-        total_mc_stmt = select(func.sum(User.balance_mc))
-        total_mc_res = await session.execute(total_mc_stmt)
+        # ── Dövriyyədəki ümumi MC ──
+        total_mc_res = await session.execute(select(func.sum(User.balance_mc)))
         total_mc = total_mc_res.scalar() or 0.0
 
+        # ── Ümumi qazanılan MC ──
+        total_earned_res = await session.execute(select(func.sum(User.total_earned_mc)))
+        total_earned = total_earned_res.scalar() or 0.0
+
+        # ── Son 5 qoşulan istifadəçi ──
+        last5_res = await session.execute(
+            select(User.telegram_id, User.username, User.first_name, User.created_at)
+            .order_by(User.created_at.desc())
+            .limit(5)
+        )
+        last5 = last5_res.all()
+
+    # ── Son 5 istifadəçi sətirləri ──
+    if last5:
+        user_lines = []
+        for row in last5:
+            tg_id, uname, fname, created = row
+            username_str = f"@{uname}" if uname else (fname or "Adsız")
+            date_str = created.strftime("%d.%m.%Y %H:%M") if created else "—"
+            user_lines.append(f"  • {username_str} (<code>{tg_id}</code>) — {date_str}")
+        last5_block = "\n".join(user_lines)
+    else:
+        last5_block = "  — Hələ istifadəçi yoxdur."
+
     return (
-        f"📊 <b>Sistem Statistikası (Admin):</b>\n\n"
-        f"👥 <b>Ümumi İstifadəçi Sayı:</b> {total_users}\n"
-        f"🪙 <b>Dövriyyədəki Cəmi MC:</b> {total_mc:,.0f} MC"
+        f"📊 <b>MANAT QAZAN — ADMİN PANELİ</b>\n"
+        f"{'─' * 30}\n\n"
+        f"👤 <b>Ümumi İstifadəçi Sayı:</b> {total_users} nəfər\n"
+        f"🪙 <b>Dövriyyədəki Cəmi MC:</b> {total_mc:,.0f} MC\n"
+        f"📈 <b>Ümumi Qazanılan MC:</b> {total_earned:,.0f} MC\n\n"
+        f"🕒 <b>Son Qoşulan 5 İstifadəçi:</b>\n"
+        f"{last5_block}"
     )
 
 
