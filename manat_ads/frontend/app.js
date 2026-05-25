@@ -212,10 +212,37 @@ function renderDashboard() {
     const balanceMcEl = document.getElementById("balance-mc");
     balanceMcEl.textContent = formatNumber(userData.balance_mc);
 
-    // Çıxarış Progress Bar yeniləmə (Hədəf: 5.00 AZN * 125,000 MC = 625,000 MC)
+    // Çıxarış Progress Bar yeniləmə -> Liqa Sistemi
     const currentMc = userData.balance_mc || 0;
-    const progressPct = Math.min((currentMc / 625000) * 100, 100);
+    let leagueName = "";
+    let progressPct = 0;
+
+    if (currentMc <= 10000) {
+        leagueName = "🟤 Bürünc Liqa";
+        progressPct = (currentMc / 10000) * 100;
+    } else if (currentMc <= 50000) {
+        leagueName = "⚪ Gümüş Liqa";
+        progressPct = ((currentMc - 10000) / 40000) * 100;
+    } else if (currentMc <= 150000) {
+        leagueName = "🟡 Qızıl Liqa";
+        progressPct = ((currentMc - 50000) / 100000) * 100;
+    } else if (currentMc <= 350000) {
+        leagueName = "🔵 Platin Liqa";
+        progressPct = ((currentMc - 150000) / 200000) * 100;
+    } else if (currentMc < 625000) {
+        leagueName = "💎 Almaz Liqa";
+        progressPct = ((currentMc - 350000) / 275000) * 100;
+    } else {
+        leagueName = "💎 Almaz Liqa"; // Maximum hədəfə çatıb
+        progressPct = 100;
+    }
+
     const pctStr = progressPct.toFixed(1);
+    
+    const leagueNameEl = document.getElementById("league-name-text");
+    if (leagueNameEl) {
+        leagueNameEl.textContent = leagueName;
+    }
     
     const withdrawalPctEl = document.getElementById("withdrawal-pct");
     if (withdrawalPctEl) {
