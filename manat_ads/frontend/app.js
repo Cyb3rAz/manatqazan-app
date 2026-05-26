@@ -13,7 +13,7 @@ const ADSGRAM_BLOCK_ID = "31923";
 
 // ── i18n Dil Dəstəyi ─────────────────────────────────────────────────
 const SUPPORTED_LANGS = ['az', 'tr', 'en', 'ru'];
-let currentLang = 'az';
+let currentLang = 'en'; // Changed default from 'az' to 'en'
 
 const LOCALES = {
     az: {
@@ -421,7 +421,8 @@ async function initApp() {
         }
 
         // Təhlükəsiz dil yoxlanışı funksiyası
-        function getValidLang(langStr) {
+        function getValidLang(langStr, source) {
+            console.log(`[LangDebug] Checking source (${source}):`, langStr);
             if (langStr && typeof langStr === 'string') {
                 const lower = langStr.toLowerCase().trim();
                 if (lower.startsWith('az')) return 'az';
@@ -436,21 +437,28 @@ async function initApp() {
         let detectedLang = null;
 
         // a) Priority 1: Telegram initData
-        detectedLang = getValidLang(tg?.initDataUnsafe?.user?.language_code);
+        const tgLang = tg?.initDataUnsafe?.user?.language_code;
+        detectedLang = getValidLang(tgLang, 'Telegram initDataUnsafe');
+        if (detectedLang) console.log(`[LangDebug] Picked Priority 1 (TG): ${detectedLang}`);
 
         // b) Priority 2: URL parametri
         if (!detectedLang) {
             const urlParams = new URLSearchParams(window.location.search);
-            detectedLang = getValidLang(urlParams.get('lang'));
+            const urlLang = urlParams.get('lang');
+            detectedLang = getValidLang(urlLang, 'URL ?lang=');
+            if (detectedLang) console.log(`[LangDebug] Picked Priority 2 (URL): ${detectedLang}`);
         }
 
         // c) Priority 3: localStorage
         if (!detectedLang) {
-            detectedLang = getValidLang(localStorage.getItem('saved_language'));
+            const lsLang = localStorage.getItem('saved_language');
+            detectedLang = getValidLang(lsLang, 'localStorage saved_language');
+            if (detectedLang) console.log(`[LangDebug] Picked Priority 3 (Storage): ${detectedLang}`);
         }
 
         // d) Priority 4: Default
         currentLang = detectedLang || 'en';
+        console.log(`[LangDebug] Final initialized language: ${currentLang}`);
         localStorage.setItem('saved_language', currentLang); // Yadda saxla
 
         // Backend-dən istifadəçi məlumatlarını çək
@@ -464,7 +472,10 @@ async function initApp() {
 
         // Check if onboarding is completed
         const onboardingCompleted = localStorage.getItem('onboarding_completed');
+        console.log(`[LangDebug] onboardingCompleted flag:`, onboardingCompleted);
+        
         if (!onboardingCompleted) {
+            console.log(`[LangDebug] Showing onboarding modal for lang: ${currentLang}`);
             // Preset the onboarding selection according to initial currentLang
             onboardingSelectedLang = currentLang;
             selectOnboardingLang(currentLang);
@@ -472,19 +483,22 @@ async function initApp() {
             // Force dynamic localization updates for onboarding title & button
             const obTitle = document.getElementById("onboarding-title");
             if (obTitle) {
-                obTitle.textContent = LOCALES[currentLang]?.onboardingTitle || LOCALES['az'].onboardingTitle;
+                obTitle.textContent = LOCALES[currentLang]?.onboardingTitle || LOCALES['en'].onboardingTitle;
             }
             const obConfirmBtn = document.getElementById("onboarding-confirm-btn");
             if (obConfirmBtn) {
-                obConfirmBtn.textContent = LOCALES[currentLang]?.onboardingBtn || LOCALES['az'].onboardingBtn;
+                obConfirmBtn.textContent = LOCALES[currentLang]?.onboardingBtn || LOCALES['en'].onboardingBtn;
             }
 
             // Show the modal
             const obModal = document.getElementById("onboarding-modal");
             if (obModal) {
                 obModal.style.display = "flex";
+                // If user meant 'display: block', we could use block, but 'flex' is what style.css uses to center it. 
                 setTimeout(() => obModal.classList.add("active"), 10);
             }
+        } else {
+            console.log(`[LangDebug] Onboarding already completed, skipping modal.`);
         }
 
         // Əsas kontenti göstər, loaderi gizlə
