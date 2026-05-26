@@ -76,6 +76,36 @@ async def lifespan(application: FastAPI):
     await init_db()
     logger.info("Database initialised.")
 
+    # ── Set Bot Commands Menu ──
+    try:
+        commands_az = [
+            aio_types.BotCommand(command="start", description="Botu başladın və Yeniləyin"),
+            aio_types.BotCommand(command="help", description="Necə işləyir və Kömək"),
+        ]
+        commands_tr = [
+            aio_types.BotCommand(command="start", description="Botu başlat ve Yenile"),
+            aio_types.BotCommand(command="help", description="Nasıl Çalışır ve Yardım"),
+        ]
+        commands_en = [
+            aio_types.BotCommand(command="start", description="Start and Refresh the Bot"),
+            aio_types.BotCommand(command="help", description="How It Works & Help"),
+        ]
+        commands_ru = [
+            aio_types.BotCommand(command="start", description="Запустить и обновить бота"),
+            aio_types.BotCommand(command="help", description="Как это работает и Помощь"),
+        ]
+
+        # Default fallback to English
+        await bot.set_my_commands(commands_en, scope=aio_types.BotCommandScopeDefault())
+        # Specific languages
+        await bot.set_my_commands(commands_az, scope=aio_types.BotCommandScopeDefault(), language_code="az")
+        await bot.set_my_commands(commands_tr, scope=aio_types.BotCommandScopeDefault(), language_code="tr")
+        await bot.set_my_commands(commands_en, scope=aio_types.BotCommandScopeDefault(), language_code="en")
+        await bot.set_my_commands(commands_ru, scope=aio_types.BotCommandScopeDefault(), language_code="ru")
+        logger.info("Bot commands menu set for multiple languages.")
+    except Exception as e:
+        logger.error("Failed to set bot commands menu: %s", e)
+
     # ── Set Menu Button ──
     try:
         await bot.set_chat_menu_button(
