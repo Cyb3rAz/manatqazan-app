@@ -306,7 +306,7 @@ BOT_LOCALES = {
         'btn_referral':   "👥 Реферальная программа",
         'btn_how':        "ℹ️ Как это работает?",
         'btn_withdraw':   "💰 Вывод",
-        'btn_start':      "🚀 Старт",
+        'btn_start':      "🚀 Запустить",
         # ── Balance screen ──
         'balance_title':    "💰 <b>Ваш баланс</b>",
         'balance_mc_row':   "🪙 <b>Manat Coins:</b>",
@@ -667,7 +667,7 @@ async def cb_set_bot_lang(callback: types.CallbackQuery) -> None:
     webapp_url = f"https://manatqazan.vercel.app/?lang={chosen_lang}"
     try:
         await callback.bot.set_chat_menu_button(
-            chat_id=callback.message.chat.id,
+            chat_id=tg_user.id,
             menu_button=MenuButtonWebApp(
                 text=loc['btn_start'],
                 web_app=types.WebAppInfo(url=webapp_url)
@@ -884,7 +884,7 @@ async def _send_welcome_back(message: types.Message, user: User) -> None:
     # Update menu button to match user's language
     try:
         await message.bot.set_chat_menu_button(
-            chat_id=message.chat.id,
+            chat_id=user.telegram_id,
             menu_button=MenuButtonWebApp(
                 text=loc['btn_start'],
                 web_app=types.WebAppInfo(url=webapp_url)

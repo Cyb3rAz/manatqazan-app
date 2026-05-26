@@ -604,6 +604,28 @@ async def update_user_language(telegram_id: int, body: LanguageUpdate) -> JSONRe
         session.add(user)
         await session.commit()
 
+    # Per-user menu button localization when language is mutated inside WebApp
+    btn_start_texts = {
+        'az': "🚀 Başlat",
+        'tr': "🚀 Başlat",
+        'en': "🚀 Start",
+        'ru': "🚀 Запустить"
+    }
+    btn_text = btn_start_texts.get(lang, "🚀 Start")
+    webapp_url = f"https://manatqazan.vercel.app/?lang={lang}"
+    try:
+        from aiogram.types import MenuButtonWebApp, WebAppInfo
+        await bot.set_chat_menu_button(
+            chat_id=telegram_id,
+            menu_button=MenuButtonWebApp(
+                text=btn_text,
+                web_app=WebAppInfo(url=webapp_url)
+            )
+        )
+        logger.info("Updated menu button to dynamic language in API: chat_id=%s, lang=%s", telegram_id, lang)
+    except Exception as e:
+        logger.error("Failed to update user chat menu button in API: %s", e)
+
     return JSONResponse({"ok": True, "language": lang})
 
 
