@@ -112,6 +112,52 @@ BOT_LOCALES = {
         'btn_how':        "ℹ️ Necə İşləyir?",
         'btn_withdraw':   "💰 Çıxarış",
         'btn_start':      "🚀 Başlat",
+        # ── Balance screen ──
+        'balance_title':    "💰 <b>Balansınız</b>",
+        'balance_mc_row':   "🪙 <b>Manat Coins:</b>",
+        'balance_earn_row': "📈 <b>Ümumi Qazanc:</b>",
+        'balance_s1_row':   "1️⃣ <b>Seans 1:</b>",
+        'balance_s2_row':   "2️⃣ <b>Seans 2:</b>",
+        'balance_locked':   "Kilidli 🔒",
+        'balance_active':   "Aktiv 🟢",
+        'balance_lock_rem': "🔒 Kilidli ({h:02d}s {m:02d}d qalıb)",
+        # ── Referral screen ──
+        'referral_title':   "👥 <b>Referal Proqramı</b>",
+        'referral_desc':    "Dəvət linkinizi paylaşın və dostlarınızın izlədiyi hər videodan <b>ömürlük 10% bonus</b> qazanın!",
+        'referral_link_lbl':"🔗 <b>Sizin Referal Linkiniz:</b>",
+        'referral_invited': "👤 <b>Dəvət Olunanlar:</b>",
+        'referral_earned':  "🪙 <b>Referal Qazancı:</b>",
+        'referral_azn':     "💵 <b>Referal AZN:</b>",
+        'referral_tip':     "💡 <i>Dəvət etdiyiniz hər bir şəxsin izlədiyi video üçün ({mc} MC), siz avtomatik olaraq {bonus} MC əldə edirsiniz!</i>",
+        # ── How it works ──
+        'how_title':        "ℹ️ <b>ManatAds Layihəsi Haqqında Məlumat</b>",
+        'how_body':         (
+            "Platformamızın işləmə məntiqi çox bəsitdir:\n"
+            "1️⃣ '<b>🎬 Video İzlə & Qazan</b>' düyməsinə toxunaraq qısa video reklamlar izləyirsiniz.\n"
+            "2️⃣ Hər uğurlu izləmə üçün balansınıza anında <b>{mc} MC</b> (Manat Coin) əlavə olunur.\n"
+            "3️⃣ Dostlarınızı dəvət edərək onların qazancından da əlavə bonuslar əldə edirsiniz.\n\n"
+            "💰 <b>Çıxarış və Balans Mexanizmi:</b>\n"
+            "Yığılan MC xalları sistem daxilində real Azərbaycan Manatına (AZN) konvertasiya olunur. "
+            "Minimum çıxarış limiti 5 AZN-dir. Bu limitə çatdıqdan sonra qazancınızı rahatlıqla "
+            "şəxsi elektron pul kisələrinə (məsələn, m10) və ya bank kartınıza nağdlaşdıra bilərsiniz!\n\n"
+            "Hər hansı bir sualınız yaranarsa, dəstək komandası ilə əlaqə saxlaya bilərsiniz. "
+            "İndi ilk videonuzu izləyin və qazanmağa başlayın! 🚀"
+        ),
+        # ── Withdraw ──
+        'withdraw_below_limit': (
+            "❌ Çıxarış uğursuz oldu. Minimum çıxarış limiti 5 AZN-dir.\n\n"
+            "💰 Sizin hazırkı balansınız: <b>{azn:.4f} AZN</b>\n\n"
+            "🚀 <b>Limiti necə daha sürətli tamamlamaq olar?</b>\n"
+            "Daha çox video izləməklə yanaşı, <b>dostlarınızı dəvət edərək</b> daha böyük məbləğlər qazana bilərsiniz! "
+            "Dəvət etdiyiniz hər dostunuzun izlədiyi reklamlardan sizə avtomatik <b>ömürlük 10% bonus</b> gələcək. "
+            "Linkinizi paylaşın və hədəfə sürətlə çatın! 👥💸"
+        ),
+        'withdraw_ok': (
+            "✅ Təbriklər! Çıxarış limitini keçmisiniz. Zəhmət olmasa pulu köçürmək "
+            "istədiyiniz m10 nömrənizi və ya Bank Kartı məlumatlarınızı (Ad, Soyad, 16 rəqəmli kod) bura yazın:"
+        ),
+        # ── Error / not registered ──
+        'not_registered': "⚠️ Siz hələ qeydiyyatdan keçməmisiniz. Zəhmət olmasa əvvəlcə /start göndərin.",
     },
     'tr': {
         'choose_lang':    "🌐 <b>Hoş geldiniz!</b>\n\nLütfen bot dilini seçin:",
@@ -131,6 +177,52 @@ BOT_LOCALES = {
         'btn_how':        "ℹ️ Nasıl Çalışır?",
         'btn_withdraw':   "💰 Çekim",
         'btn_start':      "🚀 Başlat",
+        # ── Balance screen ──
+        'balance_title':    "💰 <b>Bakiyeniz</b>",
+        'balance_mc_row':   "🪙 <b>Manat Coins:</b>",
+        'balance_earn_row': "📈 <b>Toplam Kazanç:</b>",
+        'balance_s1_row':   "1️⃣ <b>Seans 1:</b>",
+        'balance_s2_row':   "2️⃣ <b>Seans 2:</b>",
+        'balance_locked':   "Kilitli 🔒",
+        'balance_active':   "Aktif 🟢",
+        'balance_lock_rem': "🔒 Kilitli ({h:02d}s {m:02d}d kaldı)",
+        # ── Referral screen ──
+        'referral_title':   "👥 <b>Referans Programı</b>",
+        'referral_desc':    "Davet bağlantınızı paylaşın ve arkadaşlarınızın izlediği her videodan <b>ömür boyu %10 bonus</b> kazanın!",
+        'referral_link_lbl':"🔗 <b>Referans Bağlantınız:</b>",
+        'referral_invited': "👤 <b>Davet Edilenler:</b>",
+        'referral_earned':  "🪙 <b>Referans Kazancı:</b>",
+        'referral_azn':     "💵 <b>Referans AZN:</b>",
+        'referral_tip':     "💡 <i>Davet ettiğiniz her kişinin izlediği video için ({mc} MC), siz otomatik olarak {bonus} MC kazanırsınız!</i>",
+        # ── How it works ──
+        'how_title':        "ℹ️ <b>ManatAds Projesi Hakkında Bilgi</b>",
+        'how_body':         (
+            "Platformamızın çalışma mantığı çok basittir:\n"
+            "1️⃣ '<b>🎬 Video İzle & Kazan</b>' butonuna dokunarak kısa video reklamlar izliyorsunuz.\n"
+            "2️⃣ Her başarılı izleme için bakiyenize anında <b>{mc} MC</b> (Manat Coin) ekleniyor.\n"
+            "3️⃣ Arkadaşlarınızı davet ederek onların kazançlarından da ek bonuslar elde ediyorsunuz.\n\n"
+            "💰 <b>Çekim ve Bakiye Mekanizması:</b>\n"
+            "Biriktirilen MC puanları sistem içinde gerçek Azerbaycan Manatına (AZN) dönüştürülür. "
+            "Minimum çekim limiti 5 AZN'dir. Bu limite ulaştıktan sonra kazancınızı kolayca "
+            "kişisel elektronik cüzdanlara (örn. m10) veya banka kartınıza çekebilirsiniz!\n\n"
+            "Herhangi bir sorunuz olursa destek ekibiyle iletişime geçebilirsiniz. "
+            "Şimdi ilk videonuzu izleyin ve kazanmaya başlayın! 🚀"
+        ),
+        # ── Withdraw ──
+        'withdraw_below_limit': (
+            "❌ Çekim başarısız oldu. Minimum çekim limiti 5 AZN'dir.\n\n"
+            "💰 Mevcut bakiyeniz: <b>{azn:.4f} AZN</b>\n\n"
+            "🚀 <b>Limiti nasıl daha hızlı tamamlarsınız?</b>\n"
+            "Daha fazla video izlemenin yanı sıra, <b>arkadaşlarınızı davet ederek</b> daha büyük miktarlar kazanabilirsiniz! "
+            "Davet ettiğiniz her arkadaşınızın izlediği reklamlardan size otomatik <b>ömür boyu %10 bonus</b> gelecek. "
+            "Bağlantınızı paylaşın ve hedefe hızla ulaşın! 👥💸"
+        ),
+        'withdraw_ok': (
+            "✅ Tebrikler! Çekim limitini aştınız. Lütfen parayı transfer etmek "
+            "istediğiniz m10 numaranızı veya Banka Kartı bilgilerinizi (Ad, Soyad, 16 haneli kod) buraya yazın:"
+        ),
+        # ── Error / not registered ──
+        'not_registered': "⚠️ Henüz kayıt olmadınız. Lütfen önce /start gönderin.",
     },
     'en': {
         'choose_lang':    "🌐 <b>Welcome!</b>\n\nPlease choose the bot language:",
@@ -150,6 +242,52 @@ BOT_LOCALES = {
         'btn_how':        "ℹ️ How It Works?",
         'btn_withdraw':   "💰 Withdraw",
         'btn_start':      "🚀 Start",
+        # ── Balance screen ──
+        'balance_title':    "💰 <b>Your Balance</b>",
+        'balance_mc_row':   "🪙 <b>Manat Coins:</b>",
+        'balance_earn_row': "📈 <b>Total Earned:</b>",
+        'balance_s1_row':   "1️⃣ <b>Session 1:</b>",
+        'balance_s2_row':   "2️⃣ <b>Session 2:</b>",
+        'balance_locked':   "Locked 🔒",
+        'balance_active':   "Active 🟢",
+        'balance_lock_rem': "🔒 Locked ({h:02d}h {m:02d}m remaining)",
+        # ── Referral screen ──
+        'referral_title':   "👥 <b>Referral Program</b>",
+        'referral_desc':    "Share your invite link and earn a <b>lifetime 10% bonus</b> from every video your friends watch!",
+        'referral_link_lbl':"🔗 <b>Your Referral Link:</b>",
+        'referral_invited': "👤 <b>People Invited:</b>",
+        'referral_earned':  "🪙 <b>Referral Earnings:</b>",
+        'referral_azn':     "💵 <b>Referral AZN:</b>",
+        'referral_tip':     "💡 <i>For every video watched by someone you invite ({mc} MC each), you automatically earn {bonus} MC!</i>",
+        # ── How it works ──
+        'how_title':        "ℹ️ <b>About ManatAds</b>",
+        'how_body':         (
+            "Our platform's logic is very simple:\n"
+            "1️⃣ Tap the '<b>🎬 Watch Videos & Earn</b>' button to watch short video ads.\n"
+            "2️⃣ For each successful watch, <b>{mc} MC</b> (Manat Coin) is instantly added to your balance.\n"
+            "3️⃣ Invite your friends and earn extra bonuses from their activity too.\n\n"
+            "💰 <b>Withdrawal & Balance Mechanism:</b>\n"
+            "Accumulated MC points are converted to real Azerbaijani Manat (AZN) within the system. "
+            "The minimum withdrawal amount is 5 AZN. Once you reach this limit, you can easily "
+            "cash out to personal e-wallets (e.g. m10) or your bank card!\n\n"
+            "If you have any questions, feel free to contact the support team. "
+            "Watch your first video now and start earning! 🚀"
+        ),
+        # ── Withdraw ──
+        'withdraw_below_limit': (
+            "❌ Withdrawal failed. Minimum withdrawal amount is 5 AZN.\n\n"
+            "💰 Your current balance: <b>{azn:.4f} AZN</b>\n\n"
+            "🚀 <b>How to reach the limit faster?</b>\n"
+            "Watch more videos and <b>invite your friends</b> to earn larger amounts! "
+            "You'll automatically earn a <b>lifetime 10% bonus</b> from every ad your referrals watch. "
+            "Share your link and reach your goal faster! 👥💸"
+        ),
+        'withdraw_ok': (
+            "✅ Congratulations! You've reached the withdrawal limit. Please provide your m10 number "
+            "or Bank Card details (Full Name, 16-digit card number) to process the transfer:"
+        ),
+        # ── Error / not registered ──
+        'not_registered': "⚠️ You are not registered yet. Please send /start first.",
     },
     'ru': {
         'choose_lang':    "🌐 <b>Добро пожаловать!</b>\n\nПожалуйста, выберите язык бота:",
@@ -169,6 +307,52 @@ BOT_LOCALES = {
         'btn_how':        "ℹ️ Как это работает?",
         'btn_withdraw':   "💰 Вывод",
         'btn_start':      "🚀 Старт",
+        # ── Balance screen ──
+        'balance_title':    "💰 <b>Ваш баланс</b>",
+        'balance_mc_row':   "🪙 <b>Manat Coins:</b>",
+        'balance_earn_row': "📈 <b>Всего заработано:</b>",
+        'balance_s1_row':   "1️⃣ <b>Сеанс 1:</b>",
+        'balance_s2_row':   "2️⃣ <b>Сеанс 2:</b>",
+        'balance_locked':   "Заблокировано 🔒",
+        'balance_active':   "Активно 🟢",
+        'balance_lock_rem': "🔒 Заблок. ({h:02d}ч {m:02d}м осталось)",
+        # ── Referral screen ──
+        'referral_title':   "👥 <b>Реферальная программа</b>",
+        'referral_desc':    "Поделитесь своей реферальной ссылкой и зарабатывайте <b>пожизненный бонус 10%</b> с каждого видео, просмотренного вашими друзьями!",
+        'referral_link_lbl':"🔗 <b>Ваша реферальная ссылка:</b>",
+        'referral_invited': "👤 <b>Приглашено:</b>",
+        'referral_earned':  "🪙 <b>Реферальный заработок:</b>",
+        'referral_azn':     "💵 <b>Реферальный AZN:</b>",
+        'referral_tip':     "💡 <i>За каждое видео, просмотренное приглашённым вами пользователем ({mc} MC), вы автоматически получаете {bonus} MC!</i>",
+        # ── How it works ──
+        'how_title':        "ℹ️ <b>О проекте ManatAds</b>",
+        'how_body':         (
+            "Логика работы нашей платформы очень проста:\n"
+            "1️⃣ Нажмите на кнопку '<b>🎬 Смотреть видео & Зарабатывать</b>', чтобы смотреть короткую видеорекламу.\n"
+            "2️⃣ За каждый успешный просмотр на ваш баланс мгновенно зачисляется <b>{mc} MC</b> (Manat Coin).\n"
+            "3️⃣ Приглашайте друзей и получайте дополнительные бонусы с их активности.\n\n"
+            "💰 <b>Механизм вывода и баланса:</b>\n"
+            "Накопленные MC-баллы конвертируются в реальные азербайджанские манаты (AZN) внутри системы. "
+            "Минимальная сумма вывода составляет 5 AZN. Достигнув этого лимита, вы легко можете "
+            "вывести средства на личные электронные кошельки (например, m10) или банковскую карту!\n\n"
+            "Если у вас возникнут вопросы, вы можете обратиться в службу поддержки. "
+            "Смотрите первое видео прямо сейчас и начинайте зарабатывать! 🚀"
+        ),
+        # ── Withdraw ──
+        'withdraw_below_limit': (
+            "❌ Вывод не удался. Минимальная сумма вывода — 5 AZN.\n\n"
+            "💰 Ваш текущий баланс: <b>{azn:.4f} AZN</b>\n\n"
+            "🚀 <b>Как быстрее достичь лимита?</b>\n"
+            "Смотрите больше видео и <b>приглашайте друзей</b>, чтобы зарабатывать больше! "
+            "Вы автоматически получите <b>пожизненный бонус 10%</b> с каждой рекламы, просмотренной вашими рефералами. "
+            "Поделитесь ссылкой и быстрее достигните цели! 👥💸"
+        ),
+        'withdraw_ok': (
+            "✅ Поздравляем! Вы достигли лимита вывода. Пожалуйста, укажите номер m10 "
+            "или данные банковской карты (Имя, Фамилия, 16-значный номер) для перевода:"
+        ),
+        # ── Error / not registered ──
+        'not_registered': "⚠️ Вы ещё не зарегистрированы. Пожалуйста, сначала отправьте /start.",
     },
 }
 
@@ -509,8 +693,11 @@ async def _show_balance(tg_user: types.User, message: types.Message) -> None:
         user = result.scalar_one_or_none()
 
     if not user:
-        await message.answer("⚠️ Siz hələ qeydiyyatdan keçməmisiniz. Zəhmət olmasa əvvəlcə /start göndərin.")
+        await message.answer(BOT_LOCALES['az']['not_registered'])
         return
+
+    lang = user.language if user.language in BOT_LOCALES else 'en'
+    loc = BOT_LOCALES[lang]
 
     now = datetime.now(timezone.utc)
     today = now.date()
@@ -534,32 +721,30 @@ async def _show_balance(tg_user: types.User, message: types.Message) -> None:
     balance_mc = user.balance_mc
     total_earned_mc = user.total_earned_mc
 
-    azn_value = balance_mc / MC_TO_AZN_RATE
-    
-    # Calculate lock text
-    s2_status = "Kilidli 🔒"
+    # Calculate lock text using localized strings
+    s2_status = loc['balance_locked']
     if session_1_count >= 25:
         if session_1_completion_time is None:
-            s2_status = "Aktiv 🟢"
+            s2_status = loc['balance_active']
         else:
             from datetime import timedelta
             unlock_time = session_1_completion_time + timedelta(hours=4)
             if now < unlock_time:
                 remaining = unlock_time - now
-                hours, remainder = divmod(int(remaining.total_seconds()), 3600)
-                minutes, _ = divmod(remainder, 60)
-                s2_status = f"🔒 Kilidli ({hours:02d}s {minutes:02d}d qalıb)"
+                h, remainder = divmod(int(remaining.total_seconds()), 3600)
+                m, _ = divmod(remainder, 60)
+                s2_status = loc['balance_lock_rem'].format(h=h, m=m)
             else:
-                s2_status = "Aktiv 🟢"
+                s2_status = loc['balance_active']
 
     await message.answer(
-        f"💰 <b>Balansınız</b>\n\n"
+        f"{loc['balance_title']}\n\n"
         f"┌─────────────────────────\n"
-        f"│ 🪙 <b>Manat Coins:</b>  {balance_mc:,.0f} MC\n"
-        f"│ 📈 <b>Ümumi Qazanc:</b> {total_earned_mc:,.0f} MC\n"
+        f"│ {loc['balance_mc_row']}  {balance_mc:,.0f} MC\n"
+        f"│ {loc['balance_earn_row']} {total_earned_mc:,.0f} MC\n"
         f"├─────────────────────────\n"
-        f"│ 1️⃣ <b>Səans 1:</b>  {session_1_count}/25 video\n"
-        f"│ 2️⃣ <b>Səans 2:</b>  {session_2_count}/25 video ({s2_status})\n"
+        f"│ {loc['balance_s1_row']}  {session_1_count}/25 video\n"
+        f"│ {loc['balance_s2_row']}  {session_2_count}/25 video ({s2_status})\n"
         f"└─────────────────────────",
     )
 
@@ -581,26 +766,29 @@ async def _show_referral(tg_user: types.User, message: types.Message) -> None:
         user = result.scalar_one_or_none()
 
     if not user:
-        await message.answer("⚠️ Siz hələ qeydiyyatdan keçməmisiniz. Zəhmət olmasa əvvəlcə /start göndərin.")
+        await message.answer(BOT_LOCALES['az']['not_registered'])
         return
+
+    lang = user.language if user.language in BOT_LOCALES else 'en'
+    loc = BOT_LOCALES[lang]
 
     bot_info = await message.bot.me()
     bot_username = bot_info.username
     referral_link = f"https://t.me/{bot_username}?start={tg_user.id}"
     ref_azn = user.referral_earnings_mc / MC_TO_AZN_RATE
+    bonus_per_video = MC_PER_VIDEO * 10 // 100
 
     await message.answer(
-        f"👥 <b>Referal Proqramı</b>\n\n"
-        f"Dəvət linkinizi paylaşın və dostlarınızın izlədiyi hər videodan <b>ömürlük 10% bonus</b> qazanın!\n\n"
-        f"🔗 <b>Sizin Referal Linkiniz:</b>\n"
+        f"{loc['referral_title']}\n\n"
+        f"{loc['referral_desc']}\n\n"
+        f"{loc['referral_link_lbl']}\n"
         f"<code>{referral_link}</code>\n\n"
         f"┌─────────────────────────\n"
-        f"│ 👤 <b>Dəvət Olunanlar:</b>   {user.referral_count}\n"
-        f"│ 🪙 <b>Referal Qazancı:</b>   {user.referral_earnings_mc:,.0f} MC\n"
-        f"│ 💵 <b>Referal AZN:</b>      {ref_azn:,.4f} AZN\n"
+        f"│ {loc['referral_invited']}   {user.referral_count}\n"
+        f"│ {loc['referral_earned']}   {user.referral_earnings_mc:,.0f} MC\n"
+        f"│ {loc['referral_azn']}      {ref_azn:,.4f} AZN\n"
         f"└─────────────────────────\n\n"
-        f"💡 <i>Dəvət etdiyiniz hər bir şəxsin izlədiyi video üçün ({MC_PER_VIDEO} MC), "
-        f"siz avtomatik olaraq {MC_PER_VIDEO * 10 // 100} MC əldə edirsiniz!</i>",
+        + loc['referral_tip'].format(mc=MC_PER_VIDEO, bonus=bonus_per_video),
     )
 
 
@@ -626,7 +814,7 @@ async def cb_how_it_works(callback: types.CallbackQuery) -> None:
     """Inline button shortcut for /how_it_works."""
     await callback.answer()
     if callback.message and isinstance(callback.message, types.Message):
-        await _show_how_it_works(callback.message)
+        await _show_how_it_works(callback.from_user, callback.message)
 
 
 @router.callback_query(lambda c: c.data == "withdraw")
@@ -655,7 +843,8 @@ async def txt_referral(message: types.Message) -> None:
 
 @router.message(lambda m: m.text in _HOW_TEXTS)
 async def txt_how_it_works(message: types.Message) -> None:
-    await _show_how_it_works(message)
+    if message.from_user:
+        await _show_how_it_works(message.from_user, message)
 
 @router.message(lambda m: m.text in _WITHDRAW_TEXTS)
 async def txt_withdraw(message: types.Message) -> None:
@@ -695,21 +884,17 @@ async def _send_welcome_back(message: types.Message, user: User) -> None:
     )
 
 
-async def _show_how_it_works(message: types.Message) -> None:
-    """Show how it works info message to the user."""
-    text = (
-        "ℹ️ <b>ManatAds Layihəsi Haqqında Məlumat</b>\n\n"
-        "Platformamızın işləmə məntiqi çox bəsitdir:\n"
-        "1️⃣ '<b>🎬 Video İzlə & Qazan</b>' düyməsinə toxunaraq qısa video reklamlar izləyirsiniz.\n"
-        "2️⃣ Hər uğurlu izləmə üçün balansınıza anında <b>50 MC</b> (Manat Coin) əlavə olunur.\n"
-        "3️⃣ Dostlarınızı dəvət edərək onların qazancından da əlavə bonuslar əldə edirsiniz.\n\n"
-        "💰 <b>Çıxarış və Balans Mexanizmi:</b>\n"
-        "Yığılan MC xalları sistem daxilində real Azərbaycan Manatına (AZN) konvertasiya olunur. "
-        "Minimum çıxarış limiti 5 AZN-dir. Bu limitə çatdıqdan sonra qazancınızı rahatlıqla şəxsi elektron pul kisələrinə (məsələn, m10) "
-        "və ya bank kartınıza nağdlaşdıra bilərsiniz!\n\n"
-        "Hər hansı bir sualınız yaranarsa, dəstək komandası ilə əlaqə saxlaya bilərsiniz. "
-        "İndi ilk videonuzu izləyin və qazanmağa başlayın! 🚀"
-    )
+async def _show_how_it_works(tg_user: types.User, message: types.Message) -> None:
+    """Show how it works info message to the user in their language."""
+    async with async_session() as session:
+        stmt = select(User).where(User.telegram_id == tg_user.id)
+        result = await session.execute(stmt)
+        user = result.scalar_one_or_none()
+
+    lang = (user.language if user and user.language in BOT_LOCALES else 'en')
+    loc = BOT_LOCALES[lang]
+
+    text = loc['how_title'] + "\n\n" + loc['how_body'].format(mc=MC_PER_VIDEO)
     await message.answer(text)
 
 
@@ -720,24 +905,18 @@ async def _handle_withdraw(tg_user: types.User, message: types.Message) -> None:
         user = result.scalar_one_or_none()
 
     if not user:
-        await message.answer("⚠️ Siz hələ qeydiyyatdan keçməmisiniz. Zəhmət olmasa əvvəlcə /start göndərin.")
+        await message.answer(BOT_LOCALES['az']['not_registered'])
         return
 
+    lang = user.language if user.language in BOT_LOCALES else 'en'
+    loc = BOT_LOCALES[lang]
+
     azn_value = user.balance_mc / MC_TO_AZN_RATE
-    
+
     if azn_value < 5:
-        await message.answer(
-            f"❌ Çıxarış uğursuz oldu. Minimum çıxarış limiti 5 AZN-dir.\n\n"
-            f"💰 Sizin hazırkı balansınız: <b>{azn_value:,.4f} AZN</b>\n\n"
-            f"🚀 <b>Limiti necə daha sürətli tamamlamaq olar?</b>\n"
-            f"Daha çox video izləməklə yanaşı, <b>dostlarınızı dəvət edərək</b> daha böyük məbləğlər qazana bilərsiniz! "
-            f"Dəvət etdiyiniz hər dostunuzun izlədiyi reklamlardan sizə avtomatik <b>ömürlük 10% bonus</b> gələcək. Linkinizi paylaşın və hədəfə sürətlə çatın! 👥💸"
-        )
+        await message.answer(loc['withdraw_below_limit'].format(azn=azn_value))
     else:
-        await message.answer(
-            "✅ Təbriklər! Çıxarış limitini keçmisiniz. Zəhmət olmasa pulu köçürmək "
-            "istədiyiniz m10 nömrənizi və ya Bank Kartı məlumatlarınızı (Ad, Soyad, 16 rəqəmli kod) bura yazın:"
-        )
+        await message.answer(loc['withdraw_ok'])
 
 
 # ── Admin Commands ──────────────────────────────────────────────────────
