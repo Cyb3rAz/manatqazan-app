@@ -127,7 +127,7 @@ BOT_LOCALES = {
         'referral_link_lbl':"🔗 <b>Sizin Referal Linkiniz:</b>",
         'referral_invited': "👤 <b>Dəvət Olunanlar:</b>",
         'referral_earned':  "🪙 <b>Referal Qazancı:</b>",
-        'referral_azn':     "💵 <b>Referal AZN:</b>",
+        'referral_azn':     "💵 <b>Referal AZN:</b>      {amount:,.4f} AZN",
         'referral_tip':     "💡 <i>Dəvət etdiyiniz hər bir şəxsin izlədiyi video üçün ({mc} MC), siz avtomatik olaraq {bonus} MC əldə edirsiniz!</i>",
         # ── How it works ──
         'how_title':        "ℹ️ <b>ManatAds Layihəsi Haqqında Məlumat</b>",
@@ -192,7 +192,7 @@ BOT_LOCALES = {
         'referral_link_lbl':"🔗 <b>Referans Bağlantınız:</b>",
         'referral_invited': "👤 <b>Davet Edilenler:</b>",
         'referral_earned':  "🪙 <b>Referans Kazancı:</b>",
-        'referral_azn':     "💵 <b>Referans AZN:</b>",
+        'referral_azn':     "💵 <b>Referans TRY:</b>     {amount:,.4f} TRY",
         'referral_tip':     "💡 <i>Davet ettiğiniz her kişinin izlediği video için ({mc} MC), siz otomatik olarak {bonus} MC kazanırsınız!</i>",
         # ── How it works ──
         'how_title':        "ℹ️ <b>ManatAds Projesi Hakkında Bilgi</b>",
@@ -257,7 +257,7 @@ BOT_LOCALES = {
         'referral_link_lbl':"🔗 <b>Your Referral Link:</b>",
         'referral_invited': "👤 <b>People Invited:</b>",
         'referral_earned':  "🪙 <b>Referral Earnings:</b>",
-        'referral_azn':     "💵 <b>Referral AZN:</b>",
+        'referral_azn':     "💵 <b>Referral USDT:</b>     {amount:,.4f} USDT",
         'referral_tip':     "💡 <i>For every video watched by someone you invite ({mc} MC each), you automatically earn {bonus} MC!</i>",
         # ── How it works ──
         'how_title':        "ℹ️ <b>About ManatAds</b>",
@@ -322,7 +322,7 @@ BOT_LOCALES = {
         'referral_link_lbl':"🔗 <b>Ваша реферальная ссылка:</b>",
         'referral_invited': "👤 <b>Приглашено:</b>",
         'referral_earned':  "🪙 <b>Реферальный заработок:</b>",
-        'referral_azn':     "💵 <b>Реферальный AZN:</b>",
+        'referral_azn':     "💵 <b>Реферальные USDT:</b> {amount:,.4f} USDT",
         'referral_tip':     "💡 <i>За каждое видео, просмотренное приглашённым вами пользователем ({mc} MC), вы автоматически получаете {bonus} MC!</i>",
         # ── How it works ──
         'how_title':        "ℹ️ <b>О проекте ManatAds</b>",
@@ -775,7 +775,15 @@ async def _show_referral(tg_user: types.User, message: types.Message) -> None:
     bot_info = await message.bot.me()
     bot_username = bot_info.username
     referral_link = f"https://t.me/{bot_username}?start={tg_user.id}"
-    ref_azn = user.referral_earnings_mc / MC_TO_AZN_RATE
+    
+    # Dynamic fiat calculation according to selected language
+    if lang == 'az':
+        ref_fiat = user.referral_earnings_mc / MC_TO_AZN_RATE
+    elif lang == 'tr':
+        ref_fiat = user.referral_earnings_mc / 6250.0
+    else:  # en, ru
+        ref_fiat = user.referral_earnings_mc / 208333.3333
+
     bonus_per_video = MC_PER_VIDEO * 10 // 100
 
     await message.answer(
@@ -786,7 +794,7 @@ async def _show_referral(tg_user: types.User, message: types.Message) -> None:
         f"┌─────────────────────────\n"
         f"│ {loc['referral_invited']}   {user.referral_count}\n"
         f"│ {loc['referral_earned']}   {user.referral_earnings_mc:,.0f} MC\n"
-        f"│ {loc['referral_azn']}      {ref_azn:,.4f} AZN\n"
+        f"│ {loc['referral_azn'].format(amount=ref_fiat)}\n"
         f"└─────────────────────────\n\n"
         + loc['referral_tip'].format(mc=MC_PER_VIDEO, bonus=bonus_per_video),
     )
