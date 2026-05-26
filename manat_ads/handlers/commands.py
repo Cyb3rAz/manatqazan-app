@@ -146,7 +146,7 @@ BOT_LOCALES = {
         # ── Withdraw ──
         'withdraw_below_limit': (
             "❌ Çıxarış uğursuz oldu. Minimum çıxarış limiti 5 AZN-dir.\n\n"
-            "💰 Sizin hazırkı balansınız: <b>{azn:.4f} AZN</b>\n\n"
+            "💰 Sizin hazırkı balansınız: <b>{amount:.4f} AZN</b>\n\n"
             "🚀 <b>Limiti necə daha sürətli tamamlamaq olar?</b>\n"
             "Daha çox video izləməklə yanaşı, <b>dostlarınızı dəvət edərək</b> daha böyük məbləğlər qazana bilərsiniz! "
             "Dəvət etdiyiniz hər dostunuzun izlədiyi reklamlardan sizə avtomatik <b>ömürlük 10% bonus</b> gələcək. "
@@ -202,16 +202,16 @@ BOT_LOCALES = {
             "2️⃣ Her başarılı izleme için bakiyenize anında <b>{mc} MC</b> (Manat Coin) ekleniyor.\n"
             "3️⃣ Arkadaşlarınızı davet ederek onların kazançlarından da ek bonuslar elde ediyorsunuz.\n\n"
             "💰 <b>Çekim ve Bakiye Mekanizması:</b>\n"
-            "Biriktirilen MC puanları sistem içinde gerçek Azerbaycan Manatına (AZN) dönüştürülür. "
-            "Minimum çekim limiti 5 AZN'dir. Bu limite ulaştıktan sonra kazancınızı kolayca "
-            "kişisel elektronik cüzdanlara (örn. m10) veya banka kartınıza çekebilirsiniz!\n\n"
+            "Biriktirilen MC puanları sistem içinde gerçek Türk Lirası (TRY) para birimine dönüştürülür. "
+            "Minimum çekim limiti 100 TRY'dir. Bu limite ulaştıktan sonra kazancınızı kolayca "
+            "Papara, İninal numaranıza veya Yerel Banka kartınıza çekebilirsiniz!\n\n"
             "Herhangi bir sorunuz olursa destek ekibiyle iletişime geçebilirsiniz. "
             "Şimdi ilk videonuzu izleyin ve kazanmaya başlayın! 🚀"
         ),
         # ── Withdraw ──
         'withdraw_below_limit': (
-            "❌ Çekim başarısız oldu. Minimum çekim limiti 5 AZN'dir.\n\n"
-            "💰 Mevcut bakiyeniz: <b>{azn:.4f} AZN</b>\n\n"
+            "❌ Çekim başarısız oldu. Minimum çekim limiti 100 TRY'dir.\n\n"
+            "💰 Mevcut bakiyeniz: <b>{amount:.4f} TRY</b>\n\n"
             "🚀 <b>Limiti nasıl daha hızlı tamamlarsınız?</b>\n"
             "Daha fazla video izlemenin yanı sıra, <b>arkadaşlarınızı davet ederek</b> daha büyük miktarlar kazanabilirsiniz! "
             "Davet ettiğiniz her arkadaşınızın izlediği reklamlardan size otomatik <b>ömür boyu %10 bonus</b> gelecek. "
@@ -219,7 +219,7 @@ BOT_LOCALES = {
         ),
         'withdraw_ok': (
             "✅ Tebrikler! Çekim limitini aştınız. Lütfen parayı transfer etmek "
-            "istediğiniz m10 numaranızı veya Banka Kartı bilgilerinizi (Ad, Soyad, 16 haneli kod) buraya yazın:"
+            "istediğiniz Papara, İninal numaranızı veya Yerel Banka kartı bilgilerinizi (Ad, Soyad, 16 haneli kod) buraya yazın:"
         ),
         # ── Error / not registered ──
         'not_registered': "⚠️ Henüz kayıt olmadınız. Lütfen önce /start gönderin.",
@@ -267,24 +267,24 @@ BOT_LOCALES = {
             "2️⃣ For each successful watch, <b>{mc} MC</b> (Manat Coin) is instantly added to your balance.\n"
             "3️⃣ Invite your friends and earn extra bonuses from their activity too.\n\n"
             "💰 <b>Withdrawal & Balance Mechanism:</b>\n"
-            "Accumulated MC points are converted to real Azerbaijani Manat (AZN) within the system. "
-            "The minimum withdrawal amount is 5 AZN. Once you reach this limit, you can easily "
-            "cash out to personal e-wallets (e.g. m10) or your bank card!\n\n"
+            "Accumulated MC points are converted to USDT (Crypto) within the system. "
+            "The minimum withdrawal amount is 5 USDT. Once you reach this limit, you can easily "
+            "cash out to your crypto wallets (e.g., TRC-20, BEP-20) or global payment systems!\n\n"
             "If you have any questions, feel free to contact the support team. "
             "Watch your first video now and start earning! 🚀"
         ),
         # ── Withdraw ──
         'withdraw_below_limit': (
-            "❌ Withdrawal failed. Minimum withdrawal amount is 5 AZN.\n\n"
-            "💰 Your current balance: <b>{azn:.4f} AZN</b>\n\n"
+            "❌ Withdrawal failed. Minimum withdrawal amount is 5 USDT.\n\n"
+            "💰 Your current balance: <b>{amount:.4f} USDT</b>\n\n"
             "🚀 <b>How to reach the limit faster?</b>\n"
             "Watch more videos and <b>invite your friends</b> to earn larger amounts! "
             "You'll automatically earn a <b>lifetime 10% bonus</b> from every ad your referrals watch. "
             "Share your link and reach your goal faster! 👥💸"
         ),
         'withdraw_ok': (
-            "✅ Congratulations! You've reached the withdrawal limit. Please provide your m10 number "
-            "or Bank Card details (Full Name, 16-digit card number) to process the transfer:"
+            "✅ Congratulations! You've reached the withdrawal limit. Please provide your "
+            "crypto wallet address (e.g., TRC-20, BEP-20) or global payment details to process the transfer:"
         ),
         # ── Error / not registered ──
         'not_registered': "⚠️ You are not registered yet. Please send /start first.",
@@ -332,24 +332,24 @@ BOT_LOCALES = {
             "2️⃣ За каждый успешный просмотр на ваш баланс мгновенно зачисляется <b>{mc} MC</b> (Manat Coin).\n"
             "3️⃣ Приглашайте друзей и получайте дополнительные бонусы с их активности.\n\n"
             "💰 <b>Механизм вывода и баланса:</b>\n"
-            "Накопленные MC-баллы конвертируются в реальные азербайджанские манаты (AZN) внутри системы. "
-            "Минимальная сумма вывода составляет 5 AZN. Достигнув этого лимита, вы легко можете "
-            "вывести средства на личные электронные кошельки (например, m10) или банковскую карту!\n\n"
+            "Накопленные MC-баллы конвертируются в USDT (Крипто) внутри системы. "
+            "Минимальная сумма вывода составляет 5 USDT. Достигнув этого лимита, вы легко можете "
+            "вывести средства на свои криптокошельки (например, TRC-20, BEP-20) или глобальные платежные системы!\n\n"
             "Если у вас возникнут вопросы, вы можете обратиться в службу поддержки. "
             "Смотрите первое видео прямо сейчас и начинайте зарабатывать! 🚀"
         ),
         # ── Withdraw ──
         'withdraw_below_limit': (
-            "❌ Вывод не удался. Минимальная сумма вывода — 5 AZN.\n\n"
-            "💰 Ваш текущий баланс: <b>{azn:.4f} AZN</b>\n\n"
+            "❌ Вывод не удался. Минимальная сумма вывода — 5 USDT.\n\n"
+            "💰 Ваш текущий баланс: <b>{amount:.4f} USDT</b>\n\n"
             "🚀 <b>Как быстрее достичь лимита?</b>\n"
             "Смотрите больше видео и <b>приглашайте друзей</b>, чтобы зарабатывать больше! "
             "Вы автоматически получите <b>пожизненный бонус 10%</b> с каждой рекламы, просмотренной вашими рефералами. "
             "Поделитесь ссылкой и быстрее достигните цели! 👥💸"
         ),
         'withdraw_ok': (
-            "✅ Поздравляем! Вы достигли лимита вывода. Пожалуйста, укажите номер m10 "
-            "или данные банковской карты (Имя, Фамилия, 16-значный номер) для перевода:"
+            "✅ Поздравляем! Вы достигли лимита вывода. Пожалуйста, укажите адрес своего "
+            "криптокошелька (например, TRC-20, BEP-20) или реквизиты глобальной платежной системы для перевода:"
         ),
         # ── Error / not registered ──
         'not_registered': "⚠️ Вы ещё не зарегистрированы. Пожалуйста, сначала отправьте /start.",
@@ -919,10 +919,19 @@ async def _handle_withdraw(tg_user: types.User, message: types.Message) -> None:
     lang = user.language if user.language in BOT_LOCALES else 'en'
     loc = BOT_LOCALES[lang]
 
-    azn_value = user.balance_mc / MC_TO_AZN_RATE
+    # Dynamic fiat value and limit calculation
+    if lang == 'az':
+        fiat_value = user.balance_mc / MC_TO_AZN_RATE
+        limit_val = 5
+    elif lang == 'tr':
+        fiat_value = user.balance_mc / 6250.0
+        limit_val = 100
+    else:  # en, ru
+        fiat_value = user.balance_mc / 125000.0
+        limit_val = 5
 
-    if azn_value < 5:
-        await message.answer(loc['withdraw_below_limit'].format(azn=azn_value))
+    if fiat_value < limit_val:
+        await message.answer(loc['withdraw_below_limit'].format(amount=fiat_value))
     else:
         await message.answer(loc['withdraw_ok'])
 
