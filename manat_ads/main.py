@@ -80,19 +80,19 @@ async def lifespan(application: FastAPI):
     try:
         commands_az = [
             aio_types.BotCommand(command="start", description="Botu başladın və Yeniləyin"),
-            aio_types.BotCommand(command="help", description="Necə işləyir və Kömək"),
+            aio_types.BotCommand(command="lang",  description="Dil seçimini dəyişdirin"),
         ]
         commands_tr = [
             aio_types.BotCommand(command="start", description="Botu başlat ve Yenile"),
-            aio_types.BotCommand(command="help", description="Nasıl Çalışır ve Yardım"),
+            aio_types.BotCommand(command="lang",  description="Dil seçimini değiştir"),
         ]
         commands_en = [
             aio_types.BotCommand(command="start", description="Start and Refresh the Bot"),
-            aio_types.BotCommand(command="help", description="How It Works & Help"),
+            aio_types.BotCommand(command="lang",  description="Change language selection"),
         ]
         commands_ru = [
             aio_types.BotCommand(command="start", description="Запустить и обновить бота"),
-            aio_types.BotCommand(command="help", description="Как это работает и Помощь"),
+            aio_types.BotCommand(command="lang",  description="Изменить выбор языка"),
         ]
 
         # Default fallback to English
@@ -109,9 +109,12 @@ async def lifespan(application: FastAPI):
     # ── Set Menu Button ──
     try:
         await bot.set_chat_menu_button(
-            menu_button=aio_types.MenuButtonDefault()
+            menu_button=aio_types.MenuButtonWebApp(
+                text="🚀 Aç",
+                web_app=aio_types.WebAppInfo(url="https://manatqazan.vercel.app")
+            )
         )
-        logger.info("Chat menu button set to Default (Commands).")
+        logger.info("Chat menu button (WebApp) restored.")
     except Exception as e:
         logger.error("Failed to set chat menu button: %s", e)
 
