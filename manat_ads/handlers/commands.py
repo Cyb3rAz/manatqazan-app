@@ -78,10 +78,18 @@ else:
 SUPPORTED_LANGS = ['az', 'tr', 'en', 'ru']
 
 def _detect_language(tg_user) -> str:
-    """Detect user language from Telegram language_code."""
+    """Detect user language from Telegram language_code using prefix matching."""
     lang_code = getattr(tg_user, 'language_code', None) or ''
-    lang_code = lang_code.lower().strip()[:2]
-    return lang_code if lang_code in SUPPORTED_LANGS else 'en'
+    lang_code = lang_code.lower().strip()
+    if lang_code.startswith('az'):
+        return 'az'
+    elif lang_code.startswith('tr'):
+        return 'tr'
+    elif lang_code.startswith('ru'):
+        return 'ru'
+    elif lang_code.startswith('en'):
+        return 'en'
+    return 'en'
 
 async def _upsert_user(
     session,

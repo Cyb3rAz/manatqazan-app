@@ -264,7 +264,15 @@ function t(key) {
 
 // ── i18n Dil Dəyişmə ─────────────────────────────────────────────────
 function setLanguage(lang) {
-    if (!SUPPORTED_LANGS.includes(lang)) lang = 'en';
+    if (lang) {
+        lang = lang.toLowerCase().trim();
+        if (lang.startsWith('az')) lang = 'az';
+        else if (lang.startsWith('tr')) lang = 'tr';
+        else if (lang.startsWith('ru')) lang = 'ru';
+        else lang = 'en';
+    } else {
+        lang = 'en';
+    }
     currentLang = lang;
 
     // Update all static elements with data-i18n attribute
@@ -322,13 +330,31 @@ document.addEventListener('click', (e) => {
 let onboardingSelectedLang = 'az';
 
 function selectOnboardingLang(lang) {
-    if (!SUPPORTED_LANGS.includes(lang)) lang = 'en';
+    if (lang) {
+        lang = lang.toLowerCase().trim();
+        if (lang.startsWith('az')) lang = 'az';
+        else if (lang.startsWith('tr')) lang = 'tr';
+        else if (lang.startsWith('ru')) lang = 'ru';
+        else lang = 'en';
+    } else {
+        lang = 'en';
+    }
     onboardingSelectedLang = lang;
     
     // Update active visual state of cards
     document.querySelectorAll('.onboarding-option-card').forEach(card => {
         card.classList.toggle('active', card.dataset.lang === lang);
     });
+
+    // Dynamically update onboarding title and confirm button text instantly
+    const obTitle = document.getElementById("onboarding-title");
+    if (obTitle) {
+        obTitle.textContent = LOCALES[lang]?.onboardingTitle || LOCALES['az'].onboardingTitle;
+    }
+    const obConfirmBtn = document.getElementById("onboarding-confirm-btn");
+    if (obConfirmBtn) {
+        obConfirmBtn.textContent = LOCALES[lang]?.onboardingBtn || LOCALES['az'].onboardingBtn;
+    }
 }
 
 function completeOnboarding() {
@@ -392,9 +418,16 @@ async function initApp() {
 
         // Detect language from URL param
         const urlParams = new URLSearchParams(window.location.search);
-        const urlLang = urlParams.get('lang');
-        if (urlLang && SUPPORTED_LANGS.includes(urlLang.toLowerCase())) {
-            currentLang = urlLang.toLowerCase();
+        let urlLang = urlParams.get('lang');
+        if (urlLang) {
+            urlLang = urlLang.toLowerCase().trim();
+            if (urlLang.startsWith('az')) urlLang = 'az';
+            else if (urlLang.startsWith('tr')) urlLang = 'tr';
+            else if (urlLang.startsWith('ru')) urlLang = 'ru';
+            else if (urlLang.startsWith('en')) urlLang = 'en';
+            else urlLang = null;
+            
+            if (urlLang) currentLang = urlLang;
         }
 
         // Backend-dən istifadəçi məlumatlarını çək
@@ -402,9 +435,14 @@ async function initApp() {
 
         // If backend returned a language preference, use it (unless URL already set one)
         if (userData && userData.language && !urlLang) {
-            if (SUPPORTED_LANGS.includes(userData.language)) {
-                currentLang = userData.language;
-            }
+            let backendLang = userData.language.toLowerCase().trim();
+            if (backendLang.startsWith('az')) backendLang = 'az';
+            else if (backendLang.startsWith('tr')) backendLang = 'tr';
+            else if (backendLang.startsWith('ru')) backendLang = 'ru';
+            else if (backendLang.startsWith('en')) backendLang = 'en';
+            else backendLang = null;
+            
+            if (backendLang) currentLang = backendLang;
         }
 
         // UI-ı yenilə
@@ -420,6 +458,16 @@ async function initApp() {
             onboardingSelectedLang = currentLang;
             selectOnboardingLang(currentLang);
             
+            // Force dynamic localization updates for onboarding title & button
+            const obTitle = document.getElementById("onboarding-title");
+            if (obTitle) {
+                obTitle.textContent = LOCALES[currentLang]?.onboardingTitle || LOCALES['az'].onboardingTitle;
+            }
+            const obConfirmBtn = document.getElementById("onboarding-confirm-btn");
+            if (obConfirmBtn) {
+                obConfirmBtn.textContent = LOCALES[currentLang]?.onboardingBtn || LOCALES['az'].onboardingBtn;
+            }
+
             // Show the modal
             const obModal = document.getElementById("onboarding-modal");
             if (obModal) {
