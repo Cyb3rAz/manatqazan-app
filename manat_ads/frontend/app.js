@@ -436,17 +436,17 @@ async function initApp() {
         // Ciddi dil prioriteti hiyerarxiyası
         let detectedLang = null;
 
-        // a) Priority 1: Telegram initData
-        const tgLang = tg?.initDataUnsafe?.user?.language_code;
-        detectedLang = getValidLang(tgLang, 'Telegram initDataUnsafe');
-        if (detectedLang) console.log(`[LangDebug] Picked Priority 1 (TG): ${detectedLang}`);
+        // a) Priority 1: URL parametri (Backend-in Bot API vasitəsilə göndərdiyi ən dəqiq məlumat)
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlLang = urlParams.get('lang');
+        detectedLang = getValidLang(urlLang, 'URL ?lang=');
+        if (detectedLang) console.log(`[LangDebug] Picked Priority 1 (URL): ${detectedLang}`);
 
-        // b) Priority 2: URL parametri
+        // b) Priority 2: Telegram initData (Web K versiyasındakı OS dil bug-ına qarşı 2ci plana keçdi)
         if (!detectedLang) {
-            const urlParams = new URLSearchParams(window.location.search);
-            const urlLang = urlParams.get('lang');
-            detectedLang = getValidLang(urlLang, 'URL ?lang=');
-            if (detectedLang) console.log(`[LangDebug] Picked Priority 2 (URL): ${detectedLang}`);
+            const tgLang = tg?.initDataUnsafe?.user?.language_code;
+            detectedLang = getValidLang(tgLang, 'Telegram initDataUnsafe');
+            if (detectedLang) console.log(`[LangDebug] Picked Priority 2 (TG): ${detectedLang}`);
         }
 
         // c) Priority 3: localStorage
