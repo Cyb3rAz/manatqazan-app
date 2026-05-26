@@ -65,7 +65,7 @@ router.callback_query.outer_middleware(BanCheckMiddleware())
 # ── Config ──────────────────────────────────────────────────────────────
 MC_TO_AZN_RATE = int(os.getenv("MC_TO_AZN_RATE", "125000"))
 MC_PER_VIDEO = int(os.getenv("MC_PER_VIDEO", "50"))
-DAILY_LIMIT = int(os.getenv("DAILY_VIDEO_LIMIT", "25"))
+DAILY_LIMIT = int(os.getenv("DAILY_VIDEO_LIMIT", "50"))
 
 raw_webhook_url = os.getenv("WEBHOOK_URL", "").strip()
 if not raw_webhook_url or "your-domain" in raw_webhook_url:

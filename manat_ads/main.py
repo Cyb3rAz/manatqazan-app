@@ -57,7 +57,7 @@ BOT_TOKEN: str = os.getenv("BOT_TOKEN", "")
 WEBHOOK_URL: str = os.getenv("WEBHOOK_URL", "").rstrip("/")
 ADSGRAM_SECRET: str = os.getenv("ADSGRAM_SECRET", "")
 MC_PER_VIDEO: int = int(os.getenv("MC_PER_VIDEO", "50"))
-DAILY_VIDEO_LIMIT: int = int(os.getenv("DAILY_VIDEO_LIMIT", "25"))
+DAILY_VIDEO_LIMIT: int = int(os.getenv("DAILY_VIDEO_LIMIT", "50"))
 MC_TO_AZN_RATE: int = int(os.getenv("MC_TO_AZN_RATE", "125000"))
 REFERRAL_BONUS_PERCENT: int = int(os.getenv("REFERRAL_BONUS_PERCENT", "10"))
 
