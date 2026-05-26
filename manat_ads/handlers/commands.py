@@ -91,24 +91,135 @@ def _detect_language(tg_user) -> str:
         return 'en'
     return 'en'
 
+
+# ── Bot Locales (Çat Dili Lüğəti) ─────────────────────────────────────
+BOT_LOCALES = {
+    'az': {
+        'choose_lang':    "🌐 <b>Xoş gəldiniz!</b>\n\nZəhmət olmasa bot dilini seçin:",
+        'lang_set':       "✅ Dil Azərbaycan dilinə təyin edildi!",
+        'welcome_new':    (
+            "🎉 <b>ManatAds-a xoş gəlmisiniz!</b>\n\n"
+            "Salam, <b>{name}</b>! 👋\n\n"
+            "📺 Qısa videolar izləyin və hər video üçün <b>{mc} MC</b> qazanın.\n"
+            "📊 Gündəlik limit: <b>{limit} video/gün</b>\n"
+            "👥 Dostlarınızı dəvət edin və <b>ömürlük 10% bonus</b> qazanın!"
+        ),
+        'welcome_back':   "👋 <b>Yenidən xoş gəldiniz, {name}!</b>\n\n🪙 Balans: <b>{balance} MC</b>\n📈 Ümumi qazanc: <b>{total} MC</b>\n\nDaha çox qazanmağa hazırsınız? Aşağıdakı düyməyə toxunun! 👇",
+        'referral_msg':   "\n\n🤝 <b>Sizi dostunuz dəvət edib!</b> Onlar sizin qazancınızdan ömürlük 10% bonus qazanacaqlar.",
+        'btn_video':      "🎬 Video İzlə & Qazan",
+        'btn_balance':    "💰 Balansım",
+        'btn_referral':   "👥 Referal Proqramı",
+        'btn_how':        "ℹ️ Necə İşləyir?",
+        'btn_withdraw':   "💰 Çıxarış",
+        'btn_start':      "🚀 Başlat",
+    },
+    'tr': {
+        'choose_lang':    "🌐 <b>Hoş geldiniz!</b>\n\nLütfen bot dilini seçin:",
+        'lang_set':       "✅ Dil Türkçe olarak ayarlandı!",
+        'welcome_new':    (
+            "🎉 <b>ManatAds'a hoş geldiniz!</b>\n\n"
+            "Merhaba, <b>{name}</b>! 👋\n\n"
+            "📺 Kısa videolar izleyin ve her video için <b>{mc} MC</b> kazanın.\n"
+            "📊 Günlük limit: <b>{limit} video/gün</b>\n"
+            "👥 Arkadaşlarınızı davet edin ve <b>ömür boyu %10 bonus</b> kazanın!"
+        ),
+        'welcome_back':   "👋 <b>Tekrar hoş geldiniz, {name}!</b>\n\n🪙 Bakiye: <b>{balance} MC</b>\n📈 Toplam kazanç: <b>{total} MC</b>\n\nDaha fazla kazanmaya hazır mısınız? Aşağıdaki butona dokunun! 👇",
+        'referral_msg':   "\n\n🤝 <b>Sizi bir arkadaşınız davet etti!</b> Kazancınızdan ömür boyu %10 bonus alacaklar.",
+        'btn_video':      "🎬 Video İzle & Kazan",
+        'btn_balance':    "💰 Bakiyem",
+        'btn_referral':   "👥 Referans Programı",
+        'btn_how':        "ℹ️ Nasıl Çalışır?",
+        'btn_withdraw':   "💰 Çekim",
+        'btn_start':      "🚀 Başlat",
+    },
+    'en': {
+        'choose_lang':    "🌐 <b>Welcome!</b>\n\nPlease choose the bot language:",
+        'lang_set':       "✅ Language set to English!",
+        'welcome_new':    (
+            "🎉 <b>Welcome to ManatAds!</b>\n\n"
+            "Hello, <b>{name}</b>! 👋\n\n"
+            "📺 Watch short videos and earn <b>{mc} MC</b> per video.\n"
+            "📊 Daily limit: <b>{limit} videos/day</b>\n"
+            "👥 Invite your friends and earn a <b>lifetime 10% bonus</b>!"
+        ),
+        'welcome_back':   "👋 <b>Welcome back, {name}!</b>\n\n🪙 Balance: <b>{balance} MC</b>\n📈 Total earned: <b>{total} MC</b>\n\nReady to earn more? Tap the button below! 👇",
+        'referral_msg':   "\n\n🤝 <b>You were invited by a friend!</b> They will earn a lifetime 10% bonus from your earnings.",
+        'btn_video':      "🎬 Watch Videos & Earn",
+        'btn_balance':    "💰 My Balance",
+        'btn_referral':   "👥 Referral Program",
+        'btn_how':        "ℹ️ How It Works?",
+        'btn_withdraw':   "💰 Withdraw",
+        'btn_start':      "🚀 Start",
+    },
+    'ru': {
+        'choose_lang':    "🌐 <b>Добро пожаловать!</b>\n\nПожалуйста, выберите язык бота:",
+        'lang_set':       "✅ Язык установлен на Русский!",
+        'welcome_new':    (
+            "🎉 <b>Добро пожаловать в ManatAds!</b>\n\n"
+            "Привет, <b>{name}</b>! 👋\n\n"
+            "📺 Смотрите короткие видео и зарабатывайте <b>{mc} MC</b> за каждое видео.\n"
+            "📊 Дневной лимит: <b>{limit} видео/день</b>\n"
+            "👥 Приглашайте друзей и зарабатывайте <b>пожизненный бонус 10%</b>!"
+        ),
+        'welcome_back':   "👋 <b>С возвращением, {name}!</b>\n\n🪙 Баланс: <b>{balance} MC</b>\n📈 Всего заработано: <b>{total} MC</b>\n\nГотовы зарабатывать больше? Нажмите на кнопку ниже! 👇",
+        'referral_msg':   "\n\n🤝 <b>Вас пригласил друг!</b> Они будут получать пожизненный бонус 10% с ваших заработков.",
+        'btn_video':      "🎬 Смотреть видео & Зарабатывать",
+        'btn_balance':    "💰 Мой баланс",
+        'btn_referral':   "👥 Реферальная программа",
+        'btn_how':        "ℹ️ Как это работает?",
+        'btn_withdraw':   "💰 Вывод",
+        'btn_start':      "🚀 Старт",
+    },
+}
+
+
+def get_lang_select_keyboard() -> InlineKeyboardMarkup:
+    """Returns 4-button language selection InlineKeyboard for new users."""
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [
+            InlineKeyboardButton(text="🇦🇿 Azərbaycan dili", callback_data="set_bot_lang:az"),
+        ],
+        [
+            InlineKeyboardButton(text="🇹🇷 Türkçe", callback_data="set_bot_lang:tr"),
+        ],
+        [
+            InlineKeyboardButton(text="🇬🇧 English", callback_data="set_bot_lang:en"),
+        ],
+        [
+            InlineKeyboardButton(text="🇷🇺 Русский", callback_data="set_bot_lang:ru"),
+        ],
+    ])
+
+
+def get_main_keyboard(lang: str) -> InlineKeyboardMarkup:
+    """Returns the main InlineKeyboard in the specified language."""
+    loc = BOT_LOCALES.get(lang, BOT_LOCALES['en'])
+    webapp_url = f"https://manatqazan.vercel.app/?lang={lang}"
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text=loc['btn_video'], web_app=types.WebAppInfo(url=webapp_url))],
+        [
+            InlineKeyboardButton(text=loc['btn_balance'], callback_data="balance"),
+            InlineKeyboardButton(text=loc['btn_referral'], callback_data="referral"),
+        ],
+        [
+            InlineKeyboardButton(text=loc['btn_how'], callback_data="how_it_works"),
+            InlineKeyboardButton(text=loc['btn_withdraw'], callback_data="withdraw"),
+        ],
+    ])
+
+
+# ── LanguageUpdateMiddleware (DB dilini oxuyur, əzmür) ─────────────────
 class LanguageUpdateMiddleware(BaseMiddleware):
-    """Dynamically updates the user's language in the DB on every request if it changes."""
+    """
+    Reads the user's language from the DB and attaches it to handler data.
+    Does NOT override language chosen by the user via set_bot_lang.
+    """
     async def __call__(
         self,
         handler: Callable[[TelegramObject, Dict[str, Any]], Awaitable[Any]],
         event: TelegramObject,
         data: Dict[str, Any]
     ) -> Any:
-        user: types.User = data.get("event_from_user")
-        if user:
-            new_lang = _detect_language(user)
-            async with async_session() as session:
-                stmt = select(User).where(User.telegram_id == user.id)
-                res = await session.execute(stmt)
-                db_user = res.scalar_one_or_none()
-                if db_user and db_user.language != new_lang:
-                    db_user.language = new_lang
-                    await session.commit()
         return await handler(event, data)
 
 router.message.outer_middleware(LanguageUpdateMiddleware())
@@ -188,8 +299,6 @@ async def cmd_start_with_referral(message: types.Message) -> None:
     if not tg_user:
         return
 
-    user_lang = _detect_language(tg_user)
-
     referral_code = message.text.split(maxsplit=1)[1] if message.text and " " in message.text else None
     referrer_tg_id: int | None = None
 
@@ -203,24 +312,23 @@ async def cmd_start_with_referral(message: types.Message) -> None:
     if referrer_tg_id == tg_user.id:
         referrer_tg_id = None
 
-    is_new_user = False
     async with async_session() as session:
         try:
-            # Check if user already exists BEFORE upsert (to detect new vs returning)
+            # Check if user already exists
             existing_stmt = select(User).where(User.telegram_id == tg_user.id)
             existing_result = await session.execute(existing_stmt)
             existing_user = existing_result.scalar_one_or_none()
 
             if existing_user:
-                # Returning user – just update profile fields
+                # Returning user – update profile fields, keep their chosen language
                 existing_user.username = tg_user.username
                 existing_user.first_name = tg_user.first_name
                 existing_user.last_name = tg_user.last_name
-                existing_user.language = user_lang
                 await session.commit()
-                await _send_welcome_back(message, existing_user, language=user_lang)
+                await _send_welcome_back(message, existing_user)
                 return
 
+            # NEW USER: Register with NULL language first, show lang selection
             # Validate referrer exists
             if referrer_tg_id:
                 ref_stmt = select(User).where(User.telegram_id == referrer_tg_id)
@@ -232,19 +340,19 @@ async def cmd_start_with_referral(message: types.Message) -> None:
                 else:
                     referrer_tg_id = None
 
-            # UPSERT: safe insert or update
-            user = await _upsert_user(
+            # Register with detected fallback lang; user will override via callback
+            tg_detected = _detect_language(tg_user)
+            await _upsert_user(
                 session,
                 telegram_id=tg_user.id,
                 username=tg_user.username,
                 first_name=tg_user.first_name,
                 last_name=tg_user.last_name,
                 referrer_id=referrer_tg_id,
-                language=user_lang,
+                language=tg_detected,
             )
             await session.commit()
-            is_new_user = True
-            logger.info("[UPSERT] User %s upserted successfully (referrer=%s)", tg_user.id, referrer_tg_id)
+            logger.info("[UPSERT] New user %s (referrer=%s) — awaiting lang selection", tg_user.id, referrer_tg_id)
 
         except Exception as e:
             await session.rollback()
@@ -252,39 +360,11 @@ async def cmd_start_with_referral(message: types.Message) -> None:
             await message.answer("⚠️ Xəta baş verdi. Zəhmət olmasa bir az sonra yenidən cəhd edin.")
             return
 
-    referral_msg = ""
-    if referrer_tg_id:
-        referral_msg = "\n\n🤝 <b>Sizi dostunuz dəvət edib!</b> Onlar sizin qazancınızdan ömürlük 10% bonus qazanacaqlar."
-
-    webapp_url = f"https://manatqazan.vercel.app/?lang={user_lang}"
-    keyboard = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="🎬 Video İzlə & Qazan", web_app=types.WebAppInfo(url=webapp_url))],
-        [
-            InlineKeyboardButton(text="💰 Balansım", callback_data="balance"),
-            InlineKeyboardButton(text="👥 Referal Proqramı", callback_data="referral")
-        ],
-        [
-            InlineKeyboardButton(text="ℹ️ Necə İşləyir?", callback_data="how_it_works"),
-            InlineKeyboardButton(text="💰 Çıxarış", callback_data="withdraw")
-        ]
-    ])
-
-    await message.bot.set_chat_menu_button(
-        chat_id=message.chat.id,
-        menu_button=MenuButtonWebApp(
-            text="🚀 Başlat",
-            web_app=types.WebAppInfo(url=webapp_url)
-        )
-    )
-
+    # Show language selection to new user
     await message.answer(
-        f"🎉 <b>ManatAds-a xoş gəlmisiniz!</b>\n\n"
-        f"Salam, <b>{tg_user.first_name}</b>! 👋\n\n"
-        f"📺 Qısa videolar izləyin və hər video üçün <b>{MC_PER_VIDEO} MC</b> qazanın.\n"
-        f"📊 Gündəlik limit: <b>{DAILY_LIMIT} video/gün</b>\n"
-        f"👥 Dostlarınızı dəvət edin və <b>ömürlük 10% bonus</b> qazanın!"
-        f"{referral_msg}",
-        reply_markup=keyboard,
+        "🌐 <b>Welcome / Xoş gəldiniz / Hoş geldiniz / Добро пожаловать!</b>\n\n"
+        "Please choose your language / Dil seçin:",
+        reply_markup=get_lang_select_keyboard(),
     )
 
 
@@ -295,9 +375,6 @@ async def cmd_start(message: types.Message) -> None:
     if not tg_user:
         return
 
-    user_lang = _detect_language(tg_user)
-
-    is_new_user = False
     async with async_session() as session:
         try:
             # Check if user already exists
@@ -306,27 +383,26 @@ async def cmd_start(message: types.Message) -> None:
             existing_user = existing_result.scalar_one_or_none()
 
             if existing_user:
-                # Returning user – update profile fields
+                # Returning user – update profile fields, keep their chosen language
                 existing_user.username = tg_user.username
                 existing_user.first_name = tg_user.first_name
                 existing_user.last_name = tg_user.last_name
-                existing_user.language = user_lang
                 await session.commit()
-                await _send_welcome_back(message, existing_user, language=user_lang)
+                await _send_welcome_back(message, existing_user)
                 return
 
-            # UPSERT: safe insert or update
-            user = await _upsert_user(
+            # NEW USER: Register with TG-detected lang, then show lang selection
+            tg_detected = _detect_language(tg_user)
+            await _upsert_user(
                 session,
                 telegram_id=tg_user.id,
                 username=tg_user.username,
                 first_name=tg_user.first_name,
                 last_name=tg_user.last_name,
-                language=user_lang,
+                language=tg_detected,
             )
             await session.commit()
-            is_new_user = True
-            logger.info("[UPSERT] User %s upserted successfully (no referrer)", tg_user.id)
+            logger.info("[UPSERT] New user %s — awaiting lang selection", tg_user.id)
 
         except Exception as e:
             await session.rollback()
@@ -334,35 +410,77 @@ async def cmd_start(message: types.Message) -> None:
             await message.answer("⚠️ Xəta baş verdi. Zəhmət olmasa bir az sonra yenidən cəhd edin.")
             return
 
-    webapp_url = f"https://manatqazan.vercel.app/?lang={user_lang}"
-    keyboard = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="🎬 Video İzlə & Qazan", web_app=types.WebAppInfo(url=webapp_url))],
-        [
-            InlineKeyboardButton(text="💰 Balansım", callback_data="balance"),
-            InlineKeyboardButton(text="👥 Referal Proqramı", callback_data="referral")
-        ],
-        [
-            InlineKeyboardButton(text="ℹ️ Necə İşləyir?", callback_data="how_it_works"),
-            InlineKeyboardButton(text="💰 Çıxarış", callback_data="withdraw")
-        ]
-    ])
-
-    await message.bot.set_chat_menu_button(
-        chat_id=message.chat.id,
-        menu_button=MenuButtonWebApp(
-            text="🚀 Başlat",
-            web_app=types.WebAppInfo(url=webapp_url)
-        )
-    )
-
+    # Show language selection to new user
     await message.answer(
-        f"🎉 <b>ManatAds-a xoş gəlmisiniz!</b>\n\n"
-        f"Salam, <b>{tg_user.first_name}</b>! 👋\n\n"
-        f"📺 Qısa videolar izləyin və hər video üçün <b>{MC_PER_VIDEO} MC</b> qazanın.\n"
-        f"📊 Gündəlik limit: <b>{DAILY_LIMIT} video/gün</b>\n"
-        f"👥 Dostlarınızı dəvət edin və <b>ömürlük 10% bonus</b> qazanın!",
-        reply_markup=keyboard,
+        "🌐 <b>Welcome / Xoş gəldiniz / Hoş geldiniz / Добро пожаловать!</b>\n\n"
+        "Please choose your language / Dil seçin:",
+        reply_markup=get_lang_select_keyboard(),
     )
+
+
+# ── set_bot_lang Callback Handler ───────────────────────────────────────
+@router.callback_query(lambda c: c.data and c.data.startswith("set_bot_lang:"))
+async def cb_set_bot_lang(callback: types.CallbackQuery) -> None:
+    """Handle language selection button for new users."""
+    tg_user = callback.from_user
+    chosen_lang = callback.data.split(":", 1)[1]
+    if chosen_lang not in SUPPORTED_LANGS:
+        chosen_lang = 'en'
+
+    loc = BOT_LOCALES[chosen_lang]
+
+    # Save chosen language to DB
+    async with async_session() as session:
+        stmt = select(User).where(User.telegram_id == tg_user.id)
+        res = await session.execute(stmt)
+        db_user = res.scalar_one_or_none()
+        if db_user:
+            db_user.language = chosen_lang
+            await session.commit()
+        else:
+            # Edge case: user not in DB yet — register now
+            tg_detected = _detect_language(tg_user)
+            await _upsert_user(
+                session,
+                telegram_id=tg_user.id,
+                username=tg_user.username,
+                first_name=tg_user.first_name,
+                last_name=tg_user.last_name,
+                language=chosen_lang,
+            )
+            await session.commit()
+            # Re-fetch
+            res2 = await session.execute(select(User).where(User.telegram_id == tg_user.id))
+            db_user = res2.scalar_one_or_none()
+
+    logger.info("[LANG] User %s chose language: %s", tg_user.id, chosen_lang)
+    await callback.answer(loc['lang_set'], show_alert=False)
+
+    # Set menu button WebApp URL with chosen lang
+    webapp_url = f"https://manatqazan.vercel.app/?lang={chosen_lang}"
+    try:
+        await callback.bot.set_chat_menu_button(
+            chat_id=callback.message.chat.id,
+            menu_button=MenuButtonWebApp(
+                text=loc['btn_start'],
+                web_app=types.WebAppInfo(url=webapp_url)
+            )
+        )
+    except Exception:
+        pass
+
+    # Build welcome message
+    name = tg_user.first_name or "friend"
+    welcome_text = loc['welcome_new'].format(
+        name=name, mc=MC_PER_VIDEO, limit=DAILY_LIMIT
+    )
+
+    # Edit the language selection message → welcome + main keyboard
+    if callback.message and isinstance(callback.message, types.Message):
+        await callback.message.edit_text(
+            welcome_text,
+            reply_markup=get_main_keyboard(chosen_lang),
+        )
 
 
 # ── /balance ────────────────────────────────────────────────────────────
@@ -510,50 +628,61 @@ async def cb_withdraw(callback: types.CallbackQuery) -> None:
         await _handle_withdraw(callback.from_user, callback.message)
 
 
-# ── Text Message Handlers (Reply Keyboard) ──────────────────────────────
-@router.message(F.text == "💰 Balansım")
+# ── Text Message Handlers (Reply Keyboard — all 4 languages) ───────────
+_BALANCE_TEXTS   = {loc['btn_balance']  for loc in BOT_LOCALES.values()}
+_REFERRAL_TEXTS  = {loc['btn_referral'] for loc in BOT_LOCALES.values()}
+_HOW_TEXTS       = {loc['btn_how']      for loc in BOT_LOCALES.values()}
+_WITHDRAW_TEXTS  = {loc['btn_withdraw'] for loc in BOT_LOCALES.values()}
+
+@router.message(lambda m: m.text in _BALANCE_TEXTS)
 async def txt_balance(message: types.Message) -> None:
     if message.from_user:
         await _show_balance(message.from_user, message)
 
-@router.message(F.text == "👥 Referal Proqramı")
+@router.message(lambda m: m.text in _REFERRAL_TEXTS)
 async def txt_referral(message: types.Message) -> None:
     if message.from_user:
         await _show_referral(message.from_user, message)
 
-@router.message(F.text == "ℹ️ Necə İşləyir?")
+@router.message(lambda m: m.text in _HOW_TEXTS)
 async def txt_how_it_works(message: types.Message) -> None:
     await _show_how_it_works(message)
 
-@router.message(F.text == "💰 Çıxarış")
+@router.message(lambda m: m.text in _WITHDRAW_TEXTS)
 async def txt_withdraw(message: types.Message) -> None:
     if message.from_user:
         await _handle_withdraw(message.from_user, message)
 
 
 # ── Helpers ─────────────────────────────────────────────────────────────
-async def _send_welcome_back(message: types.Message, user: User, language: str = 'az') -> None:
-    """Greet a returning user with their current stats."""
-    azn_value = user.balance_mc / MC_TO_AZN_RATE
-    webapp_url = f"https://manatqazan.vercel.app/?lang={language}"
-    keyboard = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="🎬 Video İzlə & Qazan", web_app=types.WebAppInfo(url=webapp_url))],
-        [
-            InlineKeyboardButton(text="💰 Balansım", callback_data="balance"),
-            InlineKeyboardButton(text="👥 Referal Proqramı", callback_data="referral")
-        ],
-        [
-            InlineKeyboardButton(text="ℹ️ Necə İşləyir?", callback_data="how_it_works"),
-            InlineKeyboardButton(text="💰 Çıxarış", callback_data="withdraw")
-        ]
-    ])
+async def _send_welcome_back(message: types.Message, user: User) -> None:
+    """Greet a returning user with their current stats in their chosen language."""
+    lang = user.language if user.language in BOT_LOCALES else 'en'
+    loc = BOT_LOCALES[lang]
+    webapp_url = f"https://manatqazan.vercel.app/?lang={lang}"
+
+    # Update menu button to match user's language
+    try:
+        await message.bot.set_chat_menu_button(
+            chat_id=message.chat.id,
+            menu_button=MenuButtonWebApp(
+                text=loc['btn_start'],
+                web_app=types.WebAppInfo(url=webapp_url)
+            )
+        )
+    except Exception:
+        pass
+
+    name = user.first_name or "friend"
+    welcome_text = loc['welcome_back'].format(
+        name=name,
+        balance=f"{user.balance_mc:,.0f}",
+        total=f"{user.total_earned_mc:,.0f}",
+    )
 
     await message.answer(
-        f"👋 <b>Yenidən xoş gəldiniz, {user.first_name or 'dost'}!</b>\n\n"
-        f"🪙 Balans: <b>{user.balance_mc:,.0f} MC</b>\n"
-        f"📈 Ümumi qazanc: <b>{user.total_earned_mc:,.0f} MC</b>\n\n"
-        f"Daha çox qazanmağa hazırsınız? Aşağıdakı düyməyə toxunun! 👇",
-        reply_markup=keyboard,
+        welcome_text,
+        reply_markup=get_main_keyboard(lang),
     )
 
 
