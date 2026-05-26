@@ -471,7 +471,6 @@ async function initApp() {
         setLanguage(currentLang);
 
         // ── Sınaq / Reset Mexanizmi ──────────────────────────────────────────
-        const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.get('reset') === 'true') {
             console.log(`[LangDebug] ?reset=true parametri tapıldı. Onboarding sıfırlanır...`);
             localStorage.removeItem('onboarding_completed');
