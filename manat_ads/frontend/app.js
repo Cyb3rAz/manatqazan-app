@@ -264,16 +264,19 @@ function t(key) {
 
 // ── i18n Dil Dəyişmə ─────────────────────────────────────────────────
 function setLanguage(lang) {
-    if (lang) {
+    if (lang && typeof lang === 'string') {
         lang = lang.toLowerCase().trim();
         if (lang.startsWith('az')) lang = 'az';
         else if (lang.startsWith('tr')) lang = 'tr';
         else if (lang.startsWith('ru')) lang = 'ru';
+        else if (lang.startsWith('en')) lang = 'en';
         else lang = 'en';
     } else {
         lang = 'en';
     }
     currentLang = lang;
+    localStorage.setItem('saved_language', currentLang);
+
 
     // Update all static elements with data-i18n attribute
     document.querySelectorAll('[data-i18n]').forEach(el => {
@@ -416,34 +419,41 @@ async function initApp() {
             currentUser = { id: 123456789, first_name: "TestUser" };
         }
 
-        // Detect language from URL param
-        const urlParams = new URLSearchParams(window.location.search);
-        let urlLang = urlParams.get('lang');
-        if (urlLang) {
-            urlLang = urlLang.toLowerCase().trim();
-            if (urlLang.startsWith('az')) urlLang = 'az';
-            else if (urlLang.startsWith('tr')) urlLang = 'tr';
-            else if (urlLang.startsWith('ru')) urlLang = 'ru';
-            else if (urlLang.startsWith('en')) urlLang = 'en';
-            else urlLang = null;
-            
-            if (urlLang) currentLang = urlLang;
+        // Təhlükəsiz dil yoxlanışı funksiyası
+        function getValidLang(langStr) {
+            if (langStr && typeof langStr === 'string') {
+                const lower = langStr.toLowerCase().trim();
+                if (lower.startsWith('az')) return 'az';
+                if (lower.startsWith('tr')) return 'tr';
+                if (lower.startsWith('en')) return 'en';
+                if (lower.startsWith('ru')) return 'ru';
+            }
+            return null;
         }
+
+        // Ciddi dil prioriteti hiyerarxiyası
+        let detectedLang = null;
+
+        // a) Priority 1: URL parametri
+        const urlParams = new URLSearchParams(window.location.search);
+        detectedLang = getValidLang(urlParams.get('lang'));
+
+        // b) Priority 2: localStorage
+        if (!detectedLang) {
+            detectedLang = getValidLang(localStorage.getItem('saved_language'));
+        }
+
+        // c) Priority 3: Telegram initData
+        if (!detectedLang && tg?.initDataUnsafe?.user?.language_code) {
+            detectedLang = getValidLang(tg.initDataUnsafe.user.language_code);
+        }
+
+        // d) Priority 4: Default
+        currentLang = detectedLang || 'en';
+        localStorage.setItem('saved_language', currentLang); // Yadda saxla
 
         // Backend-dən istifadəçi məlumatlarını çək
         await fetchUserData();
-
-        // If backend returned a language preference, use it (unless URL already set one)
-        if (userData && userData.language && !urlLang) {
-            let backendLang = userData.language.toLowerCase().trim();
-            if (backendLang.startsWith('az')) backendLang = 'az';
-            else if (backendLang.startsWith('tr')) backendLang = 'tr';
-            else if (backendLang.startsWith('ru')) backendLang = 'ru';
-            else if (backendLang.startsWith('en')) backendLang = 'en';
-            else backendLang = null;
-            
-            if (backendLang) currentLang = backendLang;
-        }
 
         // UI-ı yenilə
         renderDashboard();
