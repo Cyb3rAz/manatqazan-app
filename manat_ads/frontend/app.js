@@ -412,6 +412,8 @@ document.addEventListener("DOMContentLoaded", () => {
 // ── Tətbiqin Başlanğıcı ──────────────────────────────────────────────
 async function initApp() {
     try {
+        const urlParams = new URLSearchParams(window.location.search);
+
         // Telegram Web App-dan istifadəçini al
         if (tg?.initDataUnsafe?.user) {
             currentUser = tg.initDataUnsafe.user;
@@ -443,7 +445,6 @@ async function initApp() {
 
         // b) Priority 2: URL parametri (Fallback)
         if (!detectedLang) {
-            const urlParams = new URLSearchParams(window.location.search);
             const urlLang = urlParams.get('lang');
             detectedLang = getValidLang(urlLang, 'URL ?lang=');
             if (detectedLang) console.log(`[LangDebug] Picked Priority 2 (URL): ${detectedLang}`);
