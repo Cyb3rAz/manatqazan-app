@@ -456,11 +456,14 @@ function createDefaultUserData() {
 let cooldownInterval = null;
 
 function startCooldownTimer(unlockAt) {
-    if (!unlockAt) return;
+    const hintEl = document.getElementById("session-2-cooldown-hint");
+    if (!unlockAt) {
+        if (hintEl) hintEl.style.display = "none";
+        return;
+    }
     stopCooldownTimer();
 
     const targetTime = new Date(unlockAt).getTime();
-    const hintEl = document.getElementById("session-2-cooldown-hint");
 
     function updateTimer() {
         const now = new Date().getTime();
@@ -468,7 +471,7 @@ function startCooldownTimer(unlockAt) {
 
         if (difference <= 0) {
             stopCooldownTimer();
-            hintEl.style.display = "none";
+            if (hintEl) hintEl.style.display = "none";
             if (userData) {
                 userData.session_2_locked = false;
                 userData.unlock_at = null;
@@ -482,8 +485,11 @@ function startCooldownTimer(unlockAt) {
         const seconds = Math.floor((difference % (1000 * 60)) / 1000);
 
         const pad = (n) => n.toString().padStart(2, '0');
-        hintEl.textContent = `${t('lock_countdown')}${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
-        hintEl.style.display = "block";
+        const prefix = LOCALES[currentLang]?.lock_countdown || LOCALES['az'].lock_countdown;
+        if (hintEl) {
+            hintEl.textContent = prefix + `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+            hintEl.style.display = "block";
+        }
     }
 
     updateTimer();
@@ -677,9 +683,15 @@ function renderDashboard() {
 
     if (userData.session_2_locked) {
         s2Btn.disabled = true;
-        s2Btn.textContent = t('locked');
-        s2Hint.style.display = "block";
-        startCooldownTimer(userData.unlock_at);
+        if (userData.unlock_at) {
+            s2Btn.textContent = t('locked');
+            s2Hint.style.display = "block";
+            startCooldownTimer(userData.unlock_at);
+        } else {
+            s2Btn.textContent = t('finishFirst');
+            s2Hint.style.display = "none";
+            stopCooldownTimer();
+        }
     } else {
         s2Hint.style.display = "none";
         stopCooldownTimer();
