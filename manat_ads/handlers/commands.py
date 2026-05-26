@@ -103,8 +103,9 @@ BOT_LOCALES = {
             "📺 Qısa videolar izləyin və hər video üçün <b>{mc} MC</b> qazanın.\n"
             "📊 Gündəlik limit: <b>{limit} video/gün</b>\n"
             "👥 Dostlarınızı dəvət edin və <b>ömürlük 10% bonus</b> qazanın!"
+            "\n\n💡 İpucu: Sistemi yeniləmək üçün /start yaza bilərsiniz!"
         ),
-        'welcome_back':   "👋 <b>Yenidən xoş gəldiniz, {name}!</b>\n\n🪙 Balans: <b>{balance} MC</b>\n📈 Ümumi qazanc: <b>{total} MC</b>\n\nDaha çox qazanmağa hazırsınız? Aşağıdakı düyməyə toxunun! 👇",
+        'welcome_back':   "👋 <b>Yenidən xoş gəldiniz, {name}!</b>\n\n🪙 Balans: <b>{balance} MC</b>\n📈 Ümumi qazanc: <b>{total} MC</b>\n\nDaha çox qazanmağa hazırsınız? Aşağıdakı düyməyə toxunun! 👇\n\n💡 İpucu: Sistemi yeniləmək üçün /start yaza bilərsiniz!",
         'referral_msg':   "\n\n🤝 <b>Sizi dostunuz dəvət edib!</b> Onlar sizin qazancınızdan ömürlük 10% bonus qazanacaqlar.",
         'btn_video':      "🎬 Video İzlə & Qazan",
         'btn_balance':    "💰 Balansım",
@@ -112,6 +113,7 @@ BOT_LOCALES = {
         'btn_how':        "ℹ️ Necə İşləyir?",
         'btn_withdraw':   "💰 Çıxarış",
         'btn_start':      "🚀 Başlat",
+        'btn_lang_settings': "🌐 Dil Seçimi / Language ⚙️",
         # ── Balance screen ──
         'balance_title':    "💰 <b>Balansınız</b>",
         'balance_mc_row':   "🪙 <b>Manat Coins:</b>",
@@ -133,7 +135,7 @@ BOT_LOCALES = {
         'how_title':        "ℹ️ <b>ManatAds Layihəsi Haqqında Məlumat</b>",
         'how_body':         (
             "Platformamızın işləmə məntiqi çox bəsitdir:\n"
-            "1️⃣ '<b>🎬 Video İzlə & Qazan</b>' düyməsinə toxunaraq qısa video reklamlar izləyirsiniz.\n"
+            "1️⃣ '<b>🎬 Video İzlə & Qazan</b>' düyməsinə toxunaraq qısa video reklamlar izliyirsiniz.\n"
             "2️⃣ Hər uğurlu izləmə üçün balansınıza anında <b>{mc} MC</b> (Manat Coin) əlavə olunur.\n"
             "3️⃣ Dostlarınızı dəvət edərək onların qazancından da əlavə bonuslar əldə edirsiniz.\n\n"
             "💰 <b>Çıxarış və Balans Mexanizmi:</b>\n"
@@ -168,8 +170,9 @@ BOT_LOCALES = {
             "📺 Kısa videolar izleyin ve her video için <b>{mc} MC</b> kazanın.\n"
             "📊 Günlük limit: <b>{limit} video/gün</b>\n"
             "👥 Arkadaşlarınızı davet edin ve <b>ömür boyu %10 bonus</b> kazanın!"
+            "\n\n💡 İpucu: Sistemi yenilemek için /start yazabilirsiniz!"
         ),
-        'welcome_back':   "👋 <b>Tekrar hoş geldiniz, {name}!</b>\n\n🪙 Bakiye: <b>{balance} MC</b>\n📈 Toplam kazanç: <b>{total} MC</b>\n\nDaha fazla kazanmaya hazır mısınız? Aşağıdaki butona dokunun! 👇",
+        'welcome_back':   "👋 <b>Tekrar hoş geldiniz, {name}!</b>\n\n🪙 Bakiye: <b>{balance} MC</b>\n📈 Toplam kazanç: <b>{total} MC</b>\n\nDaha fazla kazanmaya hazır mısınız? Aşağıdaki butona dokunun! 👇\n\n💡 İpucu: Sistemi yenilemek için /start yazabilirsiniz!",
         'referral_msg':   "\n\n🤝 <b>Sizi bir arkadaşınız davet etti!</b> Kazancınızdan ömür boyu %10 bonus alacaklar.",
         'btn_video':      "🎬 Video İzle & Kazan",
         'btn_balance':    "💰 Bakiyem",
@@ -177,6 +180,7 @@ BOT_LOCALES = {
         'btn_how':        "ℹ️ Nasıl Çalışır?",
         'btn_withdraw':   "💰 Çekim",
         'btn_start':      "🚀 Başlat",
+        'btn_lang_settings': "🌐 Dil Seçimi / Language ⚙️",
         # ── Balance screen ──
         'balance_title':    "💰 <b>Bakiyeniz</b>",
         'balance_mc_row':   "🪙 <b>Manat Coins:</b>",
@@ -188,7 +192,7 @@ BOT_LOCALES = {
         'balance_lock_rem': "🔒 Kilitli ({h:02d}s {m:02d}d kaldı)",
         # ── Referral screen ──
         'referral_title':   "👥 <b>Referans Programı</b>",
-        'referral_desc':    "Davet bağlantınızı paylaşın ve arkadaşlarınızın izlediği her videodan <b>ömür boyu %10 bonus</b> kazanın!",
+        'referral_desc':    "Davet bağlantınızı paylaşın ve arkadaşınızın izlediği her videodan <b>ömür boyu %10 bonus</b> kazanın!",
         'referral_link_lbl':"🔗 <b>Referans Bağlantınız:</b>",
         'referral_invited': "👤 <b>Davet Edilenler:</b>",
         'referral_earned':  "🪙 <b>Referans Kazancı:</b>",
@@ -200,7 +204,7 @@ BOT_LOCALES = {
             "Platformamızın çalışma mantığı çok basittir:\n"
             "1️⃣ '<b>🎬 Video İzle & Kazan</b>' butonuna dokunarak kısa video reklamlar izliyorsunuz.\n"
             "2️⃣ Her başarılı izleme için bakiyenize anında <b>{mc} MC</b> (Manat Coin) ekleniyor.\n"
-            "3️⃣ Arkadaşlarınızı davet ederek onların kazançlarından da ek bonuslar elde ediyorsunuz.\n\n"
+            "3️⃣ Arkadaşlarınızı davet ederek onun kazançlarından da ek bonuslar elde ediyorsunuz.\n\n"
             "💰 <b>Çekim ve Bakiye Mekanizması:</b>\n"
             "Biriktirilen MC puanları sistem içinde gerçek Türk Lirası (TRY) para birimine dönüştürülür. "
             "Minimum çekim limiti 100 TRY'dir. Bu limite ulaştıktan sonra kazancınızı kolayca "
@@ -233,8 +237,9 @@ BOT_LOCALES = {
             "📺 Watch short videos and earn <b>{mc} MC</b> per video.\n"
             "📊 Daily limit: <b>{limit} videos/day</b>\n"
             "👥 Invite your friends and earn a <b>lifetime 10% bonus</b>!"
+            "\n\n💡 Tip: You can type /start at any time to refresh the system!"
         ),
-        'welcome_back':   "👋 <b>Welcome back, {name}!</b>\n\n🪙 Balance: <b>{balance} MC</b>\n📈 Total earned: <b>{total} MC</b>\n\nReady to earn more? Tap the button below! 👇",
+        'welcome_back':   "👋 <b>Welcome back, {name}!</b>\n\n🪙 Balance: <b>{balance} MC</b>\n📈 Total earned: <b>{total} MC</b>\n\nReady to earn more? Tap the button below! 👇\n\n💡 Tip: You can type /start at any time to refresh the system!",
         'referral_msg':   "\n\n🤝 <b>You were invited by a friend!</b> They will earn a lifetime 10% bonus from your earnings.",
         'btn_video':      "🎬 Watch Videos & Earn",
         'btn_balance':    "💰 My Balance",
@@ -242,6 +247,7 @@ BOT_LOCALES = {
         'btn_how':        "ℹ️ How It Works?",
         'btn_withdraw':   "💰 Withdraw",
         'btn_start':      "🚀 Start",
+        'btn_lang_settings': "🌐 Change Language / Dil Seçimi ⚙️",
         # ── Balance screen ──
         'balance_title':    "💰 <b>Your Balance</b>",
         'balance_mc_row':   "🪙 <b>Manat Coins:</b>",
@@ -298,8 +304,9 @@ BOT_LOCALES = {
             "📺 Смотрите короткие видео и зарабатывайте <b>{mc} MC</b> за каждое видео.\n"
             "📊 Дневной лимит: <b>{limit} видео/день</b>\n"
             "👥 Приглашайте друзей и зарабатывайте <b>пожизненный бонус 10%</b>!"
+            "\n\n💡 Подсказка: Вы можете написать /start в любое время, чтобы обновить систему!"
         ),
-        'welcome_back':   "👋 <b>С возвращением, {name}!</b>\n\n🪙 Баланс: <b>{balance} MC</b>\n📈 Всего заработано: <b>{total} MC</b>\n\nГотовы зарабатывать больше? Нажмите на кнопку ниже! 👇",
+        'welcome_back':   "👋 <b>С возвращением, {name}!</b>\n\n🪙 Баланс: <b>{balance} MC</b>\n📈 Всего заработано: <b>{total} MC</b>\n\nГотовы зарабатывать больше? Нажмите на кнопку ниже! 👇\n\n💡 Подсказка: Вы можете написать /start в любое время, чтобы обновить систему!",
         'referral_msg':   "\n\n🤝 <b>Вас пригласил друг!</b> Они будут получать пожизненный бонус 10% с ваших заработков.",
         'btn_video':      "🎬 Смотреть видео & Зарабатывать",
         'btn_balance':    "💰 Мой баланс",
@@ -307,6 +314,7 @@ BOT_LOCALES = {
         'btn_how':        "ℹ️ Как это работает?",
         'btn_withdraw':   "💰 Вывод",
         'btn_start':      "🚀 Запустить",
+        'btn_lang_settings': "🌐 Смена языка / Language ⚙️",
         # ── Balance screen ──
         'balance_title':    "💰 <b>Ваш баланс</b>",
         'balance_mc_row':   "🪙 <b>Manat Coins:</b>",
@@ -388,6 +396,9 @@ def get_main_keyboard(lang: str) -> InlineKeyboardMarkup:
         [
             InlineKeyboardButton(text=loc['btn_how'], callback_data="how_it_works"),
             InlineKeyboardButton(text=loc['btn_withdraw'], callback_data="withdraw"),
+        ],
+        [
+            InlineKeyboardButton(text=loc['btn_lang_settings'], callback_data="show_lang_menu"),
         ],
     ])
 
@@ -845,6 +856,18 @@ async def cb_withdraw(callback: types.CallbackQuery) -> None:
     await callback.answer()
     if callback.message and isinstance(callback.message, types.Message):
         await _handle_withdraw(callback.from_user, callback.message)
+
+
+@router.callback_query(lambda c: c.data == "show_lang_menu")
+async def cb_show_lang_menu(callback: types.CallbackQuery) -> None:
+    """Inline button shortcut to show language selection menu."""
+    await callback.answer()
+    if callback.message and isinstance(callback.message, types.Message):
+        await callback.message.answer(
+            "🌐 <b>Welcome / Xoş gəldiniz / Hoş geldiniz / Добро пожаловать!</b>\n\n"
+            "Please choose your language / Dil seçin:",
+            reply_markup=get_lang_select_keyboard(),
+        )
 
 
 # ── Text Message Handlers (Reply Keyboard — all 4 languages) ───────────
