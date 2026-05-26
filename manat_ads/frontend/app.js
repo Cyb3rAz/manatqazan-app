@@ -333,11 +333,12 @@ document.addEventListener('click', (e) => {
 let onboardingSelectedLang = 'az';
 
 function selectOnboardingLang(lang) {
-    if (lang) {
+    if (lang && typeof lang === 'string') {
         lang = lang.toLowerCase().trim();
         if (lang.startsWith('az')) lang = 'az';
         else if (lang.startsWith('tr')) lang = 'tr';
         else if (lang.startsWith('ru')) lang = 'ru';
+        else if (lang.startsWith('en')) lang = 'en';
         else lang = 'en';
     } else {
         lang = 'en';
@@ -434,18 +435,18 @@ async function initApp() {
         // Ciddi dil prioriteti hiyerarxiyası
         let detectedLang = null;
 
-        // a) Priority 1: URL parametri
-        const urlParams = new URLSearchParams(window.location.search);
-        detectedLang = getValidLang(urlParams.get('lang'));
+        // a) Priority 1: Telegram initData
+        detectedLang = getValidLang(tg?.initDataUnsafe?.user?.language_code);
 
-        // b) Priority 2: localStorage
+        // b) Priority 2: URL parametri
         if (!detectedLang) {
-            detectedLang = getValidLang(localStorage.getItem('saved_language'));
+            const urlParams = new URLSearchParams(window.location.search);
+            detectedLang = getValidLang(urlParams.get('lang'));
         }
 
-        // c) Priority 3: Telegram initData
-        if (!detectedLang && tg?.initDataUnsafe?.user?.language_code) {
-            detectedLang = getValidLang(tg.initDataUnsafe.user.language_code);
+        // c) Priority 3: localStorage
+        if (!detectedLang) {
+            detectedLang = getValidLang(localStorage.getItem('saved_language'));
         }
 
         // d) Priority 4: Default

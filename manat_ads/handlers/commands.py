@@ -91,6 +91,30 @@ def _detect_language(tg_user) -> str:
         return 'en'
     return 'en'
 
+class LanguageUpdateMiddleware(BaseMiddleware):
+    """Dynamically updates the user's language in the DB on every request if it changes."""
+    async def __call__(
+        self,
+        handler: Callable[[TelegramObject, Dict[str, Any]], Awaitable[Any]],
+        event: TelegramObject,
+        data: Dict[str, Any]
+    ) -> Any:
+        user: types.User = data.get("event_from_user")
+        if user:
+            new_lang = _detect_language(user)
+            async with async_session() as session:
+                stmt = select(User).where(User.telegram_id == user.id)
+                res = await session.execute(stmt)
+                db_user = res.scalar_one_or_none()
+                if db_user and db_user.language != new_lang:
+                    db_user.language = new_lang
+                    await session.commit()
+        return await handler(event, data)
+
+router.message.outer_middleware(LanguageUpdateMiddleware())
+router.callback_query.outer_middleware(LanguageUpdateMiddleware())
+
+
 async def _upsert_user(
     session,
     telegram_id: int,
