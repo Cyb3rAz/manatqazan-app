@@ -18,6 +18,8 @@ let currentLang = 'az';
 const LOCALES = {
     az: {
         subtitle: "İzlə • Qazan • Çevir",
+        onboardingTitle: "Xoş gəldiniz! Zəhmət olmasa bölgənizi və valyutanızı seçin:",
+        onboardingBtn: "Davam et 🚀",
         greeting: "Xoş gəldiniz,",
         balanceLabel: "BALANSINIZ",
         withdrawalTarget: "Çıxarış Hədəfi: 5.00 AZN",
@@ -76,6 +78,8 @@ const LOCALES = {
     },
     tr: {
         subtitle: "İzle • Kazan • Çevir",
+        onboardingTitle: "Hoş geldiniz! Lütfen bölgenizi ve para biriminizi seçin:",
+        onboardingBtn: "Devam et 🚀",
         greeting: "Hoş geldiniz,",
         balanceLabel: "BAKİYENİZ",
         withdrawalTarget: "Çekim Hedefi: 100.00 TRY",
@@ -134,6 +138,8 @@ const LOCALES = {
     },
     en: {
         subtitle: "Watch • Earn • Convert",
+        onboardingTitle: "Welcome! Please select your region and currency:",
+        onboardingBtn: "Continue 🚀",
         greeting: "Welcome,",
         balanceLabel: "YOUR BALANCE",
         withdrawalTarget: "Withdrawal Target: 3.00 USDT",
@@ -192,6 +198,8 @@ const LOCALES = {
     },
     ru: {
         subtitle: "Смотри • Зарабатывай • Конвертируй",
+        onboardingTitle: "Добро пожаловать! Пожалуйста, выберите ваш регион и валюту:",
+        onboardingBtn: "Продолжить 🚀",
         greeting: "Добро пожаловать,",
         balanceLabel: "ВАШ БАЛАНС",
         withdrawalTarget: "Цель вывода: 3.00 USDT",
@@ -310,6 +318,36 @@ document.addEventListener('click', (e) => {
     }
 });
 
+// ── Onboarding Modal Logic ───────────────────────────────────────────
+let onboardingSelectedLang = 'az';
+
+function selectOnboardingLang(lang) {
+    if (!SUPPORTED_LANGS.includes(lang)) lang = 'en';
+    onboardingSelectedLang = lang;
+    
+    // Update active visual state of cards
+    document.querySelectorAll('.onboarding-option-card').forEach(card => {
+        card.classList.toggle('active', card.dataset.lang === lang);
+    });
+}
+
+function completeOnboarding() {
+    // Set active app language
+    setLanguage(onboardingSelectedLang);
+    
+    // Save state to localStorage
+    localStorage.setItem('onboarding_completed', 'true');
+    
+    // Hide modal with elegant transition
+    const obModal = document.getElementById("onboarding-modal");
+    if (obModal) {
+        obModal.classList.remove("active");
+        setTimeout(() => {
+            obModal.style.display = "none";
+        }, 400);
+    }
+}
+
 // ── Telegram Web App ──────────────────────────────────────────────────
 const tg = window.Telegram?.WebApp;
 let currentUser = null;
@@ -374,6 +412,21 @@ async function initApp() {
 
         // Apply language to all static elements
         setLanguage(currentLang);
+
+        // Check if onboarding is completed
+        const onboardingCompleted = localStorage.getItem('onboarding_completed');
+        if (!onboardingCompleted) {
+            // Preset the onboarding selection according to initial currentLang
+            onboardingSelectedLang = currentLang;
+            selectOnboardingLang(currentLang);
+            
+            // Show the modal
+            const obModal = document.getElementById("onboarding-modal");
+            if (obModal) {
+                obModal.style.display = "flex";
+                setTimeout(() => obModal.classList.add("active"), 10);
+            }
+        }
 
         // Əsas kontenti göstər, loaderi gizlə
         document.getElementById("loader").style.display = "none";

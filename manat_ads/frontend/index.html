@@ -766,6 +766,142 @@
             margin-top: 6px;
             letter-spacing: 0.3px;
         }
+
+        /* ── Onboarding Modal (Cyberpunk / Modern Dark) ─────────────────── */
+        .onboarding-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(5, 5, 10, 0.85);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            z-index: 99999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s ease;
+        }
+
+        .onboarding-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .onboarding-card {
+            background: rgba(20, 20, 30, 0.95);
+            border: 1px solid rgba(245, 158, 11, 0.25);
+            border-radius: var(--radius-xl);
+            padding: 30px 24px;
+            width: 90%;
+            max-width: 360px;
+            text-align: center;
+            box-shadow: 0 0 40px rgba(245, 158, 11, 0.15), 0 12px 32px rgba(0, 0, 0, 0.6);
+            transform: scale(0.9) translateY(20px);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .onboarding-overlay.active .onboarding-card {
+            transform: scale(1) translateY(0);
+        }
+
+        .onboarding-title {
+            font-size: 18px;
+            font-weight: 800;
+            color: #fff;
+            margin-bottom: 24px;
+            line-height: 1.4;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+        }
+
+        .onboarding-options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 26px;
+        }
+
+        .onboarding-option-card {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: var(--radius-lg);
+            padding: 12px 18px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            text-align: left;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .onboarding-option-card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.15);
+            transform: translateY(-1px);
+        }
+
+        .onboarding-option-card.active {
+            background: rgba(245, 158, 11, 0.08);
+            border-color: var(--accent-gold);
+            box-shadow: 0 0 15px rgba(245, 158, 11, 0.2), inset 0 0 8px rgba(245, 158, 11, 0.05);
+        }
+
+        .onboarding-flag {
+            font-size: 26px;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+        }
+
+        .onboarding-details {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .onboarding-region {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-primary);
+            transition: color 0.2s;
+        }
+
+        .onboarding-option-card.active .onboarding-region {
+            color: #fff;
+        }
+
+        .onboarding-currency {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        .onboarding-option-card.active .onboarding-currency {
+            color: rgba(245, 158, 11, 0.9);
+        }
+
+        .onboarding-btn {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: var(--radius-lg);
+            background: var(--gradient-gold);
+            color: #fff;
+            font-family: 'Inter', sans-serif;
+            font-size: 16px;
+            font-weight: 800;
+            cursor: pointer;
+            box-shadow: 0 4px 20px var(--accent-gold-glow);
+            transition: var(--transition);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .onboarding-btn:active {
+            transform: scale(0.96);
+        }
     </style>
 </head>
 <body>
@@ -901,6 +1037,48 @@
             <h2 class="upgrade-modal-title" id="upgrade-modal-title">🎉 TƏBRİKLƏR! 🎉</h2>
             <p class="upgrade-modal-text" id="upgrade-modal-text">Sən rəsmən ⚪ Gümüş Liqasına yüksəldin! Sürətin mükəmməldir, belə də davam et! 🚀</p>
             <button class="upgrade-modal-btn" onclick="closeUpgradeModal()" data-i18n="upgradeBtn">Uğurlar! 🚀</button>
+        </div>
+    </div>
+
+    <!-- Onboarding Modal -->
+    <div class="onboarding-overlay" id="onboarding-modal" style="display: none;">
+        <div class="onboarding-card">
+            <h2 class="onboarding-title" id="onboarding-title" data-i18n="onboardingTitle">Xoş gəldiniz! Zəhmət olmasa bölgənizi və valyutanızı seçin:</h2>
+            
+            <div class="onboarding-options">
+                <div class="onboarding-option-card active" data-lang="az" onclick="selectOnboardingLang('az')">
+                    <span class="onboarding-flag">🇦🇿</span>
+                    <div class="onboarding-details">
+                        <span class="onboarding-region">Azərbaycan</span>
+                        <span class="onboarding-currency">AZN Balans</span>
+                    </div>
+                </div>
+                <div class="onboarding-option-card" data-lang="tr" onclick="selectOnboardingLang('tr')">
+                    <span class="onboarding-flag">🇹🇷</span>
+                    <div class="onboarding-details">
+                        <span class="onboarding-region">Türkiye</span>
+                        <span class="onboarding-currency">TRY Bakiye</span>
+                    </div>
+                </div>
+                <div class="onboarding-option-card" data-lang="en" onclick="selectOnboardingLang('en')">
+                    <span class="onboarding-flag">🇬🇧</span>
+                    <div class="onboarding-details">
+                        <span class="onboarding-region">Global</span>
+                        <span class="onboarding-currency">USDT Balance</span>
+                    </div>
+                </div>
+                <div class="onboarding-option-card" data-lang="ru" onclick="selectOnboardingLang('ru')">
+                    <span class="onboarding-flag">🇷🇺</span>
+                    <div class="onboarding-details">
+                        <span class="onboarding-region">Россия / СНГ</span>
+                        <span class="onboarding-currency">USDT Баланс</span>
+                    </div>
+                </div>
+            </div>
+            
+            <button class="onboarding-btn" onclick="completeOnboarding()" id="onboarding-confirm-btn" data-i18n="onboardingBtn">
+                Davam et 🚀
+            </button>
         </div>
     </div>
 
