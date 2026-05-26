@@ -417,6 +417,15 @@ async def cmd_start(message: types.Message) -> None:
         reply_markup=get_lang_select_keyboard(),
     )
 
+@router.message(Command("lang"))
+async def cmd_lang(message: types.Message) -> None:
+    """Allow users to change their language at any time."""
+    await message.answer(
+        "🌐 <b>Welcome / Xoş gəldiniz / Hoş geldiniz / Добро пожаловать!</b>\n\n"
+        "Please choose your language / Dil seçin:",
+        reply_markup=get_lang_select_keyboard(),
+    )
+
 
 # ── set_bot_lang Callback Handler ───────────────────────────────────────
 @router.callback_query(lambda c: c.data and c.data.startswith("set_bot_lang:"))
