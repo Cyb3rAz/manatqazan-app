@@ -101,7 +101,7 @@ BOT_LOCALES = {
             "🎉 <b>ManatAds-a xoş gəlmisiniz!</b>\n\n"
             "Salam, <b>{name}</b>! 👋\n\n"
             "📺 Qısa videolar izləyin və hər video üçün <b>{mc} MC</b> qazanın.\n"
-            "📊 Gündəlik limit: <b>{limit} video/gün</b>\n"
+            "📊 Gündəlik limit: <b>50 video/gün</b>\n"
             "👥 Dostlarınızı dəvət edin və <b>ömürlük 10% bonus</b> qazanın!"
             "\n\n💡 İpucu: Sistemi yeniləmək üçün /start yaza bilərsiniz!"
         ),
@@ -168,7 +168,7 @@ BOT_LOCALES = {
             "🎉 <b>ManatAds'a hoş geldiniz!</b>\n\n"
             "Merhaba, <b>{name}</b>! 👋\n\n"
             "📺 Kısa videolar izleyin ve her video için <b>{mc} MC</b> kazanın.\n"
-            "📊 Günlük limit: <b>{limit} video/gün</b>\n"
+            "📊 Günlük limit: <b>50 video/gün</b>\n"
             "👥 Arkadaşlarınızı davet edin ve <b>ömür boyu %10 bonus</b> kazanın!"
             "\n\n💡 İpucu: Sistemi yenilemek için /start yazabilirsiniz!"
         ),
@@ -235,7 +235,7 @@ BOT_LOCALES = {
             "🎉 <b>Welcome to ManatAds!</b>\n\n"
             "Hello, <b>{name}</b>! 👋\n\n"
             "📺 Watch short videos and earn <b>{mc} MC</b> per video.\n"
-            "📊 Daily limit: <b>{limit} videos/day</b>\n"
+            "📊 Daily limit: <b>50 videos/day</b>\n"
             "👥 Invite your friends and earn a <b>lifetime 10% bonus</b>!"
             "\n\n💡 Tip: You can type /start at any time to refresh the system!"
         ),
@@ -302,7 +302,7 @@ BOT_LOCALES = {
             "🎉 <b>Добро пожаловать в ManatAds!</b>\n\n"
             "Привет, <b>{name}</b>! 👋\n\n"
             "📺 Смотрите короткие видео и зарабатывайте <b>{mc} MC</b> за каждое видео.\n"
-            "📊 Дневной лимит: <b>{limit} видео/день</b>\n"
+            "📊 Ежедневный лимит: <b>50 видео/день</b>\n"
             "👥 Приглашайте друзей и зарабатывайте <b>пожизненный бонус 10%</b>!"
             "\n\n💡 Подсказка: Вы можете написать /start в любое время, чтобы обновить систему!"
         ),
