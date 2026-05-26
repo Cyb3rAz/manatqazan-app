@@ -470,11 +470,18 @@ async function initApp() {
         // Apply language to all static elements
         setLanguage(currentLang);
 
+        // ── Sınaq / Reset Mexanizmi ──────────────────────────────────────────
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('reset') === 'true') {
+            console.log(`[LangDebug] ?reset=true parametri tapıldı. Onboarding sıfırlanır...`);
+            localStorage.removeItem('onboarding_completed');
+        }
+
         // Check if onboarding is completed
         const onboardingCompleted = localStorage.getItem('onboarding_completed');
         console.log(`[LangDebug] onboardingCompleted flag:`, onboardingCompleted);
         
-        if (!onboardingCompleted) {
+        if (onboardingCompleted !== 'true') {
             console.log(`[LangDebug] Showing onboarding modal for lang: ${currentLang}`);
             // Preset the onboarding selection according to initial currentLang
             onboardingSelectedLang = currentLang;
