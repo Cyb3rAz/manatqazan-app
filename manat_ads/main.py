@@ -109,12 +109,9 @@ async def lifespan(application: FastAPI):
     # ── Set Menu Button ──
     try:
         await bot.set_chat_menu_button(
-            menu_button=aio_types.MenuButtonWebApp(
-                text="🚀 Aç", 
-                web_app=aio_types.WebAppInfo(url="https://manatqazan.vercel.app")
-            )
+            menu_button=aio_types.MenuButtonDefault()
         )
-        logger.info("Chat menu button set.")
+        logger.info("Chat menu button set to Default (Commands).")
     except Exception as e:
         logger.error("Failed to set chat menu button: %s", e)
 
