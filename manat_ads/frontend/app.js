@@ -35,6 +35,7 @@ const LOCALES = {
         locked: "🔒 Səans 2 Kilidlidir",
         finishFirst: "⏳ Əvvəlcə Səans 1-i bitirin",
         cooldownHint: "Kilid açılmasına:",
+        lock_countdown: "Kilid açılmasına: ",
         adLoading: "⏳ Reklam yüklənir...",
         rewardCalc: "✅ Mükafat hesablanır...",
         waitSec: "⏳ Gözləyin",
@@ -92,6 +93,7 @@ const LOCALES = {
         locked: "🔒 Oturum 2 Kilitli",
         finishFirst: "⏳ Önce Oturum 1'i bitirin",
         cooldownHint: "Kilit açılmasına:",
+        lock_countdown: "Kilidin açılmasına: ",
         adLoading: "⏳ Reklam yükleniyor...",
         rewardCalc: "✅ Ödül hesaplanıyor...",
         waitSec: "⏳ Bekleyin",
@@ -149,6 +151,7 @@ const LOCALES = {
         locked: "🔒 Session 2 Locked",
         finishFirst: "⏳ Complete Session 1 first",
         cooldownHint: "Unlocks in:",
+        lock_countdown: "Unlocks in: ",
         adLoading: "⏳ Loading ad...",
         rewardCalc: "✅ Calculating reward...",
         waitSec: "⏳ Wait",
@@ -206,6 +209,7 @@ const LOCALES = {
         locked: "🔒 Сессия 2 заблокирована",
         finishFirst: "⏳ Сначала завершите Сессию 1",
         cooldownHint: "Разблокировка через:",
+        lock_countdown: "До разблокировки: ",
         adLoading: "⏳ Загрузка рекламы...",
         rewardCalc: "✅ Расчёт награды...",
         waitSec: "⏳ Подождите",
@@ -478,7 +482,7 @@ function startCooldownTimer(unlockAt) {
         const seconds = Math.floor((difference % (1000 * 60)) / 1000);
 
         const pad = (n) => n.toString().padStart(2, '0');
-        hintEl.textContent = `${t('cooldownHint')} ${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+        hintEl.textContent = `${t('lock_countdown')}${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
         hintEl.style.display = "block";
     }
 
