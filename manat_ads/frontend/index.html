@@ -114,6 +114,8 @@
         .header {
             text-align: center;
             padding: 20px 0 16px;
+            position: relative;
+            z-index: 10000;
         }
 
         .header-logo {
@@ -684,12 +686,29 @@
             position: relative;
             display: inline-flex;
             align-items: center;
+            gap: 4px;
             cursor: pointer;
-            font-size: 18px;
-            margin-left: 8px;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-left: 10px;
             vertical-align: middle;
             user-select: none;
             -webkit-tap-highlight-color: transparent;
+            background: rgba(255, 255, 255, 0.06);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            padding: 6px 12px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.25s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .lang-switcher:hover {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(245, 158, 11, 0.35);
+            box-shadow: 0 4px 16px rgba(245, 158, 11, 0.15);
         }
 
         .lang-dropdown {
@@ -697,19 +716,19 @@
             top: 100%;
             right: 0;
             margin-top: 8px;
-            background: rgba(17, 24, 39, 0.95);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(30, 30, 40, 0.95);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(245, 158, 11, 0.3);
             border-radius: 12px;
             overflow: hidden;
-            min-width: 100px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            min-width: 110px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 15px rgba(245, 158, 11, 0.15);
             opacity: 0;
             transform: translateY(-8px) scale(0.95);
             pointer-events: none;
             transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-            z-index: 1500;
+            z-index: 9999;
         }
 
         .lang-dropdown.open {
@@ -720,7 +739,7 @@
 
         .lang-option {
             padding: 10px 16px;
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 600;
             color: var(--text-secondary);
             cursor: pointer;
@@ -766,7 +785,7 @@
                 <div class="header-greeting">
                     <span data-i18n="greeting">Xoş gəldiniz,</span> <strong id="user-name">İstifadəçi</strong> 👋
                     <span class="lang-switcher" id="lang-btn" onclick="toggleLangDropdown()">
-                        🌐
+                        <span id="current-lang">🇦🇿 AZ ▾</span>
                         <div class="lang-dropdown" id="lang-dropdown">
                             <div class="lang-option active" data-lang="az" onclick="event.stopPropagation(); setLanguage('az'); toggleLangDropdown();">🇦🇿 AZ</div>
                             <div class="lang-option" data-lang="tr" onclick="event.stopPropagation(); setLanguage('tr'); toggleLangDropdown();">🇹🇷 TR</div>

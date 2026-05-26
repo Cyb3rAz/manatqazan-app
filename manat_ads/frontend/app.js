@@ -270,6 +270,18 @@ function setLanguage(lang) {
         opt.classList.toggle('active', opt.dataset.lang === currentLang);
     });
 
+    // Update current lang display button text (dynamic flag and code)
+    const langDisplayMap = {
+        'az': '🇦🇿 AZ ▾',
+        'tr': '🇹🇷 TR ▾',
+        'en': '🇬🇧 EN ▾',
+        'ru': '🇷🇺 RU ▾'
+    };
+    const currentLangEl = document.getElementById('current-lang');
+    if (currentLangEl) {
+        currentLangEl.textContent = langDisplayMap[lang] || '🇬🇧 EN ▾';
+    }
+
     // Persist to backend silently
     if (currentUser) {
         fetch(`${API_BASE}/api/user/${currentUser.id}/language`, {
