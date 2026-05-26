@@ -404,6 +404,20 @@ class LanguageUpdateMiddleware(BaseMiddleware):
         event: TelegramObject,
         data: Dict[str, Any]
     ) -> Any:
+        tg_user = getattr(event, 'from_user', None)
+        user_lang = 'en'
+        if tg_user:
+            async with async_session() as session:
+                stmt = select(User).where(User.telegram_id == tg_user.id)
+                res = await session.execute(stmt)
+                user = res.scalar_one_or_none()
+            
+            if user and user.language in BOT_LOCALES:
+                user_lang = user.language
+            else:
+                user_lang = _detect_language(tg_user)
+        
+        data['user_lang'] = user_lang
         return await handler(event, data)
 
 router.message.outer_middleware(LanguageUpdateMiddleware())
@@ -782,7 +796,7 @@ async def _show_referral(tg_user: types.User, message: types.Message) -> None:
     elif lang == 'tr':
         ref_fiat = user.referral_earnings_mc / 6250.0
     else:  # en, ru
-        ref_fiat = user.referral_earnings_mc / 208333.3333
+        ref_fiat = user.referral_earnings_mc / 125000.0
 
     bonus_per_video = MC_PER_VIDEO * 10 // 100
 

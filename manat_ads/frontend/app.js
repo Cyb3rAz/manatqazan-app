@@ -142,7 +142,7 @@ const LOCALES = {
         onboardingBtn: "Continue 🚀",
         greeting: "Welcome,",
         balanceLabel: "YOUR BALANCE",
-        withdrawalTarget: "Withdrawal Target: 3.00 USDT",
+        withdrawalTarget: "Withdrawal Target: 5.00 USDT",
         totalEarned: "TOTAL EARNED",
         dailyVideos: "TODAY'S VIDEOS",
         invitedLabel: "INVITED",
@@ -202,7 +202,7 @@ const LOCALES = {
         onboardingBtn: "Продолжить 🚀",
         greeting: "Добро пожаловать,",
         balanceLabel: "ВАШ БАЛАНС",
-        withdrawalTarget: "Цель вывода: 3.00 USDT",
+        withdrawalTarget: "Цель вывода: 5.00 USDT",
         totalEarned: "ОБЩИЙ ЗАРАБОТОК",
         dailyVideos: "ВИДЕО СЕГОДНЯ",
         invitedLabel: "ПРИГЛАШЁННЫЕ",
@@ -436,17 +436,17 @@ async function initApp() {
         // Ciddi dil prioriteti hiyerarxiyası
         let detectedLang = null;
 
-        // a) Priority 1: URL parametri (Backend-in Bot API vasitəsilə göndərdiyi ən dəqiq məlumat)
-        const urlParams = new URLSearchParams(window.location.search);
-        const urlLang = urlParams.get('lang');
-        detectedLang = getValidLang(urlLang, 'URL ?lang=');
-        if (detectedLang) console.log(`[LangDebug] Picked Priority 1 (URL): ${detectedLang}`);
+        // a) Priority 1: Telegram initData (Absolute secure runtime user state)
+        const tgLang = tg?.initDataUnsafe?.user?.language_code;
+        detectedLang = getValidLang(tgLang, 'Telegram initDataUnsafe');
+        if (detectedLang) console.log(`[LangDebug] Picked Priority 1 (TG): ${detectedLang}`);
 
-        // b) Priority 2: Telegram initData (Web K versiyasındakı OS dil bug-ına qarşı 2ci plana keçdi)
+        // b) Priority 2: URL parametri (Fallback)
         if (!detectedLang) {
-            const tgLang = tg?.initDataUnsafe?.user?.language_code;
-            detectedLang = getValidLang(tgLang, 'Telegram initDataUnsafe');
-            if (detectedLang) console.log(`[LangDebug] Picked Priority 2 (TG): ${detectedLang}`);
+            const urlParams = new URLSearchParams(window.location.search);
+            const urlLang = urlParams.get('lang');
+            detectedLang = getValidLang(urlLang, 'URL ?lang=');
+            if (detectedLang) console.log(`[LangDebug] Picked Priority 2 (URL): ${detectedLang}`);
         }
 
         // c) Priority 3: localStorage
