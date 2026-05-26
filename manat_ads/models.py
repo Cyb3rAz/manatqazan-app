@@ -41,6 +41,7 @@ class User(Base):
     username: Mapped[str | None] = mapped_column(String(255), nullable=True)
     first_name: Mapped[str | None] = mapped_column(String(255), nullable=True)
     last_name: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    language: Mapped[str] = mapped_column(String(5), default="az", server_default="az")
 
     # ── Economy ──
     balance_mc: Mapped[float] = mapped_column(Float, default=0.0, server_default="0")

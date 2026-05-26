@@ -75,6 +75,14 @@ else:
 
 
 # ── Safe UPSERT helper ─────────────────────────────────────────────────
+SUPPORTED_LANGS = ['az', 'tr', 'en', 'ru']
+
+def _detect_language(tg_user) -> str:
+    """Detect user language from Telegram language_code."""
+    lang_code = getattr(tg_user, 'language_code', None) or ''
+    lang_code = lang_code.lower().strip()[:2]
+    return lang_code if lang_code in SUPPORTED_LANGS else 'en'
+
 async def _upsert_user(
     session,
     telegram_id: int,
@@ -82,6 +90,7 @@ async def _upsert_user(
     first_name: str | None,
     last_name: str | None,
     referrer_id: int | None = None,
+    language: str = 'az',
 ) -> User:
     """
     Insert a new user or update an existing one (ON CONFLICT DO UPDATE).
@@ -93,6 +102,7 @@ async def _upsert_user(
         username=username,
         first_name=first_name,
         last_name=last_name,
+        language=language,
     )
     if referrer_id is not None:
         values["referrer_id"] = referrer_id
@@ -102,6 +112,7 @@ async def _upsert_user(
         username=username,
         first_name=first_name,
         last_name=last_name,
+        language=language,
         updated_at=func.now(),
     )
 
@@ -145,6 +156,8 @@ async def cmd_start_with_referral(message: types.Message) -> None:
     if not tg_user:
         return
 
+    user_lang = _detect_language(tg_user)
+
     referral_code = message.text.split(maxsplit=1)[1] if message.text and " " in message.text else None
     referrer_tg_id: int | None = None
 
@@ -171,8 +184,9 @@ async def cmd_start_with_referral(message: types.Message) -> None:
                 existing_user.username = tg_user.username
                 existing_user.first_name = tg_user.first_name
                 existing_user.last_name = tg_user.last_name
+                existing_user.language = user_lang
                 await session.commit()
-                await _send_welcome_back(message, existing_user)
+                await _send_welcome_back(message, existing_user, language=user_lang)
                 return
 
             # Validate referrer exists
@@ -194,6 +208,7 @@ async def cmd_start_with_referral(message: types.Message) -> None:
                 first_name=tg_user.first_name,
                 last_name=tg_user.last_name,
                 referrer_id=referrer_tg_id,
+                language=user_lang,
             )
             await session.commit()
             is_new_user = True
@@ -209,7 +224,7 @@ async def cmd_start_with_referral(message: types.Message) -> None:
     if referrer_tg_id:
         referral_msg = "\n\n🤝 <b>Sizi dostunuz dəvət edib!</b> Onlar sizin qazancınızdan ömürlük 10% bonus qazanacaqlar."
 
-    webapp_url = "https://manatqazan.vercel.app"
+    webapp_url = f"https://manatqazan.vercel.app/?lang={user_lang}"
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="🎬 Video İzlə & Qazan", web_app=types.WebAppInfo(url=webapp_url))],
         [
@@ -248,6 +263,8 @@ async def cmd_start(message: types.Message) -> None:
     if not tg_user:
         return
 
+    user_lang = _detect_language(tg_user)
+
     is_new_user = False
     async with async_session() as session:
         try:
@@ -261,8 +278,9 @@ async def cmd_start(message: types.Message) -> None:
                 existing_user.username = tg_user.username
                 existing_user.first_name = tg_user.first_name
                 existing_user.last_name = tg_user.last_name
+                existing_user.language = user_lang
                 await session.commit()
-                await _send_welcome_back(message, existing_user)
+                await _send_welcome_back(message, existing_user, language=user_lang)
                 return
 
             # UPSERT: safe insert or update
@@ -272,6 +290,7 @@ async def cmd_start(message: types.Message) -> None:
                 username=tg_user.username,
                 first_name=tg_user.first_name,
                 last_name=tg_user.last_name,
+                language=user_lang,
             )
             await session.commit()
             is_new_user = True
@@ -283,7 +302,7 @@ async def cmd_start(message: types.Message) -> None:
             await message.answer("⚠️ Xəta baş verdi. Zəhmət olmasa bir az sonra yenidən cəhd edin.")
             return
 
-    webapp_url = "https://manatqazan.vercel.app"
+    webapp_url = f"https://manatqazan.vercel.app/?lang={user_lang}"
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="🎬 Video İzlə & Qazan", web_app=types.WebAppInfo(url=webapp_url))],
         [
@@ -481,10 +500,10 @@ async def txt_withdraw(message: types.Message) -> None:
 
 
 # ── Helpers ─────────────────────────────────────────────────────────────
-async def _send_welcome_back(message: types.Message, user: User) -> None:
+async def _send_welcome_back(message: types.Message, user: User, language: str = 'az') -> None:
     """Greet a returning user with their current stats."""
     azn_value = user.balance_mc / MC_TO_AZN_RATE
-    webapp_url = "https://manatqazan.vercel.app"
+    webapp_url = f"https://manatqazan.vercel.app/?lang={language}"
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="🎬 Video İzlə & Qazan", web_app=types.WebAppInfo(url=webapp_url))],
         [

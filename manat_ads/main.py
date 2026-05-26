@@ -512,6 +512,7 @@ async def get_user_info(telegram_id: str) -> JSONResponse:
         referral_earnings_mc = user.referral_earnings_mc
         first_name = user.first_name
         telegram_id_val = user.telegram_id
+        language = getattr(user, 'language', 'az')
 
     # Compute Session 2 lock state
     session_2_locked = True
@@ -547,7 +548,33 @@ async def get_user_info(telegram_id: str) -> JSONResponse:
         "referral_earnings_mc": referral_earnings_mc,
         "mc_per_video": MC_PER_VIDEO,
         "mc_to_azn_rate": MC_TO_AZN_RATE,
+        "language": language,
     })
+
+
+# ── Update User Language ───────────────────────────────────────────────
+class LanguageUpdate(BaseModel):
+    language: str
+
+@app.patch("/api/user/{telegram_id}/language", summary="Update user language")
+async def update_user_language(telegram_id: int, body: LanguageUpdate) -> JSONResponse:
+    """Update the user's preferred language."""
+    supported = ['az', 'tr', 'en', 'ru']
+    lang = body.language.lower().strip()
+    if lang not in supported:
+        raise HTTPException(status_code=400, detail=f"Unsupported language: {lang}")
+
+    async with async_session() as session:
+        stmt = select(User).where(User.telegram_id == telegram_id)
+        result = await session.execute(stmt)
+        user = result.scalar_one_or_none()
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found.")
+        user.language = lang
+        session.add(user)
+        await session.commit()
+
+    return JSONResponse({"ok": True, "language": lang})
 
 
 # ── Mini App Frontend Serving ──────────────────────────────────────────
