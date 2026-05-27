@@ -82,7 +82,7 @@ const LOCALES = {
         onboardingBtn: "Devam et 🚀",
         greeting: "Hoş geldiniz,",
         balanceLabel: "BAKİYENİZ",
-        withdrawalTarget: "Çekim Hedefi: 100.00 TRY",
+        withdrawalTarget: "Çekim Hedefi: 135.00 TRY",
         totalEarned: "TOPLAM KAZANÇ",
         dailyVideos: "BUGÜNKÜ VİDEOLAR",
         invitedLabel: "DAVET EDİLENLER",

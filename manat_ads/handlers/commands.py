@@ -64,6 +64,7 @@ router.callback_query.outer_middleware(BanCheckMiddleware())
 
 # ── Config ──────────────────────────────────────────────────────────────
 MC_TO_AZN_RATE = int(os.getenv("MC_TO_AZN_RATE", "125000"))
+MIN_WITHDRAWAL_TRY = float(os.getenv("MIN_WITHDRAWAL_TRY", "135.00"))
 MC_PER_VIDEO = int(os.getenv("MC_PER_VIDEO", "50"))
 DAILY_LIMIT = int(os.getenv("DAILY_VIDEO_LIMIT", "50"))
 
@@ -207,14 +208,14 @@ BOT_LOCALES = {
             "3️⃣ Arkadaşlarınızı davet ederek onun kazançlarından da ek bonuslar elde ediyorsunuz.\n\n"
             "💰 <b>Çekim ve Bakiye Mekanizması:</b>\n"
             "Biriktirilen MC puanları sistem içinde gerçek Türk Lirası (TRY) para birimine dönüştürülür. "
-            "Minimum çekim limiti 100 TRY'dir. Bu limite ulaştıktan sonra kazancınızı kolayca "
+            "Minimum çekim limiti 135.00 TRY'dir. Bu limite ulaştıktan sonra kazancınızı kolayca "
             "Papara, İninal numaranıza veya Yerel Banka kartınıza çekebilirsiniz!\n\n"
             "Herhangi bir sorunuz olursa destek ekibiyle iletişime geçebilirsiniz. "
             "Şimdi ilk videonuzu izleyin ve kazanmaya başlayın! 🚀"
         ),
         # ── Withdraw ──
         'withdraw_below_limit': (
-            "❌ Çekim başarısız oldu. Minimum çekim limiti 100 TRY'dir.\n\n"
+            "❌ Çekim başarısız oldu. Minimum çekim limiti 135.00 TRY'dir.\n\n"
             "💰 Mevcut bakiyeniz: <b>{amount:.4f} TRY</b>\n\n"
             "🚀 <b>Limiti nasıl daha hızlı tamamlarsınız?</b>\n"
             "Daha fazla video izlemenin yanı sıra, <b>arkadaşlarınızı davet ederek</b> daha büyük miktarlar kazanabilirsiniz! "
@@ -961,8 +962,8 @@ async def _handle_withdraw(tg_user: types.User, message: types.Message) -> None:
         fiat_value = user.balance_mc / MC_TO_AZN_RATE
         limit_val = 5
     elif lang == 'tr':
-        fiat_value = user.balance_mc / 6250.0
-        limit_val = 100
+        fiat_value = user.balance_mc / (625000.0 / MIN_WITHDRAWAL_TRY)
+        limit_val = MIN_WITHDRAWAL_TRY
     else:  # en, ru
         fiat_value = user.balance_mc / 125000.0
         limit_val = 5
