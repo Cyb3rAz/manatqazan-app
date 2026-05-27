@@ -31,6 +31,9 @@ logger = logging.getLogger("manatads.commands")
 # ── Admin Config ──
 ADMIN_IDS_RAW = os.getenv("ADMIN_IDS", "1970477419")
 ADMIN_IDS = [int(x.strip()) for x in ADMIN_IDS_RAW.split(",") if x.strip().isdigit()]
+# ADMIN_ID is the primary notification target (falls back to the first entry in ADMIN_IDS)
+_admin_id_env = os.getenv("ADMIN_ID", "").strip()
+ADMIN_ID: int | None = int(_admin_id_env) if _admin_id_env.isdigit() else (ADMIN_IDS[0] if ADMIN_IDS else None)
 
 class IsAdminFilter(BaseFilter):
     async def __call__(self, message: types.Message) -> bool:
@@ -501,6 +504,27 @@ async def _upsert_user(
     return user
 
 
+# ── Admin new-user notification ────────────────────────────────────────
+async def _notify_admin_new_user(bot, user_id: int, first_name: str | None, username: str | None) -> None:
+    """
+    Send a real-time notification to ADMIN_ID about a brand-new user registration.
+    Wrapped in try/except — NEVER raises; registration flow must not be affected.
+    """
+    if ADMIN_ID is None:
+        return
+    try:
+        uname_display = f"@{username}" if username else "Yoxdur"
+        text = (
+            "🚀 <b>Yeni İstifadəçi Qoşuldu!</b>\n"
+            f"👤 <b>Ad:</b> {first_name or 'Naməlum'}\n"
+            f"🆔 <b>ID:</b> <code>{user_id}</code>\n"
+            f"🏷️ <b>Username:</b> {uname_display}"
+        )
+        await bot.send_message(chat_id=ADMIN_ID, text=text, parse_mode="HTML")
+    except Exception as notify_err:
+        logger.warning("[ADMIN NOTIFY] Failed to send new-user notification: %s", notify_err)
+
+
 # ── /start with deep-link referral ─────────────────────────────────────
 @router.message(CommandStart(deep_link=True))
 async def cmd_start_with_referral(message: types.Message) -> None:
@@ -564,6 +588,14 @@ async def cmd_start_with_referral(message: types.Message) -> None:
             await session.commit()
             logger.info("[UPSERT] New user %s (referrer=%s) — awaiting lang selection", tg_user.id, referrer_tg_id)
 
+            # Notify admin about brand-new user (non-blocking, never crashes flow)
+            await _notify_admin_new_user(
+                bot=message.bot,
+                user_id=tg_user.id,
+                first_name=tg_user.first_name,
+                username=tg_user.username,
+            )
+
         except Exception as e:
             await session.rollback()
             logger.exception("[UPSERT] Failed to upsert user %s: %s", tg_user.id, e)
@@ -613,6 +645,14 @@ async def cmd_start(message: types.Message) -> None:
             )
             await session.commit()
             logger.info("[UPSERT] New user %s — awaiting lang selection", tg_user.id)
+
+            # Notify admin about brand-new user (non-blocking, never crashes flow)
+            await _notify_admin_new_user(
+                bot=message.bot,
+                user_id=tg_user.id,
+                first_name=tg_user.first_name,
+                username=tg_user.username,
+            )
 
         except Exception as e:
             await session.rollback()
