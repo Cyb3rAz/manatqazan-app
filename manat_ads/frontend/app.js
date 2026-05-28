@@ -982,10 +982,13 @@ async function creditReward(sessionNum) {
         if (sessionNum === 1) {
             userData.session_1_count += 1;
             if (userData.session_1_count === 12) {
+                // Mark Session 2 as locked optimistically.
+                // DO NOT compute unlock_at from the local device clock —
+                // device time can be spoofed or drift from server time.
+                // The authoritative unlock_at ISO timestamp will be
+                // retrieved from the backend via scheduleServerSync below.
                 userData.session_2_locked = true;
-                const unlockDate = new Date();
-                unlockDate.setHours(unlockDate.getHours() + 2);
-                userData.unlock_at = unlockDate.toISOString();
+                userData.unlock_at = null; // cleared; server will supply real value
             }
         } else if (sessionNum === 2) {
             userData.session_2_count += 1;
@@ -996,6 +999,7 @@ async function creditReward(sessionNum) {
 
     scheduleServerSync(4, 2500);
 }
+
 
 /**
  * Server ilə sinxronlaşdırma

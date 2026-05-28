@@ -19,7 +19,7 @@ import os
 import sys
 import uuid
 from contextlib import asynccontextmanager
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
@@ -64,6 +64,21 @@ REFERRAL_BONUS_PERCENT: int = int(os.getenv("REFERRAL_BONUS_PERCENT", "10"))
 
 WEBHOOK_PATH = f"/webhook/{BOT_TOKEN}"
 FRONTEND_DIR = Path(__file__).resolve().parent / "frontend"
+
+# ── Per-user concurrency locks ───────────────────────────────────────────
+# Prevents race conditions when multiple Adsgram webhooks arrive for the
+# same user within milliseconds (e.g. 3 rapid callbacks = 900 MC burst).
+# Each user gets one asyncio.Lock; concurrent requests queue and execute
+# sequentially so the DB row is never written from two coroutines at once.
+_user_credit_locks: dict[str, asyncio.Lock] = {}
+_user_credit_locks_meta: asyncio.Lock = asyncio.Lock()
+
+async def _get_user_lock(user_key: str) -> asyncio.Lock:
+    """Return (or create) a per-user asyncio.Lock keyed by user identifier."""
+    async with _user_credit_locks_meta:
+        if user_key not in _user_credit_locks:
+            _user_credit_locks[user_key] = asyncio.Lock()
+        return _user_credit_locks[user_key]
 
 if not commands_router.parent_router:
     dp.include_router(commands_router)
@@ -313,179 +328,204 @@ async def adsgram_callback(request: Request) -> JSONResponse:
 
 # ── Ortaq kredit məntiqi ─────────────────────────────────────────────────
 async def _credit_user(user_id_val: int | str, event_id: str, source: str = "unknown") -> JSONResponse:
-    """Bazada istifadecini tap, balansi artir, commit et."""
+    """
+    Bazada istifadecini tap, balansi artir, commit et.
+
+    Concurrency safety:
+    - A per-user asyncio.Lock serialises concurrent webhook calls so that
+      3 rapid callbacks for the same user are processed one at a time.
+    - Inside the DB session, SELECT … FOR UPDATE acquires a row-level write
+      lock on both the user row and (if applicable) the referrer row,
+      preventing dirty reads under PostgreSQL. Under SQLite (dev) the lock
+      degrades gracefully to a table-level write lock.
+    """
     print(f"[CREDIT] Credit attempt: user={user_id_val!r} | event_id={event_id} | source={source}")
     logger.info("[CREDIT] Attempting to credit user %s | event_id=%s | source=%s", user_id_val, event_id, source)
 
     user_str = str(user_id_val).strip()
     is_numeric = user_str.isdigit()
 
-    # -- Deyiskenleri session scope-undan evvel elan et (DetachedInstanceError-i onle) --
-    final_new_balance: float = 0.0
-    final_videos_today: int = 0
-    final_reward: float = float(MC_PER_VIDEO)
+    # ── Acquire per-user lock BEFORE opening the DB session ──────────────
+    # This queues concurrent webhooks for the same user, preventing races.
+    user_lock = await _get_user_lock(user_str)
+    async with user_lock:
 
-    async with async_session() as session:
-        # -- Istifadecini tap (relasiya olmadan, yalniz users cedvelinden) --
-        if is_numeric:
-            tg_id = int(user_str)
-            stmt = select(User).where(User.telegram_id == tg_id)
-        else:
-            username_val = user_str.lstrip('@')
-            stmt = select(User).where(User.username == username_val)
+        # -- Deyiskenleri session scope-undan evvel elan et (DetachedInstanceError-i onle) --
+        final_new_balance: float = 0.0
+        final_videos_today: int = 0
+        final_reward: float = float(MC_PER_VIDEO)
 
-        result = await session.execute(stmt)
-        user = result.scalar_one_or_none()
+        async with async_session() as session:
+            # ── SELECT … FOR UPDATE: acquires a row-level write lock so
+            # concurrent transactions for the same user are serialised by
+            # the DB engine (PostgreSQL). Under SQLite this gracefully
+            # degrades to a table-level lock — still safe in dev mode.
+            if is_numeric:
+                tg_id = int(user_str)
+                stmt = select(User).where(User.telegram_id == tg_id).with_for_update()
+            else:
+                username_val = user_str.lstrip('@')
+                stmt = select(User).where(User.username == username_val).with_for_update()
 
-        # Fallback: reqemsal idi amma tapilmadi -> username kimi yoxla
-        if not user and is_numeric:
-            print(f"[CREDIT] telegram_id={user_str} not found, checking username fallback...")
-            logger.info("[CREDIT] User not found by numeric telegram_id %s, checking username field as fallback...", user_str)
-            stmt = select(User).where(User.username == user_str)
             result = await session.execute(stmt)
             user = result.scalar_one_or_none()
 
-        if not user:
-            print(f"[CREDIT] ERROR: User {user_id_val!r} NOT FOUND in database!")
-            logger.error("[CREDIT] User %s NOT FOUND in database after all lookup strategies!", user_id_val)
-            raise HTTPException(status_code=404, detail=f"User {user_id_val} tapilmadi.")
+            # Fallback: reqemsal idi amma tapilmadi -> username kimi yoxla
+            if not user and is_numeric:
+                print(f"[CREDIT] telegram_id={user_str} not found, checking username fallback...")
+                logger.info("[CREDIT] User not found by numeric telegram_id %s, checking username field as fallback...", user_str)
+                stmt = select(User).where(User.username == user_str).with_for_update()
+                result = await session.execute(stmt)
+                user = result.scalar_one_or_none()
 
-        user_telegram_id = user.telegram_id
-        print(f"[CREDIT] OK: Found user telegram_id={user_telegram_id}, balance={user.balance_mc:.2f} MC")
-        logger.info("[CREDIT] Found user: id=%s, telegram_id=%s, current_balance=%.2f", user.id, user.telegram_id, user.balance_mc)
+            if not user:
+                print(f"[CREDIT] ERROR: User {user_id_val!r} NOT FOUND in database!")
+                logger.error("[CREDIT] User %s NOT FOUND in database after all lookup strategies!", user_id_val)
+                raise HTTPException(status_code=404, detail=f"User {user_id_val} tapilmadi.")
 
-        # -- Check if user is active (not banned) --
-        if not user.is_active:
-            print(f"[CREDIT] ERROR: User {user_telegram_id} is banned / inactive!")
-            logger.warning("[CREDIT] Inactive/banned user %s tried to watch video", user_telegram_id)
-            return JSONResponse({"ok": False, "message": "Hesab dondurulub."}, status_code=403)
+            user_telegram_id = user.telegram_id
+            print(f"[CREDIT] OK: Found user telegram_id={user_telegram_id}, balance={user.balance_mc:.2f} MC")
+            logger.info("[CREDIT] Found user: id=%s, telegram_id=%s, current_balance=%.2f", user.id, user.telegram_id, user.balance_mc)
 
-        # -- event_id ile dublikat yoxla --
-        if event_id:
-            dup_stmt = select(WatchRecord).where(WatchRecord.adsgram_event_id == event_id)
-            dup_result = await session.execute(dup_stmt)
-            dup_record = dup_result.scalar_one_or_none()
-            if dup_record:
-                existing_balance = user.balance_mc
-                print(f"[CREDIT] Duplicate event_id={event_id} - skipping.")
-                logger.info("[CREDIT] Duplicate event_id=%s - skipping.", event_id)
-                return JSONResponse({"ok": True, "message": "Artiq kreditlenib.", "balance": existing_balance})
+            # -- Check if user is active (not banned) --
+            if not user.is_active:
+                print(f"[CREDIT] ERROR: User {user_telegram_id} is banned / inactive!")
+                logger.warning("[CREDIT] Inactive/banned user %s tried to watch video", user_telegram_id)
+                return JSONResponse({"ok": False, "message": "Hesab dondurulub."}, status_code=403)
 
-        # -- Gundelik limit ve ardicil seans yoxla --
-        now = datetime.now(timezone.utc)
-        today = now.date()
-        from datetime import timedelta
+            # -- event_id ile dublikat yoxla --
+            if event_id:
+                dup_stmt = select(WatchRecord).where(WatchRecord.adsgram_event_id == event_id)
+                dup_result = await session.execute(dup_stmt)
+                dup_record = dup_result.scalar_one_or_none()
+                if dup_record:
+                    existing_balance = user.balance_mc
+                    print(f"[CREDIT] Duplicate event_id={event_id} - skipping.")
+                    logger.info("[CREDIT] Duplicate event_id=%s - skipping.", event_id)
+                    return JSONResponse({"ok": True, "message": "Artiq kreditlenib.", "balance": existing_balance})
 
-        # Dynamic daily reset
-        if user.last_watch_date and user.last_watch_date.date() != today:
-            print(f"[CREDIT] New day for user {user_telegram_id} - resetting session stats")
-            logger.info("[CREDIT] New day for user %s - resetting session stats", user_telegram_id)
-            user.session_1_count = 0
-            user.session_2_count = 0
-            user.session_1_completion_time = None
-            user.videos_today = 0
+            # -- Gundelik limit ve ardicil seans yoxla --
+            now = datetime.now(timezone.utc)
+            today = now.date()
 
-        # Determine target session & enforce limits/cooldown
-        if user.session_1_count < 12:
-            # Active in Session 1
-            user.session_1_count += 1
-            if user.session_1_count == 12:
-                user.session_1_completion_time = now
-                print(f"[CREDIT] User {user_telegram_id} COMPLETED Session 1 at {now.isoformat()}")
-                logger.info("[CREDIT] User %s COMPLETED Session 1 at %s", user_telegram_id, now.isoformat())
-        else:
-            # Session 1 is completed. Check Session 2 status.
-            if user.session_1_completion_time is None:
-                # Fallback: completed Session 1 but completion time was null, set now (though should not happen)
-                user.session_1_completion_time = now - timedelta(hours=3) # unlock immediately
+            # Dynamic daily reset
+            if user.last_watch_date and user.last_watch_date.date() != today:
+                print(f"[CREDIT] New day for user {user_telegram_id} - resetting session stats")
+                logger.info("[CREDIT] New day for user %s - resetting session stats", user_telegram_id)
+                user.session_1_count = 0
+                user.session_2_count = 0
+                user.session_1_completion_time = None
+                user.videos_today = 0
 
-            unlock_time = user.session_1_completion_time + timedelta(hours=2)
-            if now < unlock_time:
-                # Session 2 is currently locked
-                print(f"[CREDIT] Session 2 is LOCKED for user {user_telegram_id} until {unlock_time.isoformat()}")
-                logger.warning("[CREDIT] Session 2 is LOCKED for user %s until %s", user_telegram_id, unlock_time.isoformat())
-                return JSONResponse(
-                    {"ok": False, "message": "Növbəti seans hələ kilidlidir.", "unlock_at": unlock_time.isoformat()},
-                    status_code=403
+            # Determine target session & enforce limits/cooldown
+            if user.session_1_count < 12:
+                # Active in Session 1
+                user.session_1_count += 1
+                if user.session_1_count == 12:
+                    user.session_1_completion_time = now
+                    print(f"[CREDIT] User {user_telegram_id} COMPLETED Session 1 at {now.isoformat()}")
+                    logger.info("[CREDIT] User %s COMPLETED Session 1 at %s", user_telegram_id, now.isoformat())
+            else:
+                # Session 1 is completed. Check Session 2 status.
+                if user.session_1_completion_time is None:
+                    # Fallback: session_1_completion_time is NULL (legacy row).
+                    # Back-date by exactly 2 hours so unlock_time == now,
+                    # meaning Session 2 unlocks immediately without a wait.
+                    user.session_1_completion_time = now - timedelta(hours=2)
+
+                unlock_time = user.session_1_completion_time + timedelta(hours=2)
+                if now < unlock_time:
+                    # Session 2 is currently locked
+                    print(f"[CREDIT] Session 2 is LOCKED for user {user_telegram_id} until {unlock_time.isoformat()}")
+                    logger.warning("[CREDIT] Session 2 is LOCKED for user %s until %s", user_telegram_id, unlock_time.isoformat())
+                    return JSONResponse(
+                        {"ok": False, "message": "Növbəti seans hələ kilidlidir.", "unlock_at": unlock_time.isoformat()},
+                        status_code=403
+                    )
+
+                # Session 2 is unlocked. Check if already completed Session 2.
+                if user.session_2_count >= 12:
+                    print(f"[CREDIT] User {user_telegram_id} completed both sessions today (24 clicks). Limit hit.")
+                    logger.warning("[CREDIT] User %s completed both sessions today (24 clicks). Limit hit.", user_telegram_id)
+                    return JSONResponse({"ok": False, "message": "Gündəlik limitiniz bitdi."}, status_code=429)
+
+                # Increment Session 2 count
+                user.session_2_count += 1
+
+            # -- Balansi artir --
+            final_reward = float(MC_PER_VIDEO)
+            old_balance = user.balance_mc
+            user.balance_mc = old_balance + final_reward
+            user.total_earned_mc = user.total_earned_mc + final_reward
+            user.videos_today = user.session_1_count + user.session_2_count
+            user.last_watch_date = now
+
+            # Deyerleri cixmadan yadda saxla
+            final_new_balance = user.balance_mc
+            final_videos_today = user.videos_today
+
+            print(f"[CREDIT] Balance update: {old_balance:.2f} -> {final_new_balance:.2f} (+{final_reward:.2f}) | videos_today={final_videos_today} (S1={user.session_1_count}, S2={user.session_2_count})")
+            logger.info(
+                "[CREDIT] balance: %.2f -> %.2f (+%.2f) | videos_today=%s (S1=%s, S2=%s)",
+                old_balance, final_new_balance, final_reward, final_videos_today, user.session_1_count, user.session_2_count
+            )
+
+            # ── Referal bonusu (same transaction — atomic with main credit) ──
+            # The referrer row is also locked with FOR UPDATE to prevent
+            # concurrent earnings from the same referree overwriting each other.
+            referrer_bonus: float = 0.0
+            referrer_tg_id: int | None = user.referrer_id
+
+            if referrer_tg_id:
+                referrer_bonus = final_reward * REFERRAL_BONUS_PERCENT / 100.0
+                ref_stmt = (
+                    select(User)
+                    .where(User.telegram_id == referrer_tg_id)
+                    .with_for_update()
                 )
+                ref_result = await session.execute(ref_stmt)
+                referrer = ref_result.scalar_one_or_none()
+                if referrer:
+                    referrer.balance_mc = referrer.balance_mc + referrer_bonus
+                    referrer.total_earned_mc = referrer.total_earned_mc + referrer_bonus
+                    referrer.referral_earnings_mc = referrer.referral_earnings_mc + referrer_bonus
+                    session.add(referrer)  # staged in same transaction
+                    print(f"[CREDIT] Referral bonus {referrer_bonus:.2f} MC -> user {referrer_tg_id}")
+                    logger.info("[CREDIT] Referral bonus %.2f MC -> user %s", referrer_bonus, referrer_tg_id)
 
-            # Session 2 is unlocked. Check if already completed Session 2.
-            if user.session_2_count >= 12:
-                print(f"[CREDIT] User {user_telegram_id} completed both sessions today (24 clicks). Limit hit.")
-                logger.warning("[CREDIT] User %s completed both sessions today (24 clicks). Limit hit.", user_telegram_id)
-                return JSONResponse({"ok": False, "message": "Gündəlik limitiniz bitdi."}, status_code=429)
+            # -- Audit record --
+            record = WatchRecord(
+                user_id=user.id,
+                telegram_id=user_telegram_id,
+                reward_mc=final_reward,
+                referrer_bonus_mc=referrer_bonus,
+                referrer_telegram_id=referrer_tg_id,
+                adsgram_event_id=event_id,
+            )
+            session.add(record)
+            session.add(user)
 
-            # Increment Session 2 count
-            user.session_2_count += 1
+            # -- COMMIT: user credit + referrer bonus + audit record — all atomic --
+            try:
+                await session.flush()   # SQL-i bazaya gonder
+                await session.commit()  # Emeliyyati qeti mohurle
+                print(f"[CREDIT] SUCCESS: DB COMMITTED! user={user_telegram_id} | new_balance={final_new_balance:.2f} MC")
+                logger.info("[CREDIT] COMMITTED DATABASE TRANS! user=%s new_balance=%.2f", user_telegram_id, final_new_balance)
+            except Exception as db_err:
+                await session.rollback()
+                print(f"[CREDIT] FAILED: Commit error: {db_err}")
+                logger.exception("[CREDIT] Database commit failed for user %s", user_telegram_id)
+                raise HTTPException(status_code=500, detail=f"Verilənlər bazasina yazma xetasi: {db_err}")
 
-        # -- Balansi artir --
-        final_reward = float(MC_PER_VIDEO)
-        old_balance = user.balance_mc
-        user.balance_mc = old_balance + final_reward
-        user.total_earned_mc = user.total_earned_mc + final_reward
-        user.videos_today = user.session_1_count + user.session_2_count
-        user.last_watch_date = now
-
-        # Deyerleri cixmadan yadda saxla
-        final_new_balance = user.balance_mc
-        final_videos_today = user.videos_today
-
-        print(f"[CREDIT] Balance update: {old_balance:.2f} -> {final_new_balance:.2f} (+{final_reward:.2f}) | videos_today={final_videos_today} (S1={user.session_1_count}, S2={user.session_2_count})")
-        logger.info(
-            "[CREDIT] balance: %.2f -> %.2f (+%.2f) | videos_today=%s (S1=%s, S2=%s)",
-            old_balance, final_new_balance, final_reward, final_videos_today, user.session_1_count, user.session_2_count
-        )
-
-        # -- Referal bonusu --
-        referrer_bonus: float = 0.0
-        referrer_tg_id: int | None = user.referrer_id
-
-        if referrer_tg_id:
-            referrer_bonus = final_reward * REFERRAL_BONUS_PERCENT / 100.0
-            ref_stmt = select(User).where(User.telegram_id == referrer_tg_id)
-            ref_result = await session.execute(ref_stmt)
-            referrer = ref_result.scalar_one_or_none()
-            if referrer:
-                referrer.balance_mc = referrer.balance_mc + referrer_bonus
-                referrer.total_earned_mc = referrer.total_earned_mc + referrer_bonus
-                referrer.referral_earnings_mc = referrer.referral_earnings_mc + referrer_bonus
-                session.add(referrer)
-                print(f"[CREDIT] Referral bonus {referrer_bonus:.2f} MC -> user {referrer_tg_id}")
-                logger.info("[CREDIT] Referral bonus %.2f MC -> user %s", referrer_bonus, referrer_tg_id)
-
-        # -- Audit record --
-        record = WatchRecord(
-            user_id=user.id,
-            telegram_id=user_telegram_id,
-            reward_mc=final_reward,
-            referrer_bonus_mc=referrer_bonus,
-            referrer_telegram_id=referrer_tg_id,
-            adsgram_event_id=event_id,
-        )
-        session.add(record)
-        session.add(user)
-
-        # -- COMMIT -- balansi yaddasa yaz --
-        try:
-            await session.flush()   # SQL-i bazaya gonder
-            await session.commit()  # Emeliyyati qeti mohurle
-            print(f"[CREDIT] SUCCESS: DB COMMITTED! user={user_telegram_id} | new_balance={final_new_balance:.2f} MC")
-            logger.info("[CREDIT] COMMITTED DATABASE TRANS! user=%s new_balance=%.2f", user_telegram_id, final_new_balance)
-        except Exception as db_err:
-            await session.rollback()
-            print(f"[CREDIT] FAILED: Commit error: {db_err}")
-            logger.exception("[CREDIT] Database commit failed for user %s", user_telegram_id)
-            raise HTTPException(status_code=500, detail=f"Verilənlər bazasina yazma xetasi: {db_err}")
-
-    # Session baglandi - yadda saxlanmis deyerleri istifade et
-    return JSONResponse({
-        "ok": True,
-        "source": source,
-        "reward": final_reward,
-        "new_balance": final_new_balance,
-        "videos_today": final_videos_today,
-        "daily_limit": DAILY_VIDEO_LIMIT,
-    })
+        # Session baglandi - yadda saxlanmis deyerleri istifade et
+        return JSONResponse({
+            "ok": True,
+            "source": source,
+            "reward": final_reward,
+            "new_balance": final_new_balance,
+            "videos_today": final_videos_today,
+            "daily_limit": DAILY_VIDEO_LIMIT,
+        })
 
 
 # ── User Info API (for Mini App) ───────────────────────────────────────
