@@ -602,10 +602,16 @@ async def cmd_start_with_referral(message: types.Message) -> None:
         username=tg_user.username,
     ))
 
-    # Show language selection to new user
+    # Show language selection to new user – greeting localized to their native Telegram language
+    _tg_lang = _detect_language(tg_user)
+    _lang_greetings = {
+        'az': "🌐 <b>Xoş gəldiniz!</b>\n\nZəhmət olmasa ölkənizi seçin:",
+        'tr': "🌐 <b>Hoş geldiniz!</b>\n\nLütfen ülkenizi seçin:",
+        'ru': "🌐 <b>Добро пожаловать!</b>\n\nПожалуйста, выберите вашу страну:",
+        'en': "🌐 <b>Welcome!</b>\n\nPlease select your country:",
+    }
     await message.answer(
-        "🌐 <b>Welcome / Xoş gəldiniz / Hoş geldiniz / Добро пожаловать!</b>\n\n"
-        "Please choose your language / Dil seçin:",
+        _lang_greetings.get(_tg_lang, _lang_greetings['en']),
         reply_markup=get_lang_select_keyboard(),
     )
 
@@ -660,10 +666,16 @@ async def cmd_start(message: types.Message) -> None:
         username=tg_user.username,
     ))
 
-    # Show language selection to new user
+    # Show language selection to new user – greeting localized to their native Telegram language
+    _tg_lang = _detect_language(tg_user)
+    _lang_greetings = {
+        'az': "🌐 <b>Xoş gəldiniz!</b>\n\nZəhmət olmasa ölkənizi seçin:",
+        'tr': "🌐 <b>Hoş geldiniz!</b>\n\nLütfen ülkenizi seçin:",
+        'ru': "🌐 <b>Добро пожаловать!</b>\n\nПожалуйста, выберите вашу страну:",
+        'en': "🌐 <b>Welcome!</b>\n\nPlease select your country:",
+    }
     await message.answer(
-        "🌐 <b>Welcome / Xoş gəldiniz / Hoş geldiniz / Добро пожаловать!</b>\n\n"
-        "Please choose your language / Dil seçin:",
+        _lang_greetings.get(_tg_lang, _lang_greetings['en']),
         reply_markup=get_lang_select_keyboard(),
     )
 

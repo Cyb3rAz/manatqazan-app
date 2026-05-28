@@ -465,6 +465,18 @@ async function initApp() {
         // Backend-dən istifadəçi məlumatlarını çək
         await fetchUserData();
 
+        // ── WEBAPP LANGUAGE SYNC: If the user already has a language set in the DB
+        //    (guaranteed after passing through the bot's /start), override the local
+        //    detected language with the authoritative server value and skip onboarding.
+        if (userData && userData.language && SUPPORTED_LANGS.includes(userData.language)) {
+            const serverLang = userData.language;
+            console.log(`[LangDebug] userData.language from backend: ${serverLang} — overriding local detection.`);
+            currentLang = serverLang;
+            localStorage.setItem('saved_language', currentLang);
+            // Mark onboarding as already completed so the modal is never shown again
+            localStorage.setItem('onboarding_completed', 'true');
+        }
+
         // UI-ı yenilə
         renderDashboard();
 
@@ -477,7 +489,7 @@ async function initApp() {
             localStorage.removeItem('onboarding_completed');
         }
 
-        // Check if onboarding is completed
+        // Check if onboarding is completed (set above if userData.language was present)
         const onboardingCompleted = localStorage.getItem('onboarding_completed');
         console.log(`[LangDebug] onboardingCompleted flag:`, onboardingCompleted);
         
@@ -505,6 +517,12 @@ async function initApp() {
                 setTimeout(() => obModal.classList.add("active"), 10);
             }
         } else {
+            // Ensure the modal stays hidden / is not rendered when onboarding is complete
+            const obModal = document.getElementById("onboarding-modal");
+            if (obModal) {
+                obModal.style.display = "none";
+                obModal.classList.remove("active");
+            }
             console.log(`[LangDebug] Onboarding already completed, skipping modal.`);
         }
 
