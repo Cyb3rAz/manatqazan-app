@@ -68,7 +68,7 @@ router.callback_query.outer_middleware(BanCheckMiddleware())
 # ── Config ──────────────────────────────────────────────────────────────
 MC_TO_AZN_RATE = int(os.getenv("MC_TO_AZN_RATE", "125000"))
 MIN_WITHDRAWAL_TRY = float(os.getenv("MIN_WITHDRAWAL_TRY", "135.00"))
-MC_PER_VIDEO = int(os.getenv("MC_PER_VIDEO", "50"))
+MC_PER_VIDEO = int(os.getenv("MC_PER_VIDEO", "250"))
 DAILY_LIMIT = int(os.getenv("DAILY_VIDEO_LIMIT", "24"))
 
 raw_webhook_url = os.getenv("WEBHOOK_URL", "").strip()

@@ -581,7 +581,7 @@ function createDefaultUserData() {
         daily_limit: 24,
         referral_count: 0,
         referral_earnings_mc: 0,
-        mc_per_video: 50,
+        mc_per_video: 250,
     };
 }
 
@@ -804,7 +804,7 @@ function renderDashboard() {
         s1Btn.textContent = t('completedS1');
     } else {
         s1Btn.disabled = false;
-        s1Btn.textContent = `${t('watchBtn')} ${userData.mc_per_video || 50} ${t('watchBtnSuffix')}`;
+        s1Btn.textContent = `${t('watchBtn')} ${userData.mc_per_video || 250} ${t('watchBtnSuffix')}`;
     }
 
     // Səans 2 Card
@@ -837,7 +837,7 @@ function renderDashboard() {
                 s2Btn.textContent = t('finishFirst');
             } else {
                 s2Btn.disabled = false;
-                s2Btn.textContent = `${t('watchBtn')} ${userData.mc_per_video || 50} ${t('watchBtnSuffix')}`;
+                s2Btn.textContent = `${t('watchBtn')} ${userData.mc_per_video || 250} ${t('watchBtnSuffix')}`;
             }
         }
     }
