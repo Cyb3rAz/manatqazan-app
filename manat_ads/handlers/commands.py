@@ -776,8 +776,12 @@ async def _show_balance(tg_user: types.User, message: types.Message) -> None:
             db_user = res.scalar_one()
             db_user.session_1_count = 0
             db_user.session_2_count = 0
-            db_user.session_1_completion_time = None
             db_user.videos_today = 0
+            if db_user.session_1_completion_time is not None:
+                from datetime import timedelta
+                crossday_unlock = db_user.session_1_completion_time + timedelta(hours=2)
+                if now >= crossday_unlock:
+                    db_user.session_1_completion_time = None
             await reset_session.commit()
             user = db_user
 
@@ -938,6 +942,62 @@ async def txt_withdraw(message: types.Message) -> None:
         await _handle_withdraw(message.from_user, message)
 
 
+@router.message(lambda m: m.text and not m.text.startswith("/"))
+async def handle_user_text_message(message: types.Message) -> None:
+    # Ignore if it matches main keyboard button texts
+    if message.text in _BALANCE_TEXTS or message.text in _REFERRAL_TEXTS or message.text in _HOW_TEXTS or message.text in _WITHDRAW_TEXTS:
+        return
+        
+    tg_user = message.from_user
+    if not tg_user:
+        return
+        
+    async with async_session() as session:
+        stmt = select(User).where(User.telegram_id == tg_user.id)
+        result = await session.execute(stmt)
+        user = result.scalar_one_or_none()
+        
+    if not user:
+        return
+        
+    # If the user has enough balance to withdraw, we forward the message to admin
+    if user.balance_mc >= 625000.0:
+        if ADMIN_ID:
+            uname_display = f"@{user.username}" if user.username else "Yoxdur"
+            name_display = user.first_name or "Namelum"
+            admin_text = (
+                "📥 <b>Yeni Çıxarış Sorğusu!</b>\n\n"
+                f"👤 <b>İstifadəçi:</b> {name_display} ({uname_display})\n"
+                f"🆔 <b>Telegram ID:</b> <code>{user.telegram_id}</code>\n"
+                f"🪙 <b>Balans:</b> {user.balance_mc:,.0f} MC\n"
+                f"💬 <b>Kart/Məhsul Məlumatları:</b>\n"
+                f"<code>{message.text}</code>"
+            )
+            try:
+                await message.bot.send_message(chat_id=ADMIN_ID, text=admin_text, parse_mode="HTML")
+                # Send confirmation in user's language
+                lang = user.language if user.language in BOT_LOCALES else 'en'
+                # Simple localized messages
+                confirm_msgs = {
+                    'az': "✅ <b>Çıxarış sorğunuz qəbul edildi!</b>\nMəlumatlarınız adminlərə göndərildi. Tezliklə ödənişiniz icra olunacaq.",
+                    'tr': "✅ <b>Çekim talebiniz alındı!</b>\nBilgileriniz yöneticilere iletildi. En kısa sürede ödemeniz yapılacaktır.",
+                    'en': "✅ <b>Your withdrawal request has been received!</b>\nYour details have been forwarded to the admins. Your payment will be processed shortly.",
+                    'ru': "✅ <b>Ваш запрос на вывод средств принят!</b>\nВаши данные отправлены администраторам. Ваша выплата будет произведена в ближайшее время."
+                }
+                user_msg = confirm_msgs.get(lang, confirm_msgs['en'])
+                await message.answer(user_msg, parse_mode="HTML")
+                logger.info("[WITHDRAW] Request from user %s forwarded to admin %s", user.telegram_id, ADMIN_ID)
+            except Exception as e:
+                logger.exception("Failed to forward withdrawal request to admin: %s", e)
+                err_msgs = {
+                    'az': "⚠️ Xəta baş verdi. Zəhmət olmasa bir az sonra yenidən cəhd edin.",
+                    'tr': "⚠️ Bir hata oluştu. Lütfen daha sonra tekrar deneyin.",
+                    'en': "⚠️ An error occurred. Please try again later.",
+                    'ru': "⚠️ Произошла ошибка. Пожалуйста, попробуйте позже."
+                }
+                await message.answer(err_msgs.get(lang, err_msgs['en']))
+
+
 # ── Helpers ─────────────────────────────────────────────────────────────
 async def _send_welcome_back(message: types.Message, user: User) -> None:
     """Greet a returning user with their current stats in their chosen language."""
@@ -997,18 +1057,14 @@ async def _handle_withdraw(tg_user: types.User, message: types.Message) -> None:
     lang = user.language if user.language in BOT_LOCALES else 'en'
     loc = BOT_LOCALES[lang]
 
-    # Dynamic fiat value and limit calculation
-    if lang == 'az':
-        fiat_value = user.balance_mc / MC_TO_AZN_RATE
-        limit_val = 5
-    elif lang == 'tr':
-        fiat_value = user.balance_mc / (625000.0 / MIN_WITHDRAWAL_TRY)
-        limit_val = MIN_WITHDRAWAL_TRY
-    else:  # en, ru
-        fiat_value = user.balance_mc / 125000.0
-        limit_val = 5
-
-    if fiat_value < limit_val:
+    # Hardcoded minimum threshold (625,000 MC) check to prevent floating-point rounding bypasses
+    if user.balance_mc < 625000.0:
+        if lang == 'az':
+            fiat_value = user.balance_mc / MC_TO_AZN_RATE
+        elif lang == 'tr':
+            fiat_value = user.balance_mc / (625000.0 / MIN_WITHDRAWAL_TRY)
+        else:  # en, ru
+            fiat_value = user.balance_mc / 125000.0
         await message.answer(loc['withdraw_below_limit'].format(amount=fiat_value))
     else:
         await message.answer(loc['withdraw_ok'])

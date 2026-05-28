@@ -414,8 +414,11 @@ async def _credit_user(user_id_val: int | str, event_id: str, source: str = "unk
                 logger.info("[CREDIT] New day for user %s - resetting session stats", user_telegram_id)
                 user.session_1_count = 0
                 user.session_2_count = 0
-                user.session_1_completion_time = None
                 user.videos_today = 0
+                if user.session_1_completion_time is not None:
+                    crossday_unlock = user.session_1_completion_time + timedelta(hours=2)
+                    if now >= crossday_unlock:
+                        user.session_1_completion_time = None
 
             # Determine target session & enforce limits/cooldown
             if user.session_1_count < 12:
@@ -563,12 +566,29 @@ async def get_user_info(telegram_id: str) -> JSONResponse:
         now = datetime.now(timezone.utc)
         today = now.date()
 
-        # Dynamic reset on-the-fly if last watch date is not today
+        # Dynamic reset on-the-fly if last watch date is not today.
+        # IMPORTANT: We deliberately keep session_1_completion_time intact
+        # so that a 2-hour cooldown window that crosses UTC midnight is still
+        # honoured. Only if the completion time itself is from a previous day
+        # (>= 2 hours ago at minimum) do we also clear it.
+        # This prevents two edge cases:
+        #   A) User watches S1 at 23:55 → cooldown expires 01:55 → midnight
+        #      reset clears completion_time → S2 unlocks at 00:00 (exploit).
+        #   B) User in mid-cooldown → reset strands them in a permanent lock
+        #      because session_1_count resets to 0 but completion_time is gone.
         if user.last_watch_date and user.last_watch_date.date() != today:
             user.session_1_count = 0
             user.session_2_count = 0
-            user.session_1_completion_time = None
             user.videos_today = 0
+            # Only clear completion_time if the cooldown window has already
+            # fully expired (i.e. unlock_time is in the past).
+            if user.session_1_completion_time is not None:
+                crossday_unlock = user.session_1_completion_time + timedelta(hours=2)
+                if now >= crossday_unlock:
+                    # Cooldown expired — safe to clear
+                    user.session_1_completion_time = None
+                # else: cooldown still active — keep completion_time so the
+                # lock state remains correct after the count reset.
             session.add(user)
             await session.commit()
             await session.refresh(user)
@@ -594,13 +614,23 @@ async def get_user_info(telegram_id: str) -> JSONResponse:
             # Legacy or fallback: if completed but no timestamp, unlock immediately
             session_2_locked = False
         else:
-            from datetime import timedelta
             unlock_time = session_1_completion_time + timedelta(hours=2)
             if now < unlock_time:
                 session_2_locked = True
                 unlock_at = unlock_time.isoformat()
             else:
                 session_2_locked = False
+    elif session_1_completion_time is not None:
+        # Edge case: session_1_count was reset to 0 by the midnight reset
+        # but the cooldown window has NOT yet expired (crossed midnight).
+        # In this state, session_1_count < 12 but we must keep S2 locked
+        # until the original 2-hour window elapses.
+        unlock_time = session_1_completion_time + timedelta(hours=2)
+        if now < unlock_time:
+            session_2_locked = True
+            unlock_at = unlock_time.isoformat()
+        else:
+            session_2_locked = False
 
     return JSONResponse({
         "telegram_id": telegram_id_val,
