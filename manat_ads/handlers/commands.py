@@ -794,7 +794,7 @@ async def _show_balance(tg_user: types.User, message: types.Message) -> None:
             s2_status = loc['balance_active']
         else:
             from datetime import timedelta
-            unlock_time = session_1_completion_time + timedelta(hours=4)
+            unlock_time = session_1_completion_time + timedelta(hours=2)
             if now < unlock_time:
                 remaining = unlock_time - now
                 h, remainder = divmod(int(remaining.total_seconds()), 3600)

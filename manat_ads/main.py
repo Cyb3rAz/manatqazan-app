@@ -397,9 +397,9 @@ async def _credit_user(user_id_val: int | str, event_id: str, source: str = "unk
             # Session 1 is completed. Check Session 2 status.
             if user.session_1_completion_time is None:
                 # Fallback: completed Session 1 but completion time was null, set now (though should not happen)
-                user.session_1_completion_time = now - timedelta(hours=5) # unlock immediately
+                user.session_1_completion_time = now - timedelta(hours=3) # unlock immediately
 
-            unlock_time = user.session_1_completion_time + timedelta(hours=4)
+            unlock_time = user.session_1_completion_time + timedelta(hours=2)
             if now < unlock_time:
                 # Session 2 is currently locked
                 print(f"[CREDIT] Session 2 is LOCKED for user {user_telegram_id} until {unlock_time.isoformat()}")
@@ -555,7 +555,7 @@ async def get_user_info(telegram_id: str) -> JSONResponse:
             session_2_locked = False
         else:
             from datetime import timedelta
-            unlock_time = session_1_completion_time + timedelta(hours=4)
+            unlock_time = session_1_completion_time + timedelta(hours=2)
             if now < unlock_time:
                 session_2_locked = True
                 unlock_at = unlock_time.isoformat()
