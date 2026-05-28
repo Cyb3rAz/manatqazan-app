@@ -578,7 +578,7 @@ function createDefaultUserData() {
         balance_azn: 0,
         total_earned_mc: 0,
         videos_today: 0,
-        daily_limit: 25,
+        daily_limit: 24,
         referral_count: 0,
         referral_earnings_mc: 0,
         mc_per_video: 50,
@@ -789,17 +789,17 @@ function renderDashboard() {
 
     // Statistika
     document.getElementById("total-earned").textContent = formatNumber(userData.total_earned_mc);
-    document.getElementById("videos-count").textContent = `${userData.videos_today}/${userData.daily_limit || 50}`;
+    document.getElementById("videos-count").textContent = `${userData.videos_today}/${userData.daily_limit || 24}`;
     document.getElementById("referral-count").textContent = userData.referral_count;
     document.getElementById("referral-earnings").textContent = formatNumber(userData.referral_earnings_mc);
 
     // Səans 1 Card
     const s1Count = userData.session_1_count || 0;
-    document.getElementById("session-1-progress-text").textContent = `${s1Count}/25 ${t('videoUnit')}`;
-    document.getElementById("session-1-progress-fill").style.width = `${(s1Count / 25) * 100}%`;
+    document.getElementById("session-1-progress-text").textContent = `${s1Count}/12 ${t('videoUnit')}`;
+    document.getElementById("session-1-progress-fill").style.width = `${(s1Count / 12) * 100}%`;
     const s1Btn = document.getElementById("session-1-btn");
 
-    if (s1Count >= 25) {
+    if (s1Count >= 12) {
         s1Btn.disabled = true;
         s1Btn.textContent = t('completedS1');
     } else {
@@ -809,8 +809,8 @@ function renderDashboard() {
 
     // Səans 2 Card
     const s2Count = userData.session_2_count || 0;
-    document.getElementById("session-2-progress-text").textContent = `${s2Count}/25 ${t('videoUnit')}`;
-    document.getElementById("session-2-progress-fill").style.width = `${(s2Count / 25) * 100}%`;
+    document.getElementById("session-2-progress-text").textContent = `${s2Count}/12 ${t('videoUnit')}`;
+    document.getElementById("session-2-progress-fill").style.width = `${(s2Count / 12) * 100}%`;
     const s2Btn = document.getElementById("session-2-btn");
     const s2Hint = document.getElementById("session-2-cooldown-hint");
 
@@ -828,11 +828,11 @@ function renderDashboard() {
     } else {
         s2Hint.style.display = "none";
         stopCooldownTimer();
-        if (s2Count >= 25) {
+        if (s2Count >= 12) {
             s2Btn.disabled = true;
             s2Btn.textContent = t('completedS2');
         } else {
-            if (s1Count < 25) {
+            if (s1Count < 12) {
                 s2Btn.disabled = true;
                 s2Btn.textContent = t('finishFirst');
             } else {
@@ -887,7 +887,7 @@ async function watchAd(sessionNum = 1) {
 
     if (!userData) return;
 
-    if (sessionNum === 1 && userData.session_1_count >= 25) {
+    if (sessionNum === 1 && userData.session_1_count >= 12) {
         showToast(t('toastS1Done'), "error");
         return;
     }
@@ -896,7 +896,7 @@ async function watchAd(sessionNum = 1) {
             showToast(t('toastS2Locked'), "error");
             return;
         }
-        if (userData.session_2_count >= 25) {
+        if (userData.session_2_count >= 12) {
             showToast(t('toastS2Done'), "error");
             return;
         }
@@ -971,7 +971,7 @@ async function creditReward(sessionNum) {
 
         if (sessionNum === 1) {
             userData.session_1_count += 1;
-            if (userData.session_1_count === 25) {
+            if (userData.session_1_count === 12) {
                 userData.session_2_locked = true;
                 const unlockDate = new Date();
                 unlockDate.setHours(unlockDate.getHours() + 2);

@@ -69,7 +69,7 @@ router.callback_query.outer_middleware(BanCheckMiddleware())
 MC_TO_AZN_RATE = int(os.getenv("MC_TO_AZN_RATE", "125000"))
 MIN_WITHDRAWAL_TRY = float(os.getenv("MIN_WITHDRAWAL_TRY", "135.00"))
 MC_PER_VIDEO = int(os.getenv("MC_PER_VIDEO", "50"))
-DAILY_LIMIT = int(os.getenv("DAILY_VIDEO_LIMIT", "50"))
+DAILY_LIMIT = int(os.getenv("DAILY_VIDEO_LIMIT", "24"))
 
 raw_webhook_url = os.getenv("WEBHOOK_URL", "").strip()
 if not raw_webhook_url or "your-domain" in raw_webhook_url:
@@ -105,7 +105,7 @@ BOT_LOCALES = {
             "🎉 <b>ManatAds-a xoş gəlmisiniz!</b>\n\n"
             "Salam, <b>{name}</b>! 👋\n\n"
             "📺 Qısa videolar izləyin və hər video üçün <b>{mc} MC</b> qazanın.\n"
-            "📊 Gündəlik limit: <b>50 video/gün</b>\n"
+            "📊 Gündəlik limit: <b>24 video klik</b> (hər seans 12 video klik)\n"
             "👥 Dostlarınızı dəvət edin və <b>ömürlük 10% bonus</b> qazanın!"
             "\n\n💡 İpucu: Sistemi yeniləmək üçün /start yaza bilərsiniz!"
         ),
@@ -172,7 +172,7 @@ BOT_LOCALES = {
             "🎉 <b>ManatAds'a hoş geldiniz!</b>\n\n"
             "Merhaba, <b>{name}</b>! 👋\n\n"
             "📺 Kısa videolar izleyin ve her video için <b>{mc} MC</b> kazanın.\n"
-            "📊 Günlük limit: <b>50 video/gün</b>\n"
+            "📊 Günlük limit: <b>24 video klik</b> (her seans 12 video klik)\n"
             "👥 Arkadaşlarınızı davet edin ve <b>ömür boyu %10 bonus</b> kazanın!"
             "\n\n💡 İpucu: Sistemi yenilemek için /start yazabilirsiniz!"
         ),
@@ -239,7 +239,7 @@ BOT_LOCALES = {
             "🎉 <b>Welcome to ManatAds!</b>\n\n"
             "Hello, <b>{name}</b>! 👋\n\n"
             "📺 Watch short videos and earn <b>{mc} MC</b> per video.\n"
-            "📊 Daily limit: <b>50 videos/day</b>\n"
+            "📊 Daily limit: <b>24 video klik</b> (12 video klik per session)\n"
             "👥 Invite your friends and earn a <b>lifetime 10% bonus</b>!"
             "\n\n💡 Tip: You can type /start at any time to refresh the system!"
         ),
@@ -306,7 +306,7 @@ BOT_LOCALES = {
             "🎉 <b>Добро пожаловать в ManatAds!</b>\n\n"
             "Привет, <b>{name}</b>! 👋\n\n"
             "📺 Смотрите короткие видео и зарабатывайте <b>{mc} MC</b> за каждое видео.\n"
-            "📊 Ежедневный лимит: <b>50 видео/день</b>\n"
+            "📊 Ежедневный лимит: <b>24 video klik</b> (12 video klik за сессию)\n"
             "👥 Приглашайте друзей и зарабатывайте <b>пожизненный бонус 10%</b>!"
             "\n\n💡 Подсказка: Вы можете написать /start в любое время, чтобы обновить систему!"
         ),
@@ -789,7 +789,7 @@ async def _show_balance(tg_user: types.User, message: types.Message) -> None:
 
     # Calculate lock text using localized strings
     s2_status = loc['balance_locked']
-    if session_1_count >= 25:
+    if session_1_count >= 12:
         if session_1_completion_time is None:
             s2_status = loc['balance_active']
         else:
@@ -809,8 +809,8 @@ async def _show_balance(tg_user: types.User, message: types.Message) -> None:
         f"│ {loc['balance_mc_row']}  {balance_mc:,.0f} MC\n"
         f"│ {loc['balance_earn_row']} {total_earned_mc:,.0f} MC\n"
         f"├─────────────────────────\n"
-        f"│ {loc['balance_s1_row']}  {session_1_count}/25 video\n"
-        f"│ {loc['balance_s2_row']}  {session_2_count}/25 video ({s2_status})\n"
+        f"│ {loc['balance_s1_row']}  {session_1_count}/12 klik\n"
+        f"│ {loc['balance_s2_row']}  {session_2_count}/12 klik ({s2_status})\n"
         f"└─────────────────────────",
     )
 
@@ -846,7 +846,7 @@ async def _show_referral(tg_user: types.User, message: types.Message) -> None:
     if lang == 'az':
         ref_fiat = user.referral_earnings_mc / MC_TO_AZN_RATE
     elif lang == 'tr':
-        ref_fiat = user.referral_earnings_mc / 6250.0
+        ref_fiat = user.referral_earnings_mc / (625000.0 / MIN_WITHDRAWAL_TRY)
     else:  # en, ru
         ref_fiat = user.referral_earnings_mc / 125000.0
 
@@ -1168,7 +1168,7 @@ async def cmd_info(message: types.Message) -> None:
         f"• <b>Username:</b> {username_display}\n"
         f"• <b>Hazırkı Balans:</b> {user.balance_mc:,.0f} MC\n"
         f"• <b>Ümumi Qazanc:</b> {user.total_earned_mc:,.0f} MC\n"
-        f"• <b>Bugünkü Videolar:</b> {total_videos}/50 (S1: {session_1}/25 | S2: {session_2}/25)\n"
+        f"• <b>Bugünkü Videolar:</b> {total_videos}/24 (S1: {session_1}/12 | S2: {session_2}/12)\n"
         f"• <b>Dəvət Etdiyi Şəxslər:</b> {user.referral_count} nəfər\n"
         f"• <b>Status:</b> {status_str}"
     )

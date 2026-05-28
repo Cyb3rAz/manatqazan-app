@@ -386,10 +386,10 @@ async def _credit_user(user_id_val: int | str, event_id: str, source: str = "unk
             user.videos_today = 0
 
         # Determine target session & enforce limits/cooldown
-        if user.session_1_count < 25:
+        if user.session_1_count < 12:
             # Active in Session 1
             user.session_1_count += 1
-            if user.session_1_count == 25:
+            if user.session_1_count == 12:
                 user.session_1_completion_time = now
                 print(f"[CREDIT] User {user_telegram_id} COMPLETED Session 1 at {now.isoformat()}")
                 logger.info("[CREDIT] User %s COMPLETED Session 1 at %s", user_telegram_id, now.isoformat())
@@ -410,9 +410,9 @@ async def _credit_user(user_id_val: int | str, event_id: str, source: str = "unk
                 )
 
             # Session 2 is unlocked. Check if already completed Session 2.
-            if user.session_2_count >= 25:
-                print(f"[CREDIT] User {user_telegram_id} completed both sessions today (50 videos). Limit hit.")
-                logger.warning("[CREDIT] User %s completed both sessions today (50 videos). Limit hit.", user_telegram_id)
+            if user.session_2_count >= 12:
+                print(f"[CREDIT] User {user_telegram_id} completed both sessions today (24 clicks). Limit hit.")
+                logger.warning("[CREDIT] User %s completed both sessions today (24 clicks). Limit hit.", user_telegram_id)
                 return JSONResponse({"ok": False, "message": "Gündəlik limitiniz bitdi."}, status_code=429)
 
             # Increment Session 2 count
@@ -549,7 +549,7 @@ async def get_user_info(telegram_id: str) -> JSONResponse:
     session_2_locked = True
     unlock_at = None
 
-    if session_1_count >= 25:
+    if session_1_count >= 12:
         if session_1_completion_time is None:
             # Legacy or fallback: if completed but no timestamp, unlock immediately
             session_2_locked = False
@@ -569,7 +569,7 @@ async def get_user_info(telegram_id: str) -> JSONResponse:
         "balance_azn": round(balance_mc / MC_TO_AZN_RATE, 4),
         "total_earned_mc": total_earned_mc,
         "videos_today": videos_today,
-        "daily_limit": 50,
+        "daily_limit": 24,
         "session_1_count": session_1_count,
         "session_2_count": session_2_count,
         "session_2_locked": session_2_locked,
