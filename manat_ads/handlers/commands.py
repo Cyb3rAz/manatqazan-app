@@ -508,17 +508,17 @@ async def _upsert_user(
 async def _notify_admin_new_user(bot, user_id: int, first_name: str | None, username: str | None) -> None:
     """
     Send a real-time notification to ADMIN_ID about a brand-new user registration.
-    Wrapped in try/except — NEVER raises; registration flow must not be affected.
+    Runs as a fire-and-forget background task — NEVER raises; registration flow must not be affected.
     """
     if ADMIN_ID is None:
         return
     try:
         uname_display = f"@{username}" if username else "Yoxdur"
         text = (
-            "🚀 <b>Yeni İstifadəçi Qoşuldu!</b>\n"
-            f"👤 <b>Ad:</b> {first_name or 'Naməlum'}\n"
-            f"🆔 <b>ID:</b> <code>{user_id}</code>\n"
-            f"🏷️ <b>Username:</b> {uname_display}"
+            "\U0001f680 <b>Yeni Istifadeci Qosuldu!</b>\n"
+            f"\U0001f464 <b>Ad:</b> {first_name or 'Namelum'}\n"
+            f"\U0001f194 <b>ID:</b> <code>{user_id}</code>\n"
+            f"\U0001f3f7 <b>Username:</b> {uname_display}"
         )
         await bot.send_message(chat_id=ADMIN_ID, text=text, parse_mode="HTML")
     except Exception as notify_err:
@@ -586,21 +586,21 @@ async def cmd_start_with_referral(message: types.Message) -> None:
                 language=tg_detected,
             )
             await session.commit()
-            logger.info("[UPSERT] New user %s (referrer=%s) — awaiting lang selection", tg_user.id, referrer_tg_id)
-
-            # Notify admin about brand-new user (non-blocking, never crashes flow)
-            await _notify_admin_new_user(
-                bot=message.bot,
-                user_id=tg_user.id,
-                first_name=tg_user.first_name,
-                username=tg_user.username,
-            )
+            logger.info("[UPSERT] New user %s (referrer=%s) registered.", tg_user.id, referrer_tg_id)
 
         except Exception as e:
             await session.rollback()
             logger.exception("[UPSERT] Failed to upsert user %s: %s", tg_user.id, e)
-            await message.answer("⚠️ Xəta baş verdi. Zəhmət olmasa bir az sonra yenidən cəhd edin.")
+            await message.answer("\u26a0\ufe0f Xata bas verdi. Zahmat olmasa bir az sonra yenidan cahd edin.")
             return
+
+    # Fire-and-forget: admin notification runs concurrently, does not delay user response
+    asyncio.create_task(_notify_admin_new_user(
+        bot=message.bot,
+        user_id=tg_user.id,
+        first_name=tg_user.first_name,
+        username=tg_user.username,
+    ))
 
     # Show language selection to new user
     await message.answer(
@@ -644,21 +644,21 @@ async def cmd_start(message: types.Message) -> None:
                 language=tg_detected,
             )
             await session.commit()
-            logger.info("[UPSERT] New user %s — awaiting lang selection", tg_user.id)
-
-            # Notify admin about brand-new user (non-blocking, never crashes flow)
-            await _notify_admin_new_user(
-                bot=message.bot,
-                user_id=tg_user.id,
-                first_name=tg_user.first_name,
-                username=tg_user.username,
-            )
+            logger.info("[UPSERT] New user %s registered.", tg_user.id)
 
         except Exception as e:
             await session.rollback()
             logger.exception("[UPSERT] Failed to upsert user %s: %s", tg_user.id, e)
-            await message.answer("⚠️ Xəta baş verdi. Zəhmət olmasa bir az sonra yenidən cəhd edin.")
+            await message.answer("\u26a0\ufe0f Xata bas verdi. Zahmat olmasa bir az sonra yenidan cahd edin.")
             return
+
+    # Fire-and-forget: admin notification runs concurrently, does not delay user response
+    asyncio.create_task(_notify_admin_new_user(
+        bot=message.bot,
+        user_id=tg_user.id,
+        first_name=tg_user.first_name,
+        username=tg_user.username,
+    ))
 
     # Show language selection to new user
     await message.answer(
