@@ -740,31 +740,41 @@ function renderDashboard() {
     let progressPct = 0;
     let newLeagueIndex = 0;
 
-    if (currentMc <= 10000) {
-        leagueName = t('leagueBronze');
-        progressPct = (currentMc / 10000) * 100;
-        newLeagueIndex = 0;
-    } else if (currentMc <= 50000) {
-        leagueName = t('leagueSilver');
-        progressPct = ((currentMc - 10000) / 40000) * 100;
-        newLeagueIndex = 1;
-    } else if (currentMc <= 150000) {
-        leagueName = t('leagueGold');
-        progressPct = ((currentMc - 50000) / 100000) * 100;
-        newLeagueIndex = 2;
-    } else if (currentMc <= 350000) {
-        leagueName = t('leaguePlatinum');
-        progressPct = ((currentMc - 150000) / 200000) * 100;
-        newLeagueIndex = 3;
-    } else if (currentMc < 625000) {
-        leagueName = t('leagueDiamond');
-        progressPct = ((currentMc - 350000) / 275000) * 100;
-        newLeagueIndex = 4;
-    } else {
-        leagueName = t('leagueDiamond');
-        progressPct = 100;
-        newLeagueIndex = 4;
+    // ── League Thresholds (300 MC/video × 24 videos/day = 7,200 MC/day max) ──
+    // Each tier is calibrated to take ≥48 hours at full earning velocity.
+    //   Bronze   :      0 –  15,000 MC  (span  15,000 ~ 2 days)
+    //   Silver   : 15,000 –  75,000 MC  (span  60,000 ~ 8 days)
+    //   Gold     : 75,000 – 225,000 MC  (span 150,000 ~21 days)
+    //   Platinum :225,000 – 525,000 MC  (span 300,000 ~42 days)
+    //   Diamond  :525,000 –1,050,000 MC (span 525,000 ~73 days)
+    const LEAGUE_THRESHOLDS = [
+        { limit: 15000,   base: 0,      span: 15000  }, // 0 → Bronze
+        { limit: 75000,   base: 15000,  span: 60000  }, // 1 → Silver
+        { limit: 225000,  base: 75000,  span: 150000 }, // 2 → Gold
+        { limit: 525000,  base: 225000, span: 300000 }, // 3 → Platinum
+        { limit: 1050000, base: 525000, span: 525000 }, // 4 → Diamond
+    ];
+
+    const LEAGUE_NAMES = [
+        t('leagueBronze'), t('leagueSilver'), t('leagueGold'),
+        t('leaguePlatinum'), t('leagueDiamond')
+    ];
+
+    // Determine current tier index (clamp to max tier at cap)
+    newLeagueIndex = LEAGUE_THRESHOLDS.length - 1;
+    for (let i = 0; i < LEAGUE_THRESHOLDS.length; i++) {
+        if (currentMc < LEAGUE_THRESHOLDS[i].limit) {
+            newLeagueIndex = i;
+            break;
+        }
     }
+
+    leagueName = LEAGUE_NAMES[newLeagueIndex];
+
+    // Progress percentage — guarded against division-by-zero and clamped [0, 100]
+    const _tier = LEAGUE_THRESHOLDS[newLeagueIndex];
+    const _span = _tier.span > 0 ? _tier.span : 1;
+    progressPct = Math.min(100, Math.max(0, ((currentMc - _tier.base) / _span) * 100));
 
     // Check for league upgrade
     if (currentLeagueIndex !== -1 && newLeagueIndex > currentLeagueIndex) {
