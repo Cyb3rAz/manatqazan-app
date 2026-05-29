@@ -136,6 +136,12 @@
         }
 
         .header-greeting {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            box-sizing: border-box;
+            padding: 0 16px;
             font-size: 15px;
             color: var(--text-secondary);
             margin-top: 8px;
@@ -690,17 +696,16 @@
             cursor: pointer;
             font-size: 13px;
             font-weight: 700;
-            color: var(--text-primary);
-            margin-left: 10px;
+            color: #ffffff;
             vertical-align: middle;
             user-select: none;
             -webkit-tap-highlight-color: transparent;
-            background: rgba(255, 255, 255, 0.06);
+            background: rgba(255, 255, 255, 0.05);
             backdrop-filter: blur(8px);
             -webkit-backdrop-filter: blur(8px);
-            padding: 6px 12px;
-            border-radius: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 6px 10px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
             transition: all 0.25s ease;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
         }
@@ -1123,7 +1128,9 @@
                 <div class="header-logo">ManatAds</div>
                 <div class="header-subtitle" data-i18n="subtitle">İzlə • Qazan • Çevir</div>
                 <div class="header-greeting">
-                    <span data-i18n="greeting">Xoş gəldiniz,</span> <strong id="user-name">İstifadəçi</strong> 👋
+                    <div class="greeting-text">
+                        <span data-i18n="greeting">Xoş gəldiniz,</span> <strong id="user-name">İstifadəçi</strong> 👋
+                    </div>
                     <span class="lang-switcher" id="lang-btn" onclick="toggleLangDropdown()">
                         <span id="current-lang">🇦🇿 AZ ▾</span>
                         <div class="lang-dropdown" id="lang-dropdown">
