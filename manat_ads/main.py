@@ -118,7 +118,21 @@ async def lifespan(application: FastAPI):
         await bot.set_my_commands(commands_tr, scope=aio_types.BotCommandScopeDefault(), language_code="tr")
         await bot.set_my_commands(commands_en, scope=aio_types.BotCommandScopeDefault(), language_code="en")
         await bot.set_my_commands(commands_ru, scope=aio_types.BotCommandScopeDefault(), language_code="ru")
-        logger.info("Bot commands menu set for multiple languages.")
+        
+        # Admin scope commands
+        from handlers.commands import ADMIN_ID
+        if ADMIN_ID:
+            admin_commands = [
+                aio_types.BotCommand(command="start", description="Botu başlat ve Yenile"),
+                aio_types.BotCommand(command="lang", description="Dil seçimini dəyiş"),
+                aio_types.BotCommand(command="admin", description="Admin panelini aç")
+            ]
+            await bot.set_my_commands(
+                commands=admin_commands,
+                scope=aio_types.BotCommandScopeChat(chat_id=ADMIN_ID)
+            )
+            
+        logger.info("Bot commands menu set for multiple languages and admin scope.")
     except Exception as e:
         logger.error("Failed to set bot commands menu: %s", e)
 
