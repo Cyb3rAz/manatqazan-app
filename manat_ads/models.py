@@ -151,6 +151,7 @@ class UserTask(Base):
     )
 
     # ── Relationships ──
+    user: Mapped["User"] = relationship(back_populates="user_tasks")
     task: Mapped["Task"] = relationship(back_populates="user_tasks")
 
     def __repr__(self) -> str:
