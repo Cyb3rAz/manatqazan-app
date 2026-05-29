@@ -75,6 +75,9 @@ class User(Base):
     watch_records: Mapped[list["WatchRecord"]] = relationship(
         back_populates="user", cascade="all, delete-orphan", lazy="select"
     )
+    user_tasks: Mapped[list["UserTask"]] = relationship(
+        back_populates="user", cascade="all, delete-orphan", lazy="select"
+    )
 
     def __repr__(self) -> str:
         return f"<User telegram_id={self.telegram_id} balance={self.balance_mc:.2f} MC>"
@@ -106,3 +109,49 @@ class WatchRecord(Base):
 
     def __repr__(self) -> str:
         return f"<WatchRecord user={self.telegram_id} reward={self.reward_mc} MC>"
+
+
+# ── Tasks ──────────────────────────────────────────────────────────────
+class Task(Base):
+    __tablename__ = "tasks"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    title: Mapped[str] = mapped_column(String(255), nullable=False)
+    channel_id: Mapped[str] = mapped_column(String(255), nullable=False)
+    channel_url: Mapped[str] = mapped_column(String(255), nullable=False)
+    reward_amount: Mapped[float] = mapped_column(Float, nullable=False)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True, server_default="1")
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=_utcnow, server_default=func.now()
+    )
+
+    # ── Relationships ──
+    user_tasks: Mapped[list["UserTask"]] = relationship(
+        back_populates="task", cascade="all, delete-orphan", lazy="select"
+    )
+
+    def __repr__(self) -> str:
+        return f"<Task id={self.id} title={self.title} reward={self.reward_amount} MC>"
+
+
+# ── User Tasks (Completion mapping) ────────────────────────────────────
+class UserTask(Base):
+    __tablename__ = "user_tasks"
+    __table_args__ = (UniqueConstraint("user_id", "task_id", name="uq_user_task"),)
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    user_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    task_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("tasks.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    completed_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=_utcnow, server_default=func.now()
+    )
+
+    # ── Relationships ──
+    task: Mapped["Task"] = relationship(back_populates="user_tasks")
+
+    def __repr__(self) -> str:
+        return f"<UserTask user_id={self.user_id} task_id={self.task_id}>"

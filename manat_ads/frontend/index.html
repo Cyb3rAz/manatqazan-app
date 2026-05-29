@@ -902,6 +902,112 @@
         .onboarding-btn:active {
             transform: scale(0.96);
         }
+
+        /* ── Bottom Navigation ─────────────────────────────────────── */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: #111318;
+            border-top: 1px solid var(--border-glass);
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-tab {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-size: 14px;
+            font-weight: 600;
+            padding: 12px 0;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .nav-tab.active {
+            color: var(--accent-gold);
+            text-shadow: 0 0 10px var(--accent-gold-glow);
+        }
+        
+        .nav-tab:hover {
+            color: var(--text-primary);
+        }
+
+        /* ── Task Items ────────────────────────────────────────────── */
+        .task-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-glass);
+            border-radius: var(--radius-lg);
+            padding: 16px;
+            margin: 12px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .task-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .task-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .task-reward {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--accent-gold);
+        }
+
+        .task-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            align-items: flex-end;
+        }
+
+        .task-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: var(--radius-md);
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition);
+            text-decoration: none;
+            text-align: center;
+            min-width: 90px;
+        }
+
+        .task-btn-join {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .task-btn-join:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .task-btn-verify {
+            background: var(--gradient-gold);
+            color: #fff;
+            box-shadow: 0 2px 10px var(--accent-gold-glow);
+        }
+
+        .task-btn-verify:active {
+            transform: scale(0.95);
+        }
     </style>
 </head>
 <body>
@@ -914,8 +1020,11 @@
 
         <!-- Main content (hidden until loaded) -->
         <div id="main-content" style="display: none;">
-            <!-- Header -->
-            <div class="header animate-in">
+            
+            <!-- Tab: MAIN -->
+            <div id="tab-main-content">
+                <!-- Header -->
+                <div class="header animate-in">
                 <div class="header-logo">ManatAds</div>
                 <div class="header-subtitle" data-i18n="subtitle">İzlə • Qazan • Çevir</div>
                 <div class="header-greeting">
@@ -1025,6 +1134,25 @@
                     📋 Linki Kopyala
                 </button>
             </div>
+            </div> <!-- End Tab MAIN -->
+
+            <!-- Tab: TASKS -->
+            <div id="tab-tasks-content" style="display: none;">
+                <div class="header animate-in">
+                    <div class="header-logo">🎯 Tapşırıqlar</div>
+                    <div class="header-subtitle">Kanallara abunə ol və qazan</div>
+                </div>
+                <div id="tasks-list-container" class="animate-in delay-1">
+                    <!-- Tasks injected by app.js -->
+                </div>
+            </div> <!-- End Tab TASKS -->
+
+            <!-- Bottom Navigation Bar -->
+            <nav class="bottom-nav">
+                <button class="nav-tab active" id="nav-main" onclick="switchTab('main')">🏠 Əsas</button>
+                <button class="nav-tab" id="nav-tasks" onclick="switchTab('tasks')">🎯 Tapşırıqlar</button>
+            </nav>
+
         </div>
     </div>
 

@@ -18,6 +18,8 @@ import logging
 import os
 import sys
 import uuid
+import urllib.parse
+import json
 from contextlib import asynccontextmanager
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -41,7 +43,7 @@ from sqlalchemy import select
 from bot_instance import bot, dp
 from database import async_session, close_db, init_db
 from handlers import commands_router
-from models import User, WatchRecord
+from models import User, WatchRecord, Task, UserTask
 
 load_dotenv()
 
@@ -735,6 +737,119 @@ async def update_user_language(telegram_id: int, body: LanguageUpdate) -> JSONRe
         logger.error("Failed to update user chat menu button in API: %s", e)
 
     return JSONResponse({"ok": True, "language": lang})
+
+
+# ── Tasks API ─────────────────────────────────────────────────────────
+
+def validate_init_data(init_data: str, bot_token: str) -> dict | None:
+    """Validate Telegram WebApp initData and extract user JSON."""
+    try:
+        parsed = urllib.parse.parse_qsl(init_data)
+        data_dict = dict(parsed)
+        if "hash" not in data_dict:
+            return None
+            
+        received_hash = data_dict.pop("hash")
+        
+        # Sort keys alphabetically and join with '\n'
+        data_check_string = "\n".join(f"{k}={data_dict[k]}" for k in sorted(data_dict.keys()))
+        
+        secret_key = hmac.new(b"WebAppData", bot_token.encode(), hashlib.sha256).digest()
+        calculated_hash = hmac.new(secret_key, data_check_string.encode(), hashlib.sha256).hexdigest()
+        
+        if hmac.compare_digest(calculated_hash, received_hash):
+            user_str = data_dict.get("user")
+            if user_str:
+                return json.loads(user_str)
+    except Exception as e:
+        logger.error("initData validation error: %s", e)
+    return None
+
+
+@app.get("/api/tasks", summary="Get active tasks for user")
+async def get_tasks(telegram_id: int) -> JSONResponse:
+    """Return list of active tasks excluding those already completed by the user."""
+    async with async_session() as session:
+        # Get user id to filter tasks
+        user_stmt = select(User).where(User.telegram_id == telegram_id)
+        user_res = await session.execute(user_stmt)
+        user = user_res.scalar_one_or_none()
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+
+        # Get completed task ids
+        completed_stmt = select(UserTask.task_id).where(UserTask.user_id == user.id)
+        completed_res = await session.execute(completed_stmt)
+        completed_task_ids = [row[0] for row in completed_res.all()]
+
+        # Get active tasks
+        tasks_stmt = select(Task).where(Task.is_active == True)
+        tasks_res = await session.execute(tasks_stmt)
+        all_tasks = tasks_res.scalars().all()
+
+        available_tasks = []
+        for t in all_tasks:
+            if t.id not in completed_task_ids:
+                available_tasks.append({
+                    "id": t.id,
+                    "title": t.title,
+                    "channel_url": t.channel_url,
+                    "reward_amount": t.reward_amount
+                })
+        
+        return JSONResponse({"tasks": available_tasks})
+
+class VerifyTaskRequest(BaseModel):
+    task_id: int
+    initData: str
+
+@app.post("/api/tasks/verify", summary="Verify and complete a task")
+async def verify_task(req: VerifyTaskRequest) -> JSONResponse:
+    user_data = validate_init_data(req.initData, BOT_TOKEN)
+    if not user_data or "id" not in user_data:
+        logger.warning("[TASK-VERIFY] Invalid initData received.")
+        return JSONResponse({"ok": False, "message": "Invalid authentication"}, status_code=401)
+        
+    telegram_id = user_data["id"]
+    
+    async with async_session() as session:
+        user_stmt = select(User).where(User.telegram_id == telegram_id).with_for_update()
+        user_res = await session.execute(user_stmt)
+        user = user_res.scalar_one_or_none()
+        if not user:
+            return JSONResponse({"ok": False, "message": "User not found"}, status_code=404)
+            
+        task_stmt = select(Task).where(Task.id == req.task_id)
+        task_res = await session.execute(task_stmt)
+        task = task_res.scalar_one_or_none()
+        if not task or not task.is_active:
+            return JSONResponse({"ok": False, "message": "Task not found or inactive"}, status_code=404)
+            
+        # Check if already completed
+        ut_stmt = select(UserTask).where(UserTask.user_id == user.id, UserTask.task_id == task.id)
+        ut_res = await session.execute(ut_stmt)
+        if ut_res.scalar_one_or_none():
+            return JSONResponse({"ok": False, "message": "Task already completed"}, status_code=400)
+            
+        # Verify via bot
+        try:
+            member = await bot.get_chat_member(chat_id=task.channel_id, user_id=telegram_id)
+            if member.status not in ("member", "administrator", "creator"):
+                return JSONResponse({"ok": False, "message": "Kanalda yoxsunuz! / Not joined!"}, status_code=400)
+        except Exception as e:
+            logger.error("[TASK-VERIFY] Error verifying chat member for user %s channel %s: %s", telegram_id, task.channel_id, e)
+            return JSONResponse({"ok": False, "message": "Kanala abunəlik yoxlanıla bilmədi. Bot kanalda admin deyil və ya xəta baş verdi."}, status_code=400)
+            
+        # Reward user
+        user.balance_mc += task.reward_amount
+        user.total_earned_mc += task.reward_amount
+        
+        user_task = UserTask(user_id=user.id, task_id=task.id)
+        session.add(user_task)
+        session.add(user)
+        await session.commit()
+        
+        return JSONResponse({"ok": True, "reward": task.reward_amount, "new_balance": user.balance_mc})
 
 
 # ── Async Cooldown Notification Worker ────────────────────────────────

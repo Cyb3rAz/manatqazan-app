@@ -1142,3 +1142,107 @@ function formatNumber(num) {
     if (num === undefined || num === null) return "0";
     return Math.floor(num).toLocaleString("az-AZ");
 }
+
+// ── Tabs Navigation ──────────────────────────────────────────────────
+function switchTab(tabId) {
+    const mainTab = document.getElementById("tab-main-content");
+    const tasksTab = document.getElementById("tab-tasks-content");
+    const navMain = document.getElementById("nav-main");
+    const navTasks = document.getElementById("nav-tasks");
+
+    if (!mainTab || !tasksTab) return;
+
+    if (tabId === 'main') {
+        mainTab.style.display = "block";
+        tasksTab.style.display = "none";
+        if (navMain) navMain.classList.add("active");
+        if (navTasks) navTasks.classList.remove("active");
+    } else if (tabId === 'tasks') {
+        mainTab.style.display = "none";
+        tasksTab.style.display = "block";
+        if (navTasks) navTasks.classList.add("active");
+        if (navMain) navMain.classList.remove("active");
+        fetchTasks();
+    }
+}
+
+// ── Tasks Logic ──────────────────────────────────────────────────────
+async function fetchTasks() {
+    const container = document.getElementById("tasks-list-container");
+    if (!container) return;
+    
+    container.innerHTML = `<div style="text-align:center; padding: 20px; color: var(--text-muted);">Yüklənir...</div>`;
+    
+    if (!currentUser) return;
+    
+    try {
+        const resp = await fetch(`${API_BASE}/api/tasks?telegram_id=${currentUser.id}`);
+        if (!resp.ok) throw new Error("Failed to load tasks");
+        const data = await resp.json();
+        
+        if (!data.tasks || data.tasks.length === 0) {
+            container.innerHTML = `<div style="text-align:center; padding: 20px; color: var(--text-muted);">Hazırda aktiv tapşırıq yoxdur.</div>`;
+            return;
+        }
+        
+        container.innerHTML = "";
+        data.tasks.forEach(task => {
+            const card = document.createElement("div");
+            card.className = "task-card";
+            card.innerHTML = `
+                <div class="task-info">
+                    <div class="task-title">${task.title}</div>
+                    <div class="task-reward">+${task.reward_amount} MC</div>
+                </div>
+                <div class="task-actions">
+                    <a href="${task.channel_url}" target="_blank" class="task-btn task-btn-join">Abunə Ol 🚀</a>
+                    <button class="task-btn task-btn-verify" onclick="verifyTask(${task.id})">Yoxla 🔄</button>
+                </div>
+            `;
+            container.appendChild(card);
+        });
+    } catch (err) {
+        console.error("fetchTasks error:", err);
+        container.innerHTML = `<div style="text-align:center; padding: 20px; color: var(--accent-rose);">Tapşırıqlar yüklənə bilmədi.</div>`;
+    }
+}
+
+async function verifyTask(taskId) {
+    if (!tg || !tg.initData) {
+        showToast("Təhlükəsizlik xətası: Telegram mühiti tapılmadı", "error");
+        return;
+    }
+    
+    try {
+        const resp = await fetch(`${API_BASE}/api/tasks/verify`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                task_id: taskId,
+                initData: tg.initData
+            })
+        });
+        
+        const data = await resp.json();
+        
+        if (resp.ok && data.ok) {
+            showToast(`🎉 Təbriklər! +${data.reward} MC qazandınız!`, "success");
+            spawnCoinBurst();
+            
+            // Update local balance
+            if (userData) {
+                userData.balance_mc = data.new_balance;
+                renderDashboard();
+            }
+            
+            // Remove task from list or refresh
+            fetchTasks();
+        } else {
+            showToast(data.message || "Uğursuz yoxlama.", "error");
+        }
+    } catch (err) {
+        console.error("verifyTask error:", err);
+        showToast("Xəta baş verdi. Yenidən cəhd edin.", "error");
+    }
+}
+
