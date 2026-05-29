@@ -1108,6 +1108,152 @@
         .task-btn-verify:active {
             transform: scale(0.95);
         }
+
+        /* ── Admin Action Button ───────────────────────────────────── */
+        .admin-action-btn {
+            display: block;
+            width: 100%;
+            background: linear-gradient(135deg, #ff9900, #ef4444);
+            color: #ffffff;
+            border: none;
+            border-radius: var(--radius-md);
+            padding: 14px 20px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            margin: 16px 0;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(255, 153, 0, 0.25);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .admin-action-btn:active {
+            transform: scale(0.97);
+        }
+
+        /* ── Admin Modal Overlay ───────────────────────────────────── */
+        .admin-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 14, 26, 0.92);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            z-index: 100000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .admin-modal-overlay.open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .admin-modal-card {
+            background: rgba(17, 19, 24, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            width: 100%;
+            max-width: 360px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5), 0 0 30px rgba(255, 153, 0, 0.15);
+            transform: scale(0.9);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .admin-modal-overlay.open .admin-modal-card {
+            transform: scale(1);
+        }
+
+        .admin-modal-title {
+            font-size: 20px;
+            font-weight: 800;
+            color: #ffffff;
+            margin-bottom: 16px;
+            text-align: center;
+            background: linear-gradient(135deg, #ff9900, #ef4444);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .admin-form-group {
+            margin-bottom: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .admin-form-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: #71717a;
+            letter-spacing: 0.3px;
+            text-transform: uppercase;
+        }
+
+        .admin-input {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 8px;
+            color: #ffffff;
+            padding: 10px 12px;
+            font-size: 13px;
+            outline: none;
+            transition: all 0.25s ease;
+        }
+
+        .admin-input:focus {
+            border-color: #ff9900;
+            background: rgba(255, 255, 255, 0.06);
+            box-shadow: 0 0 10px rgba(255, 153, 0, 0.2);
+        }
+
+        .admin-modal-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 18px;
+        }
+
+        .admin-modal-btn {
+            flex: 1;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            border: none;
+            transition: all 0.25s ease;
+        }
+
+        .admin-btn-create {
+            background: linear-gradient(135deg, #ff9900, #d97706);
+            color: #ffffff;
+            box-shadow: 0 4px 12px rgba(255, 153, 0, 0.2);
+        }
+
+        .admin-btn-create:active {
+            transform: scale(0.97);
+        }
+
+        .admin-btn-close {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: #71717a;
+        }
+
+        .admin-btn-close:hover {
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.1);
+        }
     </style>
 </head>
 <body>
@@ -1252,6 +1398,7 @@
                         <span class="tasks-header-subtitle" data-i18n="task_sub">Kanallara abunə ol və qazan</span>
                     </div>
                 </div>
+                <button id="admin-add-task-btn" class="admin-action-btn" style="display: none;" onclick="openAdminTaskModal()">➕ Yeni Tapşırıq Əlavə Et</button>
                 <div id="tasks-list-container" class="animate-in delay-1">
                     <div id="tasks-empty-msg" style="display: none; text-align:center; padding: 20px; color: var(--text-muted);" data-i18n="tasks_empty_msg">Hazırda aktiv tapşırıq yoxdur.</div>
                 </div>
@@ -1332,6 +1479,38 @@
             <button class="onboarding-btn" onclick="completeOnboarding()" id="onboarding-confirm-btn" data-i18n="onboardingBtn">
                 Davam et 🚀
             </button>
+        </div>
+    </div>
+    
+    <!-- Admin Add Task Modal -->
+    <div class="admin-modal-overlay" id="admin-task-modal">
+        <div class="admin-modal-card">
+            <h2 class="admin-modal-title">➕ Yeni Tapşırıq Yarat</h2>
+            
+            <div class="admin-form-group">
+                <label class="admin-form-label">Başlıq</label>
+                <input type="text" id="admin-task-title" class="admin-input" placeholder="Məs. Kanala Abunə Ol">
+            </div>
+            
+            <div class="admin-form-group">
+                <label class="admin-form-label">Kanal ID</label>
+                <input type="text" id="admin-task-channel-id" class="admin-input" placeholder="Məs. -100123456789">
+            </div>
+            
+            <div class="admin-form-group">
+                <label class="admin-form-label">Kanal Linki</label>
+                <input type="text" id="admin-task-channel-url" class="admin-input" placeholder="Məs. https://t.me/kanal_adı">
+            </div>
+            
+            <div class="admin-form-group">
+                <label class="admin-form-label">Mükafat (MC)</label>
+                <input type="number" id="admin-task-reward" class="admin-input" placeholder="Məs. 100" step="any">
+            </div>
+            
+            <div class="admin-modal-actions">
+                <button class="admin-modal-btn admin-btn-close" onclick="closeAdminTaskModal()">Bağla</button>
+                <button class="admin-modal-btn admin-btn-create" onclick="submitAdminTask()">Yarat</button>
+            </div>
         </div>
     </div>
 

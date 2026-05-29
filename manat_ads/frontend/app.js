@@ -1214,9 +1214,14 @@ async function fetchTasks() {
     if (!currentUser) return;
     
     try {
-        const resp = await fetch(`${API_BASE}/api/tasks?telegram_id=${currentUser.id}`);
+        const resp = await fetch(`${API_BASE}/api/tasks?telegram_id=${currentUser.id}&initData=${encodeURIComponent(tg.initData || '')}`);
         if (!resp.ok) throw new Error("Failed to load tasks");
         const data = await resp.json();
+        
+        const adminBtn = document.getElementById("admin-add-task-btn");
+        if (adminBtn) {
+            adminBtn.style.display = data.is_admin ? "block" : "none";
+        }
         
         if (!data.tasks || data.tasks.length === 0) {
             container.innerHTML = `<div id="tasks-empty-msg" style="text-align:center; padding: 20px; color: var(--text-muted);" data-i18n="tasks_empty_msg">${t('tasks_empty_msg')}</div>`;
@@ -1283,4 +1288,69 @@ async function verifyTask(taskId) {
         showToast("Xəta baş verdi. Yenidən cəhd edin.", "error");
     }
 }
+// ── Admin Modal Handlers ─────────────────────────────────────────────
+function openAdminTaskModal() {
+    const modal = document.getElementById("admin-task-modal");
+    if (modal) modal.classList.add("open");
+}
 
+function closeAdminTaskModal() {
+    const modal = document.getElementById("admin-task-modal");
+    if (modal) {
+        modal.classList.remove("open");
+        // Clear inputs
+        document.getElementById("admin-task-title").value = "";
+        document.getElementById("admin-task-channel-id").value = "";
+        document.getElementById("admin-task-channel-url").value = "";
+        document.getElementById("admin-task-reward").value = "";
+    }
+}
+
+async function submitAdminTask() {
+    const title = document.getElementById("admin-task-title").value.trim();
+    const channelId = document.getElementById("admin-task-channel-id").value.trim();
+    const channelUrl = document.getElementById("admin-task-channel-url").value.trim();
+    const rewardVal = document.getElementById("admin-task-reward").value.trim();
+    
+    if (!title || !channelId || !channelUrl || !rewardVal) {
+        showToast("Zəhmət olmasa bütün xanaları doldurun", "error");
+        return;
+    }
+    
+    const rewardAmount = parseFloat(rewardVal);
+    if (isNaN(rewardAmount) || rewardAmount <= 0) {
+        showToast("Mükafat düzgün məbləğ olmalıdır", "error");
+        return;
+    }
+    
+    if (!tg || !tg.initData) {
+        showToast("Təhlükəsizlik xətası: Telegram initData tapılmadı", "error");
+        return;
+    }
+    
+    try {
+        const resp = await fetch(`${API_BASE}/api/admin/add-task`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                initData: tg.initData,
+                title: title,
+                channel_id: channelId,
+                channel_url: channelUrl,
+                reward_amount: rewardAmount
+            })
+        });
+        
+        const data = await resp.json();
+        if (resp.ok && data.ok) {
+            showToast("🎉 Tapşırıq uğurla yaradıldı!", "success");
+            closeAdminTaskModal();
+            fetchTasks(); // Reload task list
+        } else {
+            showToast(data.message || "Xəta baş verdi", "error");
+        }
+    } catch (err) {
+        console.error("submitAdminTask error:", err);
+        showToast("Şəbəkə xətası, yenidən cəhd edin", "error");
+    }
+}

@@ -767,7 +767,7 @@ def validate_init_data(init_data: str, bot_token: str) -> dict | None:
 
 
 @app.get("/api/tasks", summary="Get active tasks for user")
-async def get_tasks(telegram_id: int) -> JSONResponse:
+async def get_tasks(telegram_id: int, initData: str | None = None) -> JSONResponse:
     """Return list of active tasks excluding those already completed by the user."""
     async with async_session() as session:
         # Get user id to filter tasks
@@ -797,7 +797,52 @@ async def get_tasks(telegram_id: int) -> JSONResponse:
                     "reward_amount": t.reward_amount
                 })
         
-        return JSONResponse({"tasks": available_tasks})
+        # Admin check
+        is_admin = False
+        if initData:
+            user_data = validate_init_data(initData, BOT_TOKEN)
+            if user_data and "id" in user_data:
+                tg_id_from_init = user_data["id"]
+                if tg_id_from_init == telegram_id:
+                    ADMIN_TELEGRAM_ID = os.getenv("ADMIN_TELEGRAM_ID")
+                    if ADMIN_TELEGRAM_ID and str(tg_id_from_init) == str(ADMIN_TELEGRAM_ID):
+                        is_admin = True
+
+        return JSONResponse({"tasks": available_tasks, "is_admin": is_admin})
+
+class AddTaskRequest(BaseModel):
+    initData: str
+    title: str
+    channel_id: str
+    channel_url: str
+    reward_amount: float
+
+@app.post("/api/admin/add-task", summary="Add a new task (Admin only)")
+async def add_task(req: AddTaskRequest) -> JSONResponse:
+    user_data = validate_init_data(req.initData, BOT_TOKEN)
+    if not user_data or "id" not in user_data:
+        logger.warning("[ADMIN-ADD-TASK] Invalid initData received.")
+        return JSONResponse({"ok": False, "message": "Invalid authentication"}, status_code=401)
+        
+    telegram_id = user_data["id"]
+    ADMIN_TELEGRAM_ID = os.getenv("ADMIN_TELEGRAM_ID")
+    
+    if not ADMIN_TELEGRAM_ID or str(telegram_id) != str(ADMIN_TELEGRAM_ID):
+        logger.warning("[ADMIN-ADD-TASK] Unauthorized access attempt by ID %s.", telegram_id)
+        return JSONResponse({"ok": False, "message": "Forbidden"}, status_code=403)
+        
+    async with async_session() as session:
+        async with session.begin():
+            new_task = Task(
+                title=req.title,
+                channel_id=req.channel_id,
+                channel_url=req.channel_url,
+                reward_amount=req.reward_amount,
+                is_active=True
+            )
+            session.add(new_task)
+            
+    return JSONResponse({"ok": True, "message": "Task created successfully"})
 
 class VerifyTaskRequest(BaseModel):
     task_id: int
