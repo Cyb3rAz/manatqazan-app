@@ -435,6 +435,8 @@ async def _credit_user(user_id_val: int | str, event_id: str, source: str = "unk
                     # Back-date by exactly 2 hours so unlock_time == now,
                     # meaning Session 2 unlocks immediately without a wait.
                     user.session_1_completion_time = now - timedelta(hours=2)
+                elif user.session_1_completion_time.tzinfo is None:
+                    user.session_1_completion_time = user.session_1_completion_time.replace(tzinfo=timezone.utc)
 
                 unlock_time = user.session_1_completion_time + timedelta(hours=2)
                 if now < unlock_time:
@@ -583,6 +585,8 @@ async def get_user_info(telegram_id: str) -> JSONResponse:
             # Only clear completion_time if the cooldown window has already
             # fully expired (i.e. unlock_time is in the past).
             if user.session_1_completion_time is not None:
+                if user.session_1_completion_time.tzinfo is None:
+                    user.session_1_completion_time = user.session_1_completion_time.replace(tzinfo=timezone.utc)
                 crossday_unlock = user.session_1_completion_time + timedelta(hours=2)
                 if now >= crossday_unlock:
                     # Cooldown expired — safe to clear
@@ -596,6 +600,11 @@ async def get_user_info(telegram_id: str) -> JSONResponse:
         session_1_count = user.session_1_count
         session_2_count = user.session_2_count
         session_1_completion_time = user.session_1_completion_time
+        if session_1_completion_time is not None and session_1_completion_time.tzinfo is None:
+            session_1_completion_time = session_1_completion_time.replace(tzinfo=timezone.utc)
+            
+        session_1_count = user.session_1_count
+        session_2_count = user.session_2_count
         videos_today = session_1_count + session_2_count
         balance_mc = user.balance_mc
         total_earned_mc = user.total_earned_mc

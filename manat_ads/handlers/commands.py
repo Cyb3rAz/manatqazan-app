@@ -791,6 +791,8 @@ async def _show_balance(tg_user: types.User, message: types.Message) -> None:
             db_user.videos_today = 0
             if db_user.session_1_completion_time is not None:
                 from datetime import timedelta
+                if db_user.session_1_completion_time.tzinfo is None:
+                    db_user.session_1_completion_time = db_user.session_1_completion_time.replace(tzinfo=timezone.utc)
                 crossday_unlock = db_user.session_1_completion_time + timedelta(hours=2)
                 if now >= crossday_unlock:
                     db_user.session_1_completion_time = None
@@ -800,6 +802,9 @@ async def _show_balance(tg_user: types.User, message: types.Message) -> None:
     session_1_count = user.session_1_count
     session_2_count = user.session_2_count
     session_1_completion_time = user.session_1_completion_time
+    if session_1_completion_time is not None and session_1_completion_time.tzinfo is None:
+        session_1_completion_time = session_1_completion_time.replace(tzinfo=timezone.utc)
+        
     balance_mc = user.balance_mc
     total_earned_mc = user.total_earned_mc
 

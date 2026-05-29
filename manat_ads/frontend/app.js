@@ -614,7 +614,11 @@ function startCooldownTimer(unlockAt) {
     }
     stopCooldownTimer();
 
-    const targetTime = new Date(unlockAt).getTime();
+    let unlockAtStr = unlockAt;
+    if (typeof unlockAtStr === 'string' && !unlockAtStr.endsWith('Z') && !unlockAtStr.includes('+')) {
+        unlockAtStr += 'Z';
+    }
+    const targetTime = new Date(unlockAtStr).getTime();
 
     function updateTimer() {
         const now = new Date().getTime();
