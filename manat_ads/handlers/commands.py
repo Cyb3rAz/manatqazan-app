@@ -806,7 +806,7 @@ async def _show_balance(tg_user: types.User, message: types.Message) -> None:
                 from datetime import timedelta
                 if db_user.session_1_completion_time.tzinfo is None:
                     db_user.session_1_completion_time = db_user.session_1_completion_time.replace(tzinfo=timezone.utc)
-                crossday_unlock = db_user.session_1_completion_time + timedelta(hours=2)
+                crossday_unlock = db_user.session_1_completion_time + timedelta(hours=3)
                 if now >= crossday_unlock:
                     db_user.session_1_completion_time = None
             await reset_session.commit()
@@ -828,7 +828,7 @@ async def _show_balance(tg_user: types.User, message: types.Message) -> None:
             s2_status = loc['balance_active']
         else:
             from datetime import timedelta
-            unlock_time = session_1_completion_time + timedelta(hours=2)
+            unlock_time = session_1_completion_time + timedelta(hours=3)
             if now < unlock_time:
                 remaining = unlock_time - now
                 h, remainder = divmod(int(remaining.total_seconds()), 3600)

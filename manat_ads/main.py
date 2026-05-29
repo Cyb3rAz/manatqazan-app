@@ -92,6 +92,11 @@ async def lifespan(application: FastAPI):
     await init_db()
     logger.info("Database initialised.")
 
+    # ── Launch async cooldown notification worker ──
+    notification_task = asyncio.create_task(_cooldown_notification_worker())
+    application.state.notification_task = notification_task
+    logger.info("Cooldown notification worker started.")
+
     # ── Set Bot Commands Menu ──
     try:
         commands_az = [
@@ -176,6 +181,14 @@ async def lifespan(application: FastAPI):
     yield
 
     # ── Shutdown ──
+    if hasattr(application.state, "notification_task"):
+        application.state.notification_task.cancel()
+        try:
+            await application.state.notification_task
+        except asyncio.CancelledError:
+            pass
+        logger.info("Cooldown notification worker stopped.")
+
     if hasattr(application.state, "polling_task"):
         logger.info("Stopping Long Polling...")
         application.state.polling_task.cancel()
@@ -430,7 +443,7 @@ async def _credit_user(user_id_val: int | str, event_id: str, source: str = "unk
                 user.session_2_count = 0
                 user.videos_today = 0
                 if user.session_1_completion_time is not None:
-                    crossday_unlock = user.session_1_completion_time + timedelta(hours=2)
+                    crossday_unlock = user.session_1_completion_time + timedelta(hours=3)
                     if now >= crossday_unlock:
                         user.session_1_completion_time = None
 
@@ -440,19 +453,20 @@ async def _credit_user(user_id_val: int | str, event_id: str, source: str = "unk
                 user.session_1_count += 1
                 if user.session_1_count == 12:
                     user.session_1_completion_time = now
+                    user.cooldown_notified = False  # Flag: push notification pending
                     print(f"[CREDIT] User {user_telegram_id} COMPLETED Session 1 at {now.isoformat()}")
                     logger.info("[CREDIT] User %s COMPLETED Session 1 at %s", user_telegram_id, now.isoformat())
             else:
                 # Session 1 is completed. Check Session 2 status.
                 if user.session_1_completion_time is None:
                     # Fallback: session_1_completion_time is NULL (legacy row).
-                    # Back-date by exactly 2 hours so unlock_time == now,
+                    # Back-date by exactly 3 hours so unlock_time == now,
                     # meaning Session 2 unlocks immediately without a wait.
-                    user.session_1_completion_time = now - timedelta(hours=2)
+                    user.session_1_completion_time = now - timedelta(hours=3)
                 elif user.session_1_completion_time.tzinfo is None:
                     user.session_1_completion_time = user.session_1_completion_time.replace(tzinfo=timezone.utc)
 
-                unlock_time = user.session_1_completion_time + timedelta(hours=2)
+                unlock_time = user.session_1_completion_time + timedelta(hours=3)
                 if now < unlock_time:
                     # Session 2 is currently locked
                     print(f"[CREDIT] Session 2 is LOCKED for user {user_telegram_id} until {unlock_time.isoformat()}")
@@ -596,12 +610,12 @@ async def get_user_info(telegram_id: str) -> JSONResponse:
             user.session_1_count = 0
             user.session_2_count = 0
             user.videos_today = 0
-            # Only clear completion_time if the cooldown window has already
+            # Only clear completion_time if the 3-hour cooldown window has already
             # fully expired (i.e. unlock_time is in the past).
             if user.session_1_completion_time is not None:
                 if user.session_1_completion_time.tzinfo is None:
                     user.session_1_completion_time = user.session_1_completion_time.replace(tzinfo=timezone.utc)
-                crossday_unlock = user.session_1_completion_time + timedelta(hours=2)
+                crossday_unlock = user.session_1_completion_time + timedelta(hours=3)
                 if now >= crossday_unlock:
                     # Cooldown expired — safe to clear
                     user.session_1_completion_time = None
@@ -637,7 +651,7 @@ async def get_user_info(telegram_id: str) -> JSONResponse:
             # Legacy or fallback: if completed but no timestamp, unlock immediately
             session_2_locked = False
         else:
-            unlock_time = session_1_completion_time + timedelta(hours=2)
+            unlock_time = session_1_completion_time + timedelta(hours=3)
             if now < unlock_time:
                 session_2_locked = True
                 unlock_at = unlock_time.isoformat()
@@ -645,10 +659,10 @@ async def get_user_info(telegram_id: str) -> JSONResponse:
                 session_2_locked = False
     elif session_1_completion_time is not None:
         # Edge case: session_1_count was reset to 0 by the midnight reset
-        # but the cooldown window has NOT yet expired (crossed midnight).
+        # but the 3-hour cooldown window has NOT yet expired (crossed midnight).
         # In this state, session_1_count < 12 but we must keep S2 locked
-        # until the original 2-hour window elapses.
-        unlock_time = session_1_completion_time + timedelta(hours=2)
+        # until the original 3-hour window elapses.
+        unlock_time = session_1_completion_time + timedelta(hours=3)
         if now < unlock_time:
             session_2_locked = True
             unlock_at = unlock_time.isoformat()
@@ -721,6 +735,94 @@ async def update_user_language(telegram_id: int, body: LanguageUpdate) -> JSONRe
         logger.error("Failed to update user chat menu button in API: %s", e)
 
     return JSONResponse({"ok": True, "language": lang})
+
+
+# ── Async Cooldown Notification Worker ────────────────────────────────
+_COOLDOWN_PUSH_MESSAGES = {
+    "az": (
+        "🔥 Gözlədiyin vaxt bitdi! 3 saatlıq kilid açıldı və yeni videolar artıq hazırdır! "
+        "🚀 Tez bota gir, videoları izlə və balansını doldurmağa davam et! 💸"
+    ),
+    "tr": (
+        "🔥 Beklediğin an geldi! 3 saatlik mola bitti ve yeni videolar hazır! "
+        "🚀 Hemen bota gir, videoları izle ve bakiyeni uçurmaya devam et! 💸"
+    ),
+    "ru": (
+        "🔥 Время пошло! 3-часовой перерыв окончен, новые видео уже ждут! "
+        "🚀 Заходи скорее, смотри видео и продолжай разгонять баланс! 💸"
+    ),
+    "default": (
+        "🔥 Cooldown is over! Your new 3-hour session is officially ready! "
+        "🚀 Jump back into the bot, watch videos, and keep boosting your balance! 💸"
+    ),
+}
+
+
+async def _cooldown_notification_worker() -> None:
+    """
+    Async background task that polls every 60 seconds.
+    Finds users whose 3-hour Session 1 cooldown has elapsed and
+    who have not yet been notified (cooldown_notified == False),
+    then sends them a localized private push message via the Telegram bot.
+    """
+    logger.info("[NOTIF-WORKER] Cooldown notification worker initialised — polling every 60s.")
+    while True:
+        try:
+            await asyncio.sleep(60)
+            now = datetime.now(timezone.utc)
+            cutoff = now - timedelta(hours=3)
+
+            async with async_session() as session:
+                stmt = (
+                    select(User)
+                    .where(
+                        User.session_1_count >= 12,
+                        User.cooldown_notified == False,  # noqa: E712
+                        User.session_1_completion_time <= cutoff,
+                    )
+                )
+                result = await session.execute(stmt)
+                pending_users = result.scalars().all()
+
+            if pending_users:
+                logger.info("[NOTIF-WORKER] Found %d user(s) ready for cooldown push.", len(pending_users))
+
+            for user in pending_users:
+                # Resolve localized message
+                lang = getattr(user, "language", "en") or "en"
+                msg_text = _COOLDOWN_PUSH_MESSAGES.get(lang, _COOLDOWN_PUSH_MESSAGES["default"])
+
+                # Send push notification — wrapped in try/except to handle blocked/deactivated bots
+                try:
+                    await bot.send_message(chat_id=user.telegram_id, text=msg_text)
+                    logger.info("[NOTIF-WORKER] Push sent to user telegram_id=%s (lang=%s).", user.telegram_id, lang)
+                except Exception as send_err:
+                    logger.warning(
+                        "[NOTIF-WORKER] Failed to send push to telegram_id=%s: %s",
+                        user.telegram_id, send_err
+                    )
+
+                # Mark as notified immediately inside its own transaction
+                # to guarantee no duplicate notifications even if the bot call failed.
+                async with async_session() as upd_session:
+                    upd_stmt = select(User).where(User.telegram_id == user.telegram_id)
+                    upd_res = await upd_session.execute(upd_stmt)
+                    db_user = upd_res.scalar_one_or_none()
+                    if db_user:
+                        db_user.cooldown_notified = True
+                        upd_session.add(db_user)
+                        await upd_session.commit()
+                        logger.info(
+                            "[NOTIF-WORKER] cooldown_notified=True committed for telegram_id=%s.",
+                            user.telegram_id
+                        )
+
+        except asyncio.CancelledError:
+            logger.info("[NOTIF-WORKER] Worker cancelled — shutting down cleanly.")
+            break
+        except Exception as worker_err:
+            logger.exception("[NOTIF-WORKER] Unexpected error in notification worker: %s", worker_err)
+            # Continue looping — a single cycle error must not kill the worker.
 
 
 # ── Mini App Frontend Serving ──────────────────────────────────────────
