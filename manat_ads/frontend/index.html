@@ -986,6 +986,54 @@
             transform: scaleX(1);
         }
 
+        /* ── Tasks Header Refactoring ──────────────────────────────── */
+        .tasks-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            padding: 24px 0 16px;
+            position: relative;
+            z-index: 10000;
+        }
+
+        .tasks-header-icon {
+            width: 32px;
+            height: 32px;
+            stroke: #ff9900;
+            stroke-width: 2;
+            fill: none;
+            filter: drop-shadow(0 0 8px rgba(255, 153, 0, 0.5));
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .tasks-header-content {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .tasks-header-title {
+            font-size: 26px;
+            font-weight: 900;
+            background: linear-gradient(135deg, #ff9900 0%, #f59e0b 60%, #ef4444 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.5px;
+            line-height: 1.1;
+        }
+
+        .tasks-header-subtitle {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-top: 3px;
+            font-weight: 500;
+        }
+
         /* ── Task Items ────────────────────────────────────────────── */
         .task-card {
             background: var(--bg-card);
@@ -1185,9 +1233,17 @@
 
             <!-- Tab: TASKS -->
             <div id="tab-tasks-content" style="display: none;">
-                <div class="header animate-in">
-                    <div class="header-logo">🎯 Tapşırıqlar</div>
-                    <div class="header-subtitle">Kanallara abunə ol və qazan</div>
+                <div class="tasks-header animate-in">
+                    <svg class="tasks-header-icon" viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <circle cx="12" cy="12" r="6"></circle>
+                        <circle cx="12" cy="12" r="2"></circle>
+                        <path d="M12 2v2M12 20v2M2 12h2M20 12h2"></path>
+                    </svg>
+                    <div class="tasks-header-content">
+                        <span class="tasks-header-title">Tapşırıqlar</span>
+                        <span class="tasks-header-subtitle">Kanallara abunə ol və qazan</span>
+                    </div>
                 </div>
                 <div id="tasks-list-container" class="animate-in delay-1">
                     <!-- Tasks injected by app.js -->
