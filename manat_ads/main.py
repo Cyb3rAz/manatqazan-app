@@ -804,12 +804,20 @@ async def get_tasks(telegram_id: int, initData: str | None = None) -> JSONRespon
             if user_data and "id" in user_data:
                 tg_id_from_init = user_data["id"]
                 if int(tg_id_from_init) == int(telegram_id):
-                    ADMIN_TELEGRAM_ID = os.getenv("ADMIN_TELEGRAM_ID")
-                    if ADMIN_TELEGRAM_ID:
-                        try:
-                            is_admin = (int(tg_id_from_init) == int(ADMIN_TELEGRAM_ID))
-                        except (ValueError, TypeError):
-                            pass
+                    # Load admin IDs from both ADMIN_TELEGRAM_ID and ADMIN_IDS
+                    admin_ids = []
+                    
+                    admin_telegram_id_env = os.getenv("ADMIN_TELEGRAM_ID")
+                    if admin_telegram_id_env and admin_telegram_id_env.strip().isdigit():
+                        admin_ids.append(int(admin_telegram_id_env.strip()))
+                        
+                    admin_ids_env = os.getenv("ADMIN_IDS", "1970477419")
+                    for x in admin_ids_env.split(","):
+                        x_clean = x.strip()
+                        if x_clean.isdigit():
+                            admin_ids.append(int(x_clean))
+                            
+                    is_admin = (int(tg_id_from_init) in admin_ids)
 
         return JSONResponse(
             {"tasks": available_tasks, "is_admin": is_admin},
@@ -831,9 +839,21 @@ async def add_task(req: AddTaskRequest) -> JSONResponse:
         return JSONResponse({"ok": False, "message": "Invalid authentication"}, status_code=401)
         
     telegram_id = user_data["id"]
-    ADMIN_TELEGRAM_ID = os.getenv("ADMIN_TELEGRAM_ID")
     
-    if not ADMIN_TELEGRAM_ID or str(telegram_id) != str(ADMIN_TELEGRAM_ID):
+    # Load admin IDs from both ADMIN_TELEGRAM_ID and ADMIN_IDS
+    admin_ids = []
+    
+    admin_telegram_id_env = os.getenv("ADMIN_TELEGRAM_ID")
+    if admin_telegram_id_env and admin_telegram_id_env.strip().isdigit():
+        admin_ids.append(int(admin_telegram_id_env.strip()))
+        
+    admin_ids_env = os.getenv("ADMIN_IDS", "1970477419")
+    for x in admin_ids_env.split(","):
+        x_clean = x.strip()
+        if x_clean.isdigit():
+            admin_ids.append(int(x_clean))
+            
+    if int(telegram_id) not in admin_ids:
         logger.warning("[ADMIN-ADD-TASK] Unauthorized access attempt by ID %s.", telegram_id)
         return JSONResponse({"ok": False, "message": "Forbidden"}, status_code=403)
         
