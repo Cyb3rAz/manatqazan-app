@@ -505,7 +505,7 @@ async def _upsert_user(
 
 
 # ── Admin new-user notification ────────────────────────────────────────
-async def _notify_admin_new_user(bot, user_id: int, first_name: str | None, username: str | None) -> None:
+async def _notify_admin_new_user(bot, user_id: int, first_name: str | None, username: str | None, referrer_text: str = "Doğrudan Keçid (Yoxdur)") -> None:
     """
     Send a real-time notification to ADMIN_ID about a brand-new user registration.
     Runs as a fire-and-forget background task — NEVER raises; registration flow must not be affected.
@@ -518,7 +518,8 @@ async def _notify_admin_new_user(bot, user_id: int, first_name: str | None, user
             "\U0001f680 <b>Yeni Istifadeci Qosuldu!</b>\n"
             f"\U0001f464 <b>Ad:</b> {first_name or 'Namelum'}\n"
             f"\U0001f194 <b>ID:</b> <code>{user_id}</code>\n"
-            f"\U0001f3f7 <b>Username:</b> {uname_display}"
+            f"\U0001f3f7 <b>Username:</b> {uname_display}\n"
+            f"👥 <b>Dəvət Edən:</b> {referrer_text}"
         )
         await bot.send_message(chat_id=ADMIN_ID, text=text, parse_mode="HTML")
     except Exception as notify_err:
@@ -546,6 +547,8 @@ async def cmd_start_with_referral(message: types.Message) -> None:
     if referrer_tg_id == tg_user.id:
         referrer_tg_id = None
 
+    referrer_text = "Doğrudan Keçid (Yoxdur)"
+
     async with async_session() as session:
         try:
             # Check if user already exists
@@ -571,8 +574,17 @@ async def cmd_start_with_referral(message: types.Message) -> None:
                 if referrer:
                     referrer.referral_count += 1
                     session.add(referrer)
+                    ref_uname = f"@{referrer.username}" if referrer.username else "Namelum"
+                    referrer_text = f"{ref_uname} (ID: {referrer.telegram_id})"
                 else:
                     referrer_tg_id = None
+                    if referral_code:
+                        referrer_text = f"Kampaniya: {referral_code}"
+            elif referral_code:
+                if referral_code.lower() == "tiktok_bio":
+                    referrer_text = "TikTok Bio Kampaniyası 🚀"
+                else:
+                    referrer_text = f"Kampaniya: {referral_code}"
 
             # Register with detected fallback lang; user will override via callback
             tg_detected = _detect_language(tg_user)
@@ -600,6 +612,7 @@ async def cmd_start_with_referral(message: types.Message) -> None:
         user_id=tg_user.id,
         first_name=tg_user.first_name,
         username=tg_user.username,
+        referrer_text=referrer_text,
     ))
 
     # Show language selection to new user – greeting localized to their native Telegram language
