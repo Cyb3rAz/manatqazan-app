@@ -75,6 +75,11 @@ const LOCALES = {
         upgradeDiamondTitle: "🌌 ƏFSANƏVİ! 🌌",
         upgradeDiamondText: "Vəssalam! Sən 💎 Almaz Liqasındasan! Çıxarış qapısı sənin üçün açıldı, son addımı at! 💰",
         upgradeBtn: "Uğurlar! 🚀",
+        nav_main: "Əsas",
+        nav_tasks: "Tapşırıqlar",
+        task_sub: "Kanallara abunə ol və qazan",
+        btn_verify: "Yoxla 🔄",
+        btn_join: "Abunə Ol 🚀",
     },
     tr: {
         subtitle: "İzle • Kazan • Çevir",
@@ -135,6 +140,11 @@ const LOCALES = {
         upgradeDiamondTitle: "🌌 EFSANEVİ! 🌌",
         upgradeDiamondText: "İşte bu! 💎 Elmas Lig'desin! Çekim kapısı senin için açıldı, son adımı at! 💰",
         upgradeBtn: "Başarılar! 🚀",
+        nav_main: "Ana Sayfa",
+        nav_tasks: "Görevler",
+        task_sub: "Kanallara abone ol ve kazan",
+        btn_verify: "Kontrol Et 🔄",
+        btn_join: "Abone Ol 🚀",
     },
     en: {
         subtitle: "Watch • Earn • Convert",
@@ -195,6 +205,11 @@ const LOCALES = {
         upgradeDiamondTitle: "🌌 LEGENDARY! 🌌",
         upgradeDiamondText: "That's it! You're in 💎 Diamond League! The withdrawal gate is open for you! 💰",
         upgradeBtn: "Let's Go! 🚀",
+        nav_main: "Home",
+        nav_tasks: "Tasks",
+        task_sub: "Subscribe to channels and earn",
+        btn_verify: "Verify 🔄",
+        btn_join: "Join 🚀",
     },
     ru: {
         subtitle: "Смотри • Зарабатывай • Конвертируй",
@@ -255,6 +270,11 @@ const LOCALES = {
         upgradeDiamondTitle: "🌌 ЛЕГЕНДАРНО! 🌌",
         upgradeDiamondText: "Вот это да! Вы в 💎 Алмазной Лиге! Ворота вывода открыты для вас! 💰",
         upgradeBtn: "Вперёд! 🚀",
+        nav_main: "Главная",
+        nav_tasks: "Задания",
+        task_sub: "Подписывайся на каналы и зарабатывай",
+        btn_verify: "Проверить 🔄",
+        btn_join: "Подписаться 🚀",
     }
 };
 
@@ -286,7 +306,15 @@ function setLanguage(lang) {
     });
 
     // Re-render dashboard with new language
-    if (userData) renderDashboard();
+    if (userData) {
+        renderDashboard();
+        
+        // If Tasks tab is active, re-fetch and translate task elements
+        const tasksTab = document.getElementById("tab-tasks-content");
+        if (tasksTab && tasksTab.style.display === "block") {
+            fetchTasks();
+        }
+    }
 
     // Update active language indicator
     document.querySelectorAll('.lang-option').forEach(opt => {
@@ -1195,8 +1223,8 @@ async function fetchTasks() {
                     <div class="task-reward">+${task.reward_amount} MC</div>
                 </div>
                 <div class="task-actions">
-                    <a href="${task.channel_url}" target="_blank" class="task-btn task-btn-join">Abunə Ol 🚀</a>
-                    <button class="task-btn task-btn-verify" onclick="verifyTask(${task.id})">Yoxla 🔄</button>
+                    <a href="${task.channel_url}" target="_blank" class="task-btn task-btn-join">${t('btn_join')}</a>
+                    <button class="task-btn task-btn-verify" onclick="verifyTask(${task.id})">${t('btn_verify')}</button>
                 </div>
             `;
             container.appendChild(card);
