@@ -80,6 +80,7 @@ const LOCALES = {
         task_sub: "Kanallara abunə ol və qazan",
         btn_verify: "Yoxla 🔄",
         btn_join: "Abunə Ol 🚀",
+        tasks_empty_msg: "Hazırda aktiv tapşırıq yoxdur.",
     },
     tr: {
         subtitle: "İzle • Kazan • Çevir",
@@ -145,6 +146,7 @@ const LOCALES = {
         task_sub: "Kanallara abone ol ve kazan",
         btn_verify: "Kontrol Et 🔄",
         btn_join: "Abone Ol 🚀",
+        tasks_empty_msg: "Şu anda aktif görev bulunmamaktadır.",
     },
     en: {
         subtitle: "Watch • Earn • Convert",
@@ -210,6 +212,7 @@ const LOCALES = {
         task_sub: "Subscribe to channels and earn",
         btn_verify: "Verify 🔄",
         btn_join: "Join 🚀",
+        tasks_empty_msg: "There are currently no active tasks.",
     },
     ru: {
         subtitle: "Смотри • Зарабатывай • Конвертируй",
@@ -275,6 +278,7 @@ const LOCALES = {
         task_sub: "Подписывайся на каналы и зарабатывай",
         btn_verify: "Проверить 🔄",
         btn_join: "Подписаться 🚀",
+        tasks_empty_msg: "На данный момент активных заданий нет.",
     }
 };
 
@@ -304,6 +308,12 @@ function setLanguage(lang) {
         const val = t(key);
         if (val) el.textContent = val;
     });
+
+    // Manually translate tasks-empty-msg if present in DOM
+    const emptyMsgEl = document.getElementById('tasks-empty-msg');
+    if (emptyMsgEl) {
+        emptyMsgEl.textContent = t('tasks_empty_msg');
+    }
 
     // Re-render dashboard with new language
     if (userData) {
@@ -1209,7 +1219,7 @@ async function fetchTasks() {
         const data = await resp.json();
         
         if (!data.tasks || data.tasks.length === 0) {
-            container.innerHTML = `<div style="text-align:center; padding: 20px; color: var(--text-muted);">Hazırda aktiv tapşırıq yoxdur.</div>`;
+            container.innerHTML = `<div id="tasks-empty-msg" style="text-align:center; padding: 20px; color: var(--text-muted);" data-i18n="tasks_empty_msg">${t('tasks_empty_msg')}</div>`;
             return;
         }
         
