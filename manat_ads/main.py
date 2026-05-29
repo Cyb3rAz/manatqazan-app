@@ -803,12 +803,18 @@ async def get_tasks(telegram_id: int, initData: str | None = None) -> JSONRespon
             user_data = validate_init_data(initData, BOT_TOKEN)
             if user_data and "id" in user_data:
                 tg_id_from_init = user_data["id"]
-                if tg_id_from_init == telegram_id:
+                if int(tg_id_from_init) == int(telegram_id):
                     ADMIN_TELEGRAM_ID = os.getenv("ADMIN_TELEGRAM_ID")
-                    if ADMIN_TELEGRAM_ID and str(tg_id_from_init) == str(ADMIN_TELEGRAM_ID):
-                        is_admin = True
+                    if ADMIN_TELEGRAM_ID:
+                        try:
+                            is_admin = (int(tg_id_from_init) == int(ADMIN_TELEGRAM_ID))
+                        except (ValueError, TypeError):
+                            pass
 
-        return JSONResponse({"tasks": available_tasks, "is_admin": is_admin})
+        return JSONResponse(
+            {"tasks": available_tasks, "is_admin": is_admin},
+            headers={"Cache-Control": "no-store, no-cache, must-revalidate, max-age=0"}
+        )
 
 class AddTaskRequest(BaseModel):
     initData: str
