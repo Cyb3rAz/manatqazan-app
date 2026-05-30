@@ -368,6 +368,16 @@ BOT_LOCALES = {
     },
 }
 
+# ── Localized system-refresh hint (appended to every menu screen) ──────
+# Defined once here; referenced by _show_balance, _show_referral,
+# _show_how_it_works, and _handle_withdraw so the hint is always in sync.
+SYSTEM_REFRESH_HINT: dict[str, str] = {
+    'az': "\n\n💡 <b>İpucu:</b> Sistemi yeniləmək üçün /start yaza bilərsiniz!",
+    'tr': "\n\n💡 <b>İpucu:</b> Sistemi yenilemek için /start yazabilirsiniz!",
+    'ru': "\n\n💡 <b>Подсказка:</b> Для обновления системы вы можете написать /start!",
+    'en': "\n\n💡 <b>Tip:</b> You can write /start to refresh the system!",
+}
+
 
 def get_lang_select_keyboard() -> InlineKeyboardMarkup:
     """Returns 4-button language selection InlineKeyboard for new users."""
@@ -837,6 +847,7 @@ async def _show_balance(tg_user: types.User, message: types.Message) -> None:
             else:
                 s2_status = loc['balance_active']
 
+    hint = SYSTEM_REFRESH_HINT.get(lang, SYSTEM_REFRESH_HINT['en'])
     await message.answer(
         f"{loc['balance_title']}\n\n"
         f"┌─────────────────────────\n"
@@ -845,7 +856,9 @@ async def _show_balance(tg_user: types.User, message: types.Message) -> None:
         f"├─────────────────────────\n"
         f"│ {loc['balance_s1_row']}  {session_1_count}/12 klik\n"
         f"│ {loc['balance_s2_row']}  {session_2_count}/12 klik ({s2_status})\n"
-        f"└─────────────────────────",
+        f"└─────────────────────────"
+        + hint,
+        parse_mode="HTML",
     )
 
 
@@ -886,6 +899,7 @@ async def _show_referral(tg_user: types.User, message: types.Message) -> None:
 
     bonus_per_video = MC_PER_VIDEO * 10 // 100
 
+    hint = SYSTEM_REFRESH_HINT.get(lang, SYSTEM_REFRESH_HINT['en'])
     await message.answer(
         f"{loc['referral_title']}\n\n"
         f"{loc['referral_desc']}\n\n"
@@ -896,7 +910,9 @@ async def _show_referral(tg_user: types.User, message: types.Message) -> None:
         f"│ {loc['referral_earned']}   {user.referral_earnings_mc:,.0f} MC\n"
         f"│ {loc['referral_azn'].format(amount=ref_fiat)}\n"
         f"└─────────────────────────\n\n"
-        + loc['referral_tip'].format(mc=MC_PER_VIDEO, bonus=bonus_per_video),
+        + loc['referral_tip'].format(mc=MC_PER_VIDEO, bonus=bonus_per_video)
+        + hint,
+        parse_mode="HTML",
     )
 
 
@@ -1070,8 +1086,10 @@ async def _show_how_it_works(tg_user: types.User, message: types.Message) -> Non
     lang = (user.language if user and user.language in BOT_LOCALES else 'en')
     loc = BOT_LOCALES[lang]
 
-    text = loc['how_title'] + "\n\n" + loc['how_body'].format(mc=MC_PER_VIDEO)
-    await message.answer(text)
+    hint = SYSTEM_REFRESH_HINT.get(lang, SYSTEM_REFRESH_HINT['en'])
+
+    text = loc['how_title'] + "\n\n" + loc['how_body'].format(mc=MC_PER_VIDEO) + hint
+    await message.answer(text, parse_mode="HTML")
 
 
 async def _handle_withdraw(tg_user: types.User, message: types.Message) -> None:
@@ -1087,6 +1105,8 @@ async def _handle_withdraw(tg_user: types.User, message: types.Message) -> None:
     lang = user.language if user.language in BOT_LOCALES else 'en'
     loc = BOT_LOCALES[lang]
 
+    hint = SYSTEM_REFRESH_HINT.get(lang, SYSTEM_REFRESH_HINT['en'])
+
     # Hardcoded minimum threshold (625,000 MC) check to prevent floating-point rounding bypasses
     if user.balance_mc < 625000.0:
         if lang == 'az':
@@ -1095,9 +1115,12 @@ async def _handle_withdraw(tg_user: types.User, message: types.Message) -> None:
             fiat_value = user.balance_mc / (625000.0 / MIN_WITHDRAWAL_TRY)
         else:  # en, ru
             fiat_value = user.balance_mc / 125000.0
-        await message.answer(loc['withdraw_below_limit'].format(amount=fiat_value))
+        await message.answer(
+            loc['withdraw_below_limit'].format(amount=fiat_value) + hint,
+            parse_mode="HTML",
+        )
     else:
-        await message.answer(loc['withdraw_ok'])
+        await message.answer(loc['withdraw_ok'] + hint, parse_mode="HTML")
 
 
 # ── Admin Commands ──────────────────────────────────────────────────────
