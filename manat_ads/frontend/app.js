@@ -1011,7 +1011,7 @@ async function watchAd(sessionNum = 1) {
 }
 
 // ── Düymə Cooldown ────────────────────────────────────────────────────
-function startButtonCooldown(sessionNum, seconds = 5) {
+function startButtonCooldown(sessionNum, seconds = 7) {
     const btn = document.getElementById(`session-${sessionNum}-btn`);
     const otherBtn = document.getElementById(`session-${sessionNum === 1 ? 2 : 1}-btn`);
 
