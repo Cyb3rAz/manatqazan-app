@@ -37,21 +37,21 @@
             --text-primary: #f1f5f9;
             --text-secondary: #94a3b8;
             --text-muted: #64748b;
-            --accent-gold: #f59e0b;
-            --accent-gold-glow: rgba(245, 158, 11, 0.25);
+            --accent-gold: #06b6d4;
+            --accent-gold-glow: rgba(0, 255, 204, 0.20);
             --accent-emerald: #10b981;
             --accent-violet: #8b5cf6;
             --accent-rose: #f43f5e;
             --accent-cyan: #06b6d4;
-            --gradient-gold: linear-gradient(135deg, #f59e0b, #d97706);
+            --gradient-gold: linear-gradient(135deg, #06b6d4, #00ffcc);
             --gradient-emerald: linear-gradient(135deg, #10b981, #059669);
-            --gradient-hero: linear-gradient(135deg, #f59e0b 0%, #ef4444 50%, #8b5cf6 100%);
+            --gradient-hero: linear-gradient(135deg, #06b6d4 0%, #00ffcc 100%);
             --radius-md: 12px;
             --radius-lg: 16px;
             --radius-xl: 20px;
             --radius-full: 9999px;
             --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.3);
-            --shadow-glow: 0 0 40px rgba(245, 158, 11, 0.15);
+            --shadow-glow: 0 0 40px rgba(0, 255, 204, 0.12);
             --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
@@ -67,8 +67,8 @@
 
         body {
             background:
-                radial-gradient(ellipse at 20% 0%, rgba(245, 158, 11, 0.08) 0%, transparent 50%),
-                radial-gradient(ellipse at 80% 100%, rgba(139, 92, 246, 0.06) 0%, transparent 50%),
+                radial-gradient(ellipse at 20% 0%, rgba(6, 182, 212, 0.10) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 100%, rgba(0, 255, 204, 0.05) 0%, transparent 50%),
                 var(--bg-primary);
         }
 
@@ -99,11 +99,11 @@
         .splash-logo {
             font-size: 34px;
             font-weight: 900;
-            background: linear-gradient(135deg, #ff9900 0%, #e67300 100%);
+            background: linear-gradient(135deg, #06b6d4 0%, #00ffcc 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            filter: drop-shadow(0 0 14px rgba(255, 153, 0, 0.45));
+            filter: drop-shadow(0 0 12px rgba(0, 255, 204, 0.4));
             letter-spacing: -0.5px;
             margin-bottom: 10px;
             animation: splashPulse 2s ease-in-out infinite;
@@ -121,8 +121,8 @@
         .cyber-spinner {
             width: 28px;
             height: 28px;
-            border: 2px solid rgba(255, 153, 0, 0.12);
-            border-top: 2px solid #ff9900;
+            border: 2px solid rgba(0, 255, 204, 0.12);
+            border-top: 2px solid #00ffcc;
             border-radius: 50%;
             animation: spin 0.8s linear infinite;
         }
@@ -132,8 +132,8 @@
         }
 
         @keyframes splashPulse {
-            0%, 100% { filter: drop-shadow(0 0 10px rgba(255, 153, 0, 0.35)); }
-            50%       { filter: drop-shadow(0 0 22px rgba(255, 153, 0, 0.65)); }
+            0%, 100% { filter: drop-shadow(0 0 10px rgba(0, 255, 204, 0.35)); }
+            50%       { filter: drop-shadow(0 0 24px rgba(0, 255, 204, 0.70)); }
         }
 
         /* ── Header ────────────────────────────────────────────────── */
@@ -184,12 +184,12 @@
         /* ── Balance Hero Card ──────────────────────────────────── */
         .balance-hero {
             position: relative;
-            background: linear-gradient(135deg, rgba(255, 153, 0, 0.92) 0%, rgba(220, 106, 0, 0.97) 100%);
+            background: linear-gradient(135deg, rgba(6, 182, 212, 0.92) 0%, rgba(0, 180, 148, 0.97) 100%);
             border-radius: var(--radius-xl);
             padding: 24px;
             margin: 16px 0;
             overflow: hidden;
-            box-shadow: var(--shadow-glow), var(--shadow-card);
+            box-shadow: 0 0 40px rgba(0, 255, 204, 0.12), var(--shadow-card);
         }
 
         .balance-hero::before {
@@ -396,12 +396,12 @@
             filter: drop-shadow(0 2px 6px rgba(166, 77, 255, 0.35));
         }
 
-        /* Card 4 — Referal Qazancı: amber/orange neon */
+        /* Card 4 — Referal Qazancı: cyan/mint neon */
         .stats-grid .stat-card:nth-child(4) .stat-icon {
-            filter: drop-shadow(0 1px 3px rgba(255, 153, 0, 0.22));
+            filter: drop-shadow(0 1px 3px rgba(6, 182, 212, 0.22));
         }
         .stats-grid .stat-card:nth-child(4):hover .stat-icon {
-            filter: drop-shadow(0 2px 6px rgba(255, 153, 0, 0.35));
+            filter: drop-shadow(0 2px 6px rgba(6, 182, 212, 0.35));
         }
 
         .stat-value {
@@ -430,7 +430,7 @@
             border-radius: var(--radius-lg);
             padding: 16px;
             margin: 12px 0;
-            box-shadow: 0 4px 30px rgba(255, 153, 0, 0.1) !important;
+            box-shadow: 0 4px 30px rgba(0, 255, 204, 0.08) !important;
         }
 
         .progress-header {
@@ -443,13 +443,13 @@
         .progress-title {
             font-size: 13px;
             font-weight: 700 !important;
-            color: #f59e0b !important; /* Gold text */
+            color: #06b6d4 !important; /* Cyan accent */
         }
 
         .progress-count {
             font-size: 13px;
             font-weight: 700 !important;
-            color: #f59e0b !important; /* Gold text */
+            color: #06b6d4 !important; /* Cyan accent */
         }
 
         .progress-bar {
@@ -458,15 +458,15 @@
             background: rgba(255, 255, 255, 0.04) !important;
             border-radius: var(--radius-full);
             overflow: hidden;
-            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.4), 0 0 10px rgba(255, 153, 0, 0.05) !important; /* ultra-subtle amber aura */
+            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.4), 0 0 10px rgba(6, 182, 212, 0.08) !important; /* ultra-subtle cyan aura */
         }
 
         .progress-fill {
             height: 100%;
-            background: linear-gradient(90deg, #ff9900 0%, #e67300 100%) !important;
+            background: linear-gradient(90deg, #06b6d4 0%, #00ffcc 100%) !important;
             border-radius: var(--radius-full);
             transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 0 8px rgba(255, 153, 0, 0.4) !important; /* subtle amber glow for the fill */
+            box-shadow: 0 0 8px rgba(0, 255, 204, 0.45) !important; /* subtle cyan-mint glow for the fill */
         }
 
         /* ── Watch Button ──────────────────────────────────────────── */
@@ -479,14 +479,14 @@
             padding: 18px;
             border: none;
             border-radius: var(--radius-lg);
-            background: linear-gradient(135deg, #ff9900 0%, #e67300 100%);
-            color: #fff;
+            background: linear-gradient(135deg, #06b6d4 0%, #00ffcc 100%);
+            color: #0a1a22;
             font-family: 'Inter', sans-serif;
             font-size: 16px;
             font-weight: 700;
             cursor: pointer;
             transition: var(--transition);
-            box-shadow: 0 4px 20px rgba(255, 153, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 20px rgba(0, 255, 204, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.2);
             position: relative;
             overflow: hidden;
             letter-spacing: 0.3px;
@@ -529,22 +529,22 @@
         /* Standardize active state on both session buttons */
         #session-1-btn:not(:disabled),
         #session-2-btn:not(:disabled) {
-            background: linear-gradient(135deg, #ff9900 0%, #e67300 100%) !important;
-            box-shadow: 0 4px 20px rgba(255, 153, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
-            color: #ffffff !important;
+            background: linear-gradient(135deg, #06b6d4 0%, #00ffcc 100%) !important;
+            box-shadow: 0 4px 20px rgba(0, 255, 204, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
+            color: #0a1a22 !important;
             font-weight: 700 !important;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.2) !important;
+            text-shadow: none !important;
         }
 
         /* "Tamamlandı" Status Overlay state */
         .watch-btn.completed {
-            background: rgba(255, 153, 0, 0.08) !important;
-            border: 1px solid rgba(255, 153, 0, 0.2) !important;
+            background: rgba(6, 182, 212, 0.08) !important;
+            border: 1px solid rgba(6, 182, 212, 0.2) !important;
             backdrop-filter: blur(8px) !important;
             -webkit-backdrop-filter: blur(8px) !important;
-            color: #f59e0b !important; /* Gold text */
+            color: #06b6d4 !important; /* Cyan text */
             font-weight: 700 !important;
-            box-shadow: inset 0 1px 1px rgba(255, 153, 0, 0.1), 0 4px 15px rgba(0, 0, 0, 0.2) !important;
+            box-shadow: inset 0 1px 1px rgba(6, 182, 212, 0.1), 0 4px 15px rgba(0, 0, 0, 0.2) !important;
             text-shadow: none !important;
             cursor: not-allowed !important;
             pointer-events: none !important;
@@ -638,9 +638,9 @@
         .copy-btn {
             width: 100%;
             padding: 12px;
-            background: rgba(255, 153, 0, 0.06) !important;
-            border: 1px solid rgba(255, 153, 0, 0.35) !important;
-            color: #ff9900 !important;
+            background: rgba(6, 182, 212, 0.06) !important;
+            border: 1px solid rgba(6, 182, 212, 0.35) !important;
+            color: #06b6d4 !important;
             font-weight: 700 !important;
             font-family: 'Inter', sans-serif;
             font-size: 13px;
@@ -650,13 +650,13 @@
         }
 
         .copy-btn:hover {
-            background: rgba(255, 153, 0, 0.12) !important;
+            background: rgba(6, 182, 212, 0.12) !important;
         }
 
         .copy-btn:active {
-            background: #ff9900 !important;
-            color: #ffffff !important;
-            box-shadow: 0 0 12px rgba(255, 153, 0, 0.4) !important;
+            background: #06b6d4 !important;
+            color: #0a1a22 !important;
+            box-shadow: 0 0 12px rgba(6, 182, 212, 0.4) !important;
             transform: scale(0.98) !important;
         }
 
@@ -870,8 +870,8 @@
 
         .lang-switcher:hover {
             background: rgba(255, 255, 255, 0.12);
-            border-color: rgba(245, 158, 11, 0.35);
-            box-shadow: 0 4px 16px rgba(245, 158, 11, 0.15);
+            border-color: rgba(6, 182, 212, 0.35);
+            box-shadow: 0 4px 16px rgba(6, 182, 212, 0.15);
         }
 
         .lang-dropdown {
@@ -882,11 +882,11 @@
             background: rgba(30, 30, 40, 0.95);
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(245, 158, 11, 0.3);
+            border: 1px solid rgba(6, 182, 212, 0.30);
             border-radius: 12px;
             overflow: hidden;
             min-width: 110px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 15px rgba(245, 158, 11, 0.15);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 15px rgba(6, 182, 212, 0.15);
             opacity: 0;
             transform: translateY(-8px) scale(0.95);
             pointer-events: none;
@@ -916,8 +916,8 @@
         }
 
         .lang-option.active {
-            color: var(--accent-gold);
-            background: rgba(245, 158, 11, 0.1);
+            color: var(--accent-cyan);
+            background: rgba(6, 182, 212, 0.1);
         }
 
         /* Withdrawal target label */
@@ -954,13 +954,13 @@
 
         .onboarding-card {
             background: rgba(20, 20, 30, 0.95);
-            border: 1px solid rgba(245, 158, 11, 0.25);
+            border: 1px solid rgba(6, 182, 212, 0.25);
             border-radius: var(--radius-xl);
             padding: 30px 24px;
             width: 90%;
             max-width: 360px;
             text-align: center;
-            box-shadow: 0 0 40px rgba(245, 158, 11, 0.15), 0 12px 32px rgba(0, 0, 0, 0.6);
+            box-shadow: 0 0 40px rgba(6, 182, 212, 0.12), 0 12px 32px rgba(0, 0, 0, 0.6);
             transform: scale(0.9) translateY(20px);
             transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             position: relative;
@@ -1009,9 +1009,9 @@
         }
 
         .onboarding-option-card.active {
-            background: rgba(245, 158, 11, 0.08);
-            border-color: var(--accent-gold);
-            box-shadow: 0 0 15px rgba(245, 158, 11, 0.2), inset 0 0 8px rgba(245, 158, 11, 0.05);
+            background: rgba(6, 182, 212, 0.08);
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 15px rgba(6, 182, 212, 0.2), inset 0 0 8px rgba(6, 182, 212, 0.05);
         }
 
         .onboarding-flag {
@@ -1043,7 +1043,7 @@
         }
 
         .onboarding-option-card.active .onboarding-currency {
-            color: rgba(245, 158, 11, 0.9);
+            color: rgba(6, 182, 212, 0.9);
         }
 
         .onboarding-btn {
@@ -1102,7 +1102,7 @@
         }
 
         .nav-tab.active {
-            color: #ff9900 !important;
+            color: #06b6d4 !important;
         }
         
         .nav-tab:hover {
@@ -1154,10 +1154,10 @@
         .tasks-header-icon {
             width: 32px;
             height: 32px;
-            stroke: #ff9900;
+            stroke: #06b6d4;
             stroke-width: 2;
             fill: none;
-            filter: drop-shadow(0 0 8px rgba(255, 153, 0, 0.5));
+            filter: drop-shadow(0 0 8px rgba(6, 182, 212, 0.5));
             flex-shrink: 0;
             display: flex;
             align-items: center;
@@ -1173,7 +1173,7 @@
         .tasks-header-title {
             font-size: 26px;
             font-weight: 900;
-            background: linear-gradient(135deg, #ff9900 0%, #f59e0b 60%, #ef4444 100%);
+            background: linear-gradient(135deg, #06b6d4 0%, #00ffcc 60%, #00ccaa 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
@@ -1259,24 +1259,24 @@
         }
 
         .task-btn-verify {
-            background: #ff9900;
-            color: #000000;
+            background: #06b6d4;
+            color: #0a1a22;
             font-weight: bold;
             border: none;
-            box-shadow: 0 0 10px rgba(255, 153, 0, 0.3);
+            box-shadow: 0 0 10px rgba(6, 182, 212, 0.3);
         }
 
         .task-btn-verify:hover {
-            background: #e68a00;
-            box-shadow: 0 0 15px rgba(255, 153, 0, 0.5);
+            background: #00a8c4;
+            box-shadow: 0 0 15px rgba(6, 182, 212, 0.5);
         }
 
         /* ── Admin Action Button ───────────────────────────────────── */
         .admin-action-btn {
             display: block;
             width: 100%;
-            background: linear-gradient(135deg, #ff9900, #ef4444);
-            color: #ffffff;
+            background: linear-gradient(135deg, #06b6d4, #00ffcc);
+            color: #0a1a22;
             border: none;
             border-radius: var(--radius-md);
             padding: 14px 20px;
@@ -1285,7 +1285,7 @@
             cursor: pointer;
             margin: 16px 0;
             text-align: center;
-            box-shadow: 0 4px 20px rgba(255, 153, 0, 0.25);
+            box-shadow: 0 4px 20px rgba(6, 182, 212, 0.25);
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
@@ -1326,7 +1326,7 @@
             padding: 24px;
             width: 100%;
             max-width: 360px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.5), 0 0 30px rgba(255, 153, 0, 0.15);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5), 0 0 30px rgba(6, 182, 212, 0.12);
             transform: scale(0.9);
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
@@ -1341,7 +1341,7 @@
             color: #ffffff;
             margin-bottom: 16px;
             text-align: center;
-            background: linear-gradient(135deg, #ff9900, #ef4444);
+            background: linear-gradient(135deg, #06b6d4, #00ffcc);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
@@ -1374,9 +1374,9 @@
         }
 
         .admin-input:focus {
-            border-color: #ff9900;
+            border-color: #06b6d4;
             background: rgba(255, 255, 255, 0.06);
-            box-shadow: 0 0 10px rgba(255, 153, 0, 0.2);
+            box-shadow: 0 0 10px rgba(6, 182, 212, 0.2);
         }
 
         .admin-modal-actions {
@@ -1397,9 +1397,9 @@
         }
 
         .admin-btn-create {
-            background: linear-gradient(135deg, #ff9900, #d97706);
-            color: #ffffff;
-            box-shadow: 0 4px 12px rgba(255, 153, 0, 0.2);
+            background: linear-gradient(135deg, #06b6d4, #00ccaa);
+            color: #0a1a22;
+            box-shadow: 0 4px 12px rgba(6, 182, 212, 0.2);
         }
 
         .admin-btn-create:active {
@@ -1676,7 +1676,7 @@
         </div>
     </div>
 
-    <script src="/static/app.js?v=3.6.0"></script>
+    <script src="/static/app.js?v=4.0.0"></script>
 </body>
 </html>
 <!-- trigger vercel build v8 - AZ translation -->
