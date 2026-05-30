@@ -564,14 +564,24 @@ async function initApp() {
             console.log(`[LangDebug] Onboarding already completed, skipping modal.`);
         }
 
-        // Əsas kontenti göstər, loaderi gizlə
-        document.getElementById("loader").style.display = "none";
+        // Əsas kontenti göstər, splash screen-i fade-out ilə gizlə
         document.getElementById("main-content").style.display = "block";
+        const splashSuccess = document.getElementById("loader");
+        if (splashSuccess) {
+            splashSuccess.style.opacity = '0';
+            splashSuccess.style.visibility = 'hidden';
+            setTimeout(() => splashSuccess.remove(), 400);
+        }
 
     } catch (err) {
         console.error("Başlanğıc xətası:", err);
-        document.getElementById("loader").style.display = "none";
         document.getElementById("main-content").style.display = "block";
+        const splashError = document.getElementById("loader");
+        if (splashError) {
+            splashError.style.opacity = '0';
+            splashError.style.visibility = 'hidden';
+            setTimeout(() => splashError.remove(), 400);
+        }
         renderDashboard();
         setLanguage(currentLang);
         showToast(t('toastLoadFail'), "error");
