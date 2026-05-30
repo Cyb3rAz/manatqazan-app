@@ -294,7 +294,7 @@
             100% { left: 120%; }
         }
 
-        /* ── Stats Grid ────────────────────────────────────────────── */
+        /* ── Stats Grid ───────────────────────────────────────── */
         .stats-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -303,22 +303,75 @@
         }
 
         .stat-card {
-            background: var(--bg-card);
+            background: rgba(255, 255, 255, 0.03);
             backdrop-filter: blur(12px);
-            border: 1px solid var(--border-glass);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.07);
             border-radius: var(--radius-lg);
             padding: 16px;
             transition: var(--transition);
+            box-shadow:
+                inset 0 1px 1px rgba(255, 255, 255, 0.05),
+                0 4px 24px rgba(0, 0, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Subtle top-edge highlight line on each card */
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent);
         }
 
         .stat-card:hover {
-            border-color: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.14);
             transform: translateY(-2px);
+            box-shadow:
+                inset 0 1px 1px rgba(255, 255, 255, 0.08),
+                0 8px 32px rgba(0, 0, 0, 0.28);
         }
 
+        /* ── Stat Icon base ── */
         .stat-icon {
-            font-size: 22px;
-            margin-bottom: 8px;
+            font-size: 24px;
+            margin-bottom: 10px;
+            display: block;
+            transition: filter 0.3s ease;
+        }
+
+        /* Card 1 — Ümumi Qazanc: green/gold neon */
+        .stats-grid .stat-card:nth-child(1) .stat-icon {
+            filter: drop-shadow(0 0 8px rgba(0, 230, 115, 0.65));
+        }
+        .stats-grid .stat-card:nth-child(1):hover .stat-icon {
+            filter: drop-shadow(0 0 14px rgba(0, 230, 115, 0.9));
+        }
+
+        /* Card 2 — Bugünkü Videolar: cyan/blue neon */
+        .stats-grid .stat-card:nth-child(2) .stat-icon {
+            filter: drop-shadow(0 0 8px rgba(0, 153, 255, 0.65));
+        }
+        .stats-grid .stat-card:nth-child(2):hover .stat-icon {
+            filter: drop-shadow(0 0 14px rgba(0, 153, 255, 0.9));
+        }
+
+        /* Card 3 — Dəvət Olunanlar: violet/purple neon */
+        .stats-grid .stat-card:nth-child(3) .stat-icon {
+            filter: drop-shadow(0 0 8px rgba(166, 77, 255, 0.65));
+        }
+        .stats-grid .stat-card:nth-child(3):hover .stat-icon {
+            filter: drop-shadow(0 0 14px rgba(166, 77, 255, 0.9));
+        }
+
+        /* Card 4 — Referal Qazancı: amber/orange neon */
+        .stats-grid .stat-card:nth-child(4) .stat-icon {
+            filter: drop-shadow(0 0 8px rgba(255, 153, 0, 0.65));
+        }
+        .stats-grid .stat-card:nth-child(4):hover .stat-icon {
+            filter: drop-shadow(0 0 14px rgba(255, 153, 0, 0.9));
         }
 
         .stat-value {
@@ -326,15 +379,16 @@
             font-weight: 800;
             color: var(--text-primary);
             line-height: 1.2;
+            letter-spacing: -0.3px;
         }
 
         .stat-label {
-            font-size: 11px;
-            font-weight: 600;
-            color: var(--text-muted);
+            font-size: 10px;
+            font-weight: 700;
+            color: rgba(255, 255, 255, 0.45);
             text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-top: 2px;
+            letter-spacing: 0.05em;
+            margin-top: 3px;
         }
 
         /* ── Progress Bar ──────────────────────────────────────────── */
@@ -1548,7 +1602,7 @@
         </div>
     </div>
 
-    <script src="/static/app.js?v=2.1.0"></script>
+    <script src="/static/app.js?v=2.2.0"></script>
 </body>
 </html>
 <!-- trigger vercel build v8 - AZ translation -->
