@@ -27,13 +27,13 @@ const LOCALES = {
         dailyVideos: "BUGÜNKÜ VİDEOLAR",
         invitedLabel: "DƏVƏT OLUNANLAR",
         refEarnings: "REFERAL QAZANCI",
-        session1Title: "🌅 1️⃣ Səans 1",
-        session2Title: "🌌 2️⃣ Səans 2",
+        session1Title: "<svg class=\"session-title-icon\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"12\" cy=\"12\" r=\"4\"></circle><path d=\"M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41\"></svg> Səans 1",
+        session2Title: "<svg class=\"session-title-icon\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z\"></svg> Səans 2",
         videoUnit: "video",
-        watchBtn: "🎬 Video İzlə &",
+        watchBtn: "<svg class=\"btn-inline-icon\" style=\"fill: #0a1a22; stroke: #0a1a22;\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\"><polygon points=\"6 4 20 12 6 20 6 4\"></polygon></svg> Video İzlə &",
         watchBtnSuffix: "MC Qazan",
-        completedS1: "🌅 Tamamlandı",
-        completedS2: "🌌 Tamamlandı",
+        completedS1: "<svg class=\"btn-inline-icon\" style=\"stroke: #06b6d4;\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M22 11.08V12a10 10 0 1 1-5.93-9.14\"></path><polyline points=\"22 4 12 14.01 9 11.01\"></polyline></svg> Tamamlandı",
+        completedS2: "<svg class=\"btn-inline-icon\" style=\"stroke: #06b6d4;\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M22 11.08V12a10 10 0 1 1-5.93-9.14\"></path><polyline points=\"22 4 12 14.01 9 11.01\"></polyline></svg> Tamamlandı",
         locked: "🔒 Səans 2 Kilidlidir",
         finishFirst: "⏳ Əvvəlcə Səans 1-i bitirin",
         cooldownHint: "Kilid açılmasına:",
@@ -94,13 +94,13 @@ const LOCALES = {
         dailyVideos: "BUGÜNKÜ VİDEOLAR",
         invitedLabel: "DAVET EDİLENLER",
         refEarnings: "REFERANS KAZANCI",
-        session1Title: "🌅 1️⃣ Oturum 1",
-        session2Title: "🌌 2️⃣ Oturum 2",
+        session1Title: "<svg class=\"session-title-icon\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"12\" cy=\"12\" r=\"4\"></circle><path d=\"M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41\"></svg> Oturum 1",
+        session2Title: "<svg class=\"session-title-icon\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z\"></svg> Oturum 2",
         videoUnit: "video",
-        watchBtn: "🎬 Video İzle &",
+        watchBtn: "<svg class=\"btn-inline-icon\" style=\"fill: #0a1a22; stroke: #0a1a22;\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\"><polygon points=\"6 4 20 12 6 20 6 4\"></polygon></svg> Video İzle &",
         watchBtnSuffix: "MC Kazan",
-        completedS1: "🌅 Tamamlandı",
-        completedS2: "🌌 Tamamlandı",
+        completedS1: "<svg class=\"btn-inline-icon\" style=\"stroke: #06b6d4;\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M22 11.08V12a10 10 0 1 1-5.93-9.14\"></path><polyline points=\"22 4 12 14.01 9 11.01\"></polyline></svg> Tamamlandı",
+        completedS2: "<svg class=\"btn-inline-icon\" style=\"stroke: #06b6d4;\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M22 11.08V12a10 10 0 1 1-5.93-9.14\"></path><polyline points=\"22 4 12 14.01 9 11.01\"></polyline></svg> Tamamlandı",
         locked: "🔒 Oturum 2 Kilitli",
         finishFirst: "⏳ Önce Oturum 1'i bitirin",
         cooldownHint: "Kilit açılmasına:",
@@ -161,13 +161,13 @@ const LOCALES = {
         dailyVideos: "TODAY'S VIDEOS",
         invitedLabel: "INVITED",
         refEarnings: "REFERRAL EARNINGS",
-        session1Title: "🌅 1️⃣ Session 1",
-        session2Title: "🌌 2️⃣ Session 2",
+        session1Title: "<svg class=\"session-title-icon\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"12\" cy=\"12\" r=\"4\"></circle><path d=\"M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41\"></svg> Session 1",
+        session2Title: "<svg class=\"session-title-icon\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z\"></svg> Session 2",
         videoUnit: "videos",
-        watchBtn: "🎬 Watch Video &",
+        watchBtn: "<svg class=\"btn-inline-icon\" style=\"fill: #0a1a22; stroke: #0a1a22;\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\"><polygon points=\"6 4 20 12 6 20 6 4\"></polygon></svg> Watch Video &",
         watchBtnSuffix: "MC Earn",
-        completedS1: "🌅 Completed",
-        completedS2: "🌌 Completed",
+        completedS1: "<svg class=\"btn-inline-icon\" style=\"stroke: #06b6d4;\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M22 11.08V12a10 10 0 1 1-5.93-9.14\"></path><polyline points=\"22 4 12 14.01 9 11.01\"></polyline></svg> Completed",
+        completedS2: "<svg class=\"btn-inline-icon\" style=\"stroke: #06b6d4;\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M22 11.08V12a10 10 0 1 1-5.93-9.14\"></path><polyline points=\"22 4 12 14.01 9 11.01\"></polyline></svg> Completed",
         locked: "🔒 Session 2 Locked",
         finishFirst: "⏳ Complete Session 1 first",
         cooldownHint: "Unlocks in:",
@@ -228,13 +228,13 @@ const LOCALES = {
         dailyVideos: "ВИДЕО СЕГОДНЯ",
         invitedLabel: "ПРИГЛАШЁННЫЕ",
         refEarnings: "РЕФЕРАЛЬНЫЙ ДОХОД",
-        session1Title: "🌅 1️⃣ Сессия 1",
-        session2Title: "🌌 2️⃣ Сессия 2",
+        session1Title: "<svg class=\"session-title-icon\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"12\" cy=\"12\" r=\"4\"></circle><path d=\"M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41\"></svg> Сессия 1",
+        session2Title: "<svg class=\"session-title-icon\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z\"></svg> Сессия 2",
         videoUnit: "видео",
-        watchBtn: "🎬 Смотреть видео &",
+        watchBtn: "<svg class=\"btn-inline-icon\" style=\"fill: #0a1a22; stroke: #0a1a22;\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\"><polygon points=\"6 4 20 12 6 20 6 4\"></polygon></svg> Смотреть видео &",
         watchBtnSuffix: "MC Заработать",
-        completedS1: "🌅 Завершено",
-        completedS2: "🌌 Завершено",
+        completedS1: "<svg class=\"btn-inline-icon\" style=\"stroke: #06b6d4;\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M22 11.08V12a10 10 0 1 1-5.93-9.14\"></path><polyline points=\"22 4 12 14.01 9 11.01\"></polyline></svg> Завершено",
+        completedS2: "<svg class=\"btn-inline-icon\" style=\"stroke: #06b6d4;\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M22 11.08V12a10 10 0 1 1-5.93-9.14\"></path><polyline points=\"22 4 12 14.01 9 11.01\"></polyline></svg> Завершено",
         locked: "🔒 Сессия 2 заблокирована",
         finishFirst: "⏳ Сначала завершите Сессию 1",
         cooldownHint: "Разблокировка через:",
@@ -311,7 +311,13 @@ function setLanguage(lang) {
     document.querySelectorAll('[data-i18n]').forEach(el => {
         const key = el.getAttribute('data-i18n');
         const val = t(key);
-        if (val) el.textContent = val;
+        if (val) {
+            if (val.includes('<svg')) {
+                el.innerHTML = val;
+            } else {
+                el.textContent = val;
+            }
+        }
     });
 
     // Manually translate tasks-empty-msg if present in DOM
@@ -887,11 +893,11 @@ function renderDashboard() {
 
     if (s1Count >= 12) {
         s1Btn.disabled = true;
-        s1Btn.textContent = t('completedS1');
+        s1Btn.innerHTML = t('completedS1');
         s1Btn.classList.add("completed");
     } else {
         s1Btn.disabled = false;
-        s1Btn.textContent = `${t('watchBtn')} ${userData.mc_per_video || 300} ${t('watchBtnSuffix')}`;
+        s1Btn.innerHTML = `${t('watchBtn')} ${userData.mc_per_video || 300} ${t('watchBtnSuffix')}`;
         s1Btn.classList.remove("completed");
     }
 
@@ -906,7 +912,7 @@ function renderDashboard() {
         s1Btn.style.filter = 'none';
         s1Btn.style.textShadow = 'none';
         if (currentWatchingSession === 1 && cooldownRemaining > 0) {
-            s1Btn.textContent = `${t('waitSec')} (${cooldownRemaining}s)...`;
+            s1Btn.innerHTML = `${t('waitSec')} (${cooldownRemaining}s)...`;
         }
     }
 
@@ -922,11 +928,11 @@ function renderDashboard() {
         s2Btn.disabled = true;
         s2Btn.classList.remove("completed");
         if (userData.unlock_at) {
-            s2Btn.textContent = t('locked');
+            s2Btn.innerHTML = t('locked');
             s2Hint.style.display = "block";
             startCooldownTimer(userData.unlock_at);
         } else {
-            s2Btn.textContent = t('finishFirst');
+            s2Btn.innerHTML = t('finishFirst');
             s2Hint.style.display = "none";
             stopCooldownTimer();
         }
@@ -935,16 +941,16 @@ function renderDashboard() {
         stopCooldownTimer();
         if (s2Count >= 12) {
             s2Btn.disabled = true;
-            s2Btn.textContent = t('completedS2');
+            s2Btn.innerHTML = t('completedS2');
             s2Btn.classList.add("completed");
         } else {
             s2Btn.classList.remove("completed");
             if (s1Count < 12) {
                 s2Btn.disabled = true;
-                s2Btn.textContent = t('finishFirst');
+                s2Btn.innerHTML = t('finishFirst');
             } else {
                 s2Btn.disabled = false;
-                s2Btn.textContent = `${t('watchBtn')} ${userData.mc_per_video || 300} ${t('watchBtnSuffix')}`;
+                s2Btn.innerHTML = `${t('watchBtn')} ${userData.mc_per_video || 300} ${t('watchBtnSuffix')}`;
             }
         }
     }
@@ -960,7 +966,7 @@ function renderDashboard() {
         s2Btn.style.filter = 'none';
         s2Btn.style.textShadow = 'none';
         if (currentWatchingSession === 2 && cooldownRemaining > 0) {
-            s2Btn.textContent = `${t('waitSec')} (${cooldownRemaining}s)...`;
+            s2Btn.innerHTML = `${t('waitSec')} (${cooldownRemaining}s)...`;
         }
     }
 
