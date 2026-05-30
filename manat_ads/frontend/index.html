@@ -364,44 +364,24 @@
                 0 8px 32px rgba(0, 0, 0, 0.28);
         }
 
-        /* ── Stat Icon base ── */
-        .stat-icon {
-            font-size: 24px;
-            margin-bottom: 10px;
-            display: block;
-            transition: filter 0.3s ease;
+        /* ── Stat Icon Wrapper ── */
+        .stat-icon-wrapper {
+            width: 32px !important;
+            height: 32px !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            background: rgba(6, 182, 212, 0.06) !important;
+            border: 1px solid rgba(6, 182, 212, 0.16) !important;
+            border-radius: 8px !important;
+            color: #00ffcc !important; /* Mint glow for vectors */
+            filter: drop-shadow(0 0 6px rgba(0, 255, 204, 0.25)) !important;
+            margin-bottom: 8px !important;
         }
-
-        /* Card 1 — Ümumi Qazanc: green/gold neon */
-        .stats-grid .stat-card:nth-child(1) .stat-icon {
-            filter: drop-shadow(0 1px 3px rgba(0, 230, 115, 0.22));
-        }
-        .stats-grid .stat-card:nth-child(1):hover .stat-icon {
-            filter: drop-shadow(0 2px 6px rgba(0, 230, 115, 0.35));
-        }
-
-        /* Card 2 — Bugünkü Videolar: cyan/blue neon */
-        .stats-grid .stat-card:nth-child(2) .stat-icon {
-            filter: drop-shadow(0 1px 3px rgba(0, 153, 255, 0.22));
-        }
-        .stats-grid .stat-card:nth-child(2):hover .stat-icon {
-            filter: drop-shadow(0 2px 6px rgba(0, 153, 255, 0.35));
-        }
-
-        /* Card 3 — Dəvət Olunanlar: violet/purple neon */
-        .stats-grid .stat-card:nth-child(3) .stat-icon {
-            filter: drop-shadow(0 1px 3px rgba(166, 77, 255, 0.22));
-        }
-        .stats-grid .stat-card:nth-child(3):hover .stat-icon {
-            filter: drop-shadow(0 2px 6px rgba(166, 77, 255, 0.35));
-        }
-
-        /* Card 4 — Referal Qazancı: cyan/mint neon */
-        .stats-grid .stat-card:nth-child(4) .stat-icon {
-            filter: drop-shadow(0 1px 3px rgba(6, 182, 212, 0.22));
-        }
-        .stats-grid .stat-card:nth-child(4):hover .stat-icon {
-            filter: drop-shadow(0 2px 6px rgba(6, 182, 212, 0.35));
+        .stat-icon-wrapper svg {
+            width: 18px !important;
+            height: 18px !important;
+            stroke: #00ffcc !important;
         }
 
         .stat-value {
@@ -1472,22 +1452,22 @@
             <!-- Stats Grid -->
             <div class="stats-grid animate-in delay-2">
                 <div class="stat-card">
-                    <div class="stat-icon">📈</div>
+                    <div class="stat-icon-wrapper"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg></div>
                     <div class="stat-value" id="total-earned">0</div>
                     <div class="stat-label" data-i18n="totalEarned">ÜMUMİ QAZANC</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-icon">🎬</div>
+                    <div class="stat-icon-wrapper"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polygon points="10 8 16 12 10 16 10 8"></polygon></svg></div>
                     <div class="stat-value" id="videos-count">0/24</div>
                     <div class="stat-label" data-i18n="dailyVideos">BUGÜNKÜ VİDEOLAR</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-icon">👥</div>
+                    <div class="stat-icon-wrapper"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg></div>
                     <div class="stat-value" id="referral-count">0</div>
                     <div class="stat-label" data-i18n="invitedLabel">DƏVƏT OLUNANLAR</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-icon">🎁</div>
+                    <div class="stat-icon-wrapper"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 12 20 22 4 22 4 12"></polyline><rect x="2" y="7" width="20" height="5"></rect><line x1="12" y1="22" x2="12" y2="7"></line><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"></path><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"></path></svg></div>
                     <div class="stat-value" id="referral-earnings">0</div>
                     <div class="stat-label" data-i18n="refEarnings">REFERAL QAZANCI</div>
                 </div>
@@ -1676,7 +1656,7 @@
         </div>
     </div>
 
-    <script src="/static/app.js?v=4.0.0"></script>
+    <script src="/static/app.js?v=4.1.0"></script>
 </body>
 </html>
 <!-- trigger vercel build v8 - AZ translation -->
