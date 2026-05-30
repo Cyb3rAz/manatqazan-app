@@ -486,12 +486,13 @@
             display: none;
         }
 
-        /* Seans 2 Active Button State: Premium Emerald Gradient */
-        #session-2-btn {
-            background: linear-gradient(135deg, #00cc66 0%, #00994d 100%);
-            box-shadow: 0 4px 14px rgba(0, 204, 102, 0.25);
-            color: #ffffff;
-            font-weight: 700;
+        /* Seans 2 Active Button State: Match Seans 1 Premium Orange Branding */
+        #session-2-btn:not(:disabled) {
+            background: linear-gradient(135deg, #ff9900 0%, #e67300 100%) !important;
+            box-shadow: 0 4px 14px rgba(255, 153, 0, 0.35) !important;
+            color: #ffffff !important;
+            font-weight: 700 !important;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.2) !important;
         }
 
         #session-2-btn:disabled {
@@ -1455,7 +1456,7 @@
                     <span class="progress-count" id="session-2-progress-text">0/12 video</span>
                 </div>
                 <div class="progress-bar" style="margin-bottom: 12px;">
-                    <div class="progress-fill" id="session-2-progress-fill" style="width: 0%; background: linear-gradient(135deg, #00cc66, #00994d);"></div>
+                    <div class="progress-fill" id="session-2-progress-fill" style="width: 0%"></div>
                 </div>
                 <button class="watch-btn" id="session-2-btn" onclick="watchAd(2)">
                     🎬 Video İzlə & 300 MC Qazan
@@ -1617,7 +1618,7 @@
         </div>
     </div>
 
-    <script src="/static/app.js?v=2.4.0"></script>
+    <script src="/static/app.js?v=2.5.0"></script>
 </body>
 </html>
 <!-- trigger vercel build v8 - AZ translation -->
