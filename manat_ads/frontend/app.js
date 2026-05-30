@@ -893,6 +893,22 @@ function renderDashboard() {
         s1Btn.textContent = `${t('watchBtn')} ${userData.mc_per_video || 300} ${t('watchBtnSuffix')}`;
     }
 
+    if (isCooldownActive) {
+        s1Btn.disabled = true;
+        s1Btn.style.background = '#1f293d';
+        s1Btn.style.boxShadow = 'none';
+        s1Btn.style.color = '#6b7280';
+        s1Btn.style.opacity = '1';
+        s1Btn.style.pointerEvents = 'none';
+        s1Btn.style.transform = 'none';
+        s1Btn.style.filter = 'none';
+        s1Btn.style.textShadow = 'none';
+        if (currentWatchingSession === 1 && cooldownRemaining > 0) {
+            s1Btn.textContent = `${t('waitSec')} (${cooldownRemaining}s)...`;
+        }
+    }
+
+
     // Səans 2 Card
     const s2Count = userData.session_2_count || 0;
     document.getElementById("session-2-progress-text").textContent = `${s2Count}/12 ${t('videoUnit')}`;
@@ -925,6 +941,21 @@ function renderDashboard() {
                 s2Btn.disabled = false;
                 s2Btn.textContent = `${t('watchBtn')} ${userData.mc_per_video || 300} ${t('watchBtnSuffix')}`;
             }
+        }
+    }
+
+    if (isCooldownActive) {
+        s2Btn.disabled = true;
+        s2Btn.style.background = '#1f293d';
+        s2Btn.style.boxShadow = 'none';
+        s2Btn.style.color = '#6b7280';
+        s2Btn.style.opacity = '1';
+        s2Btn.style.pointerEvents = 'none';
+        s2Btn.style.transform = 'none';
+        s2Btn.style.filter = 'none';
+        s2Btn.style.textShadow = 'none';
+        if (currentWatchingSession === 2 && cooldownRemaining > 0) {
+            s2Btn.textContent = `${t('waitSec')} (${cooldownRemaining}s)...`;
         }
     }
 
@@ -968,6 +999,7 @@ let currentWatchingSession = 1;
 
 // ── Mutex lock: prevents re-entry during the 7-second post-ad cooldown ──
 let isCooldownActive = false;
+let cooldownRemaining = 0;
 
 // Module-level handle so we can always clear the previous interval before
 // starting a new one, eliminating any stacked-interval race condition.
@@ -1083,15 +1115,15 @@ function startButtonCooldown(sessionNum, seconds = 7) {
     applyDisabledStyles(otherBtn);
 
     // ── 4. Countdown — stored in module-level handle ─────────────────
-    let remaining = seconds;
-    btn.textContent = `${t('waitSec')} (${remaining}s)...`;
+    cooldownRemaining = seconds;
+    btn.textContent = `${t('waitSec')} (${cooldownRemaining}s)...`;
 
     _btnCooldownTimerId = setInterval(() => {
-        remaining--;
-        if (remaining > 0) {
+        cooldownRemaining--;
+        if (cooldownRemaining > 0) {
             // Strictly enforce disabled appearance on every tick
             applyDisabledStyles(btn);
-            btn.textContent = `${t('waitSec')} (${remaining}s)...`;
+            btn.textContent = `${t('waitSec')} (${cooldownRemaining}s)...`;
         } else {
             // ── 5. Strict zero — release everything ──────────────────
             clearInterval(_btnCooldownTimerId);
@@ -1105,6 +1137,7 @@ function startButtonCooldown(sessionNum, seconds = 7) {
 
             // Release mutex
             isCooldownActive = false;
+            cooldownRemaining = 0;
 
             renderDashboard();
         }
