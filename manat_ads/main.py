@@ -99,6 +99,11 @@ async def lifespan(application: FastAPI):
     application.state.notification_task = notification_task
     logger.info("Cooldown notification worker started.")
 
+    # ── Launch midnight broadcast scheduler ──
+    broadcast_task = asyncio.create_task(_midnight_broadcast_scheduler())
+    application.state.broadcast_task = broadcast_task
+    logger.info("Midnight broadcast scheduler started.")
+
     # ── Set Bot Commands Menu ──
     try:
         commands_az = [
@@ -190,6 +195,14 @@ async def lifespan(application: FastAPI):
         except asyncio.CancelledError:
             pass
         logger.info("Cooldown notification worker stopped.")
+
+    if hasattr(application.state, "broadcast_task"):
+        application.state.broadcast_task.cancel()
+        try:
+            await application.state.broadcast_task
+        except asyncio.CancelledError:
+            pass
+        logger.info("Midnight broadcast scheduler stopped.")
 
     if hasattr(application.state, "polling_task"):
         logger.info("Stopping Long Polling...")
@@ -983,6 +996,112 @@ async def _cooldown_notification_worker() -> None:
         except Exception as worker_err:
             logger.exception("[NOTIF-WORKER] Unexpected error in notification worker: %s", worker_err)
             # Continue looping — a single cycle error must not kill the worker.
+
+
+# ── Midnight Broadcast Scheduler ──────────────────────────────────────
+_MIDNIGHT_BROADCAST = {
+    "az": {
+        "text": "📢 **Yeni videolar gəldi!** 🚀\nGündəlik limitiniz yeniləndi. Daxil olun və qazanın! 💰",
+        "button": "Videolara Bax 🎬",
+    },
+    "tr": {
+        "text": "📢 **Yeni videolar geldi!** 🚀\nGünlük limitiniz yenilendi. Giriş yapın ve kazanın! 💰",
+        "button": "Videoları İzle 🎬",
+    },
+    "ru": {
+        "text": "📢 **Новые видео уже тут!** 🚀\nЕжедневный лимит обновлен. Заходи и зарабатывай! 💰",
+        "button": "Смотреть видео 🎬",
+    },
+    "en": {
+        "text": "📢 **New videos are here!** 🚀\nYour daily limit has been reset. Join and earn! 💰",
+        "button": "Watch Videos 🎬",
+    },
+}
+_WEBAPP_URL = "https://manatqazan.vercel.app"
+
+
+async def _midnight_broadcast_scheduler() -> None:
+    """
+    Async background task that fires once per day at 00:01 UTC.
+    Fetches every user's (telegram_id, language) from the DB and sends
+    a localized inline-keyboard broadcast message. Blocked/deactivated
+    users are silently skipped so the loop never stalls.
+    """
+    logger.info("[BROADCAST] Midnight broadcast scheduler initialised.")
+    while True:
+        try:
+            # ── Calculate seconds until next 00:01 UTC ──────────────────
+            now = datetime.now(timezone.utc)
+            target = now.replace(hour=0, minute=1, second=0, microsecond=0)
+            if now >= target:
+                # Already past 00:01 today — aim for tomorrow
+                target += timedelta(days=1)
+            wait_seconds = (target - now).total_seconds()
+            logger.info(
+                "[BROADCAST] Next broadcast in %.0f seconds (at %s UTC).",
+                wait_seconds, target.isoformat()
+            )
+            await asyncio.sleep(wait_seconds)
+
+            # ── Fetch all users (telegram_id + language only) ────────────
+            async with async_session() as session:
+                stmt = select(User.telegram_id, User.language)
+                result = await session.execute(stmt)
+                rows = result.all()  # list of (telegram_id, language)
+
+            logger.info("[BROADCAST] Firing midnight broadcast to %d user(s).", len(rows))
+
+            sent = 0
+            skipped = 0
+            for tg_id, lang_code in rows:
+                # ── Resolve localized template ───────────────────────────
+                template = _MIDNIGHT_BROADCAST.get(
+                    lang_code or "en", _MIDNIGHT_BROADCAST["en"]
+                )
+                msg_text = template["text"]
+                btn_label = template["button"]
+
+                # ── Build inline keyboard with WebApp button ─────────────
+                keyboard = aio_types.InlineKeyboardMarkup(
+                    inline_keyboard=[
+                        [
+                            aio_types.InlineKeyboardButton(
+                                text=btn_label,
+                                web_app=aio_types.WebAppInfo(url=_WEBAPP_URL),
+                            )
+                        ]
+                    ]
+                )
+
+                # ── Send — silently skip blocked / deactivated users ─────
+                try:
+                    await bot.send_message(
+                        chat_id=tg_id,
+                        text=msg_text,
+                        parse_mode="Markdown",
+                        reply_markup=keyboard,
+                    )
+                    sent += 1
+                except Exception as send_err:
+                    logger.info(
+                        "[BROADCAST] Skipped telegram_id=%s (lang=%s): %s",
+                        tg_id, lang_code, send_err
+                    )
+                    skipped += 1
+                    continue
+
+            logger.info(
+                "[BROADCAST] Broadcast complete — sent=%d, skipped=%d.",
+                sent, skipped
+            )
+
+        except asyncio.CancelledError:
+            logger.info("[BROADCAST] Scheduler cancelled — shutting down cleanly.")
+            break
+        except Exception as broadcast_err:
+            logger.exception("[BROADCAST] Unexpected error in broadcast scheduler: %s", broadcast_err)
+            # Back off 60 s before retrying to avoid a tight error loop
+            await asyncio.sleep(60)
 
 
 # ── Mini App Frontend Serving ──────────────────────────────────────────
