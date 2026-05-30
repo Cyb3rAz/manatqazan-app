@@ -844,14 +844,14 @@ function renderDashboard() {
 
     const pctStr = progressPct.toFixed(1);
 
-    const BADGE_CLASSES = ['bronze', 'silver', 'gold', 'platinum', 'diamond'];
+    // Tier icon matrix — one distinct gamified emoji per league level
+    const TIER_ICONS = ['🥉', '🥈', '🥇', '🛡️', '💎'];
 
     const leagueNameEl  = document.getElementById("league-name-label");
     const leagueBadgeEl = document.getElementById("league-badge");
-    if (leagueNameEl)  leagueNameEl.textContent = leagueName;
-    if (leagueBadgeEl) {
-        leagueBadgeEl.className = `league-badge ${BADGE_CLASSES[newLeagueIndex] || 'bronze'}`;
-    }
+    if (leagueNameEl)  leagueNameEl.textContent = leagueName;           // pure text, no emoji prefix
+    if (leagueBadgeEl) leagueBadgeEl.textContent = TIER_ICONS[newLeagueIndex] || '🥉';
+
 
     const withdrawalPctEl = document.getElementById("withdrawal-pct");
     if (withdrawalPctEl) withdrawalPctEl.textContent = pctStr;
