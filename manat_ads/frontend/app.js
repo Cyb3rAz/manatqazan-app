@@ -304,6 +304,7 @@ function setLanguage(lang) {
     }
     currentLang = lang;
     localStorage.setItem('saved_language', currentLang);
+    localStorage.setItem('user_lang', currentLang);
 
 
     // Update all static elements with data-i18n attribute
@@ -451,7 +452,21 @@ document.addEventListener("DOMContentLoaded", () => {
     initApp();
 });
 
-// ── Tətbiqin Başlanğıcı ──────────────────────────────────────────────
+function getImmediateBootLanguage() {
+    // Priority 1: Explicitly saved user override from previous sessions
+    const localSaved = localStorage.getItem('user_lang');
+    if (localSaved && ['az', 'tr', 'en', 'ru'].includes(localSaved)) {
+        return localSaved;
+    }
+    // Priority 2: Telegram Client Language Code
+    if (window.Telegram?.WebApp?.initDataUnsafe?.user?.language_code) {
+        const tgLang = window.Telegram.WebApp.initDataUnsafe.user.language_code.toLowerCase();
+        if (['az', 'tr', 'en', 'ru'].includes(tgLang)) return tgLang;
+    }
+    // Priority 3: Global Application Default
+    return 'az';
+}
+
 async function initApp() {
     try {
         const urlParams = new URLSearchParams(window.location.search);
@@ -464,63 +479,34 @@ async function initApp() {
             currentUser = { id: 123456789, first_name: "TestUser" };
         }
 
-        // Təhlükəsiz dil yoxlanışı funksiyası
-        function getValidLang(langStr, source) {
-            console.log(`[LangDebug] Checking source (${source}):`, langStr);
-            if (langStr && typeof langStr === 'string') {
-                const lower = langStr.toLowerCase().trim();
-                if (lower.startsWith('az')) return 'az';
-                if (lower.startsWith('tr')) return 'tr';
-                if (lower.startsWith('en')) return 'en';
-                if (lower.startsWith('ru')) return 'ru';
-            }
-            return null;
-        }
+        // Phase 1 (Instant Pre-Network Injection)
+        const bootLang = getImmediateBootLanguage();
+        currentLang = bootLang;
+        localStorage.setItem('saved_language', currentLang);
 
-        // Ciddi dil prioriteti hiyerarxiyası
-        let detectedLang = null;
-
-        // a) Priority 1: Telegram initData (Absolute secure runtime user state)
-        const tgLang = tg?.initDataUnsafe?.user?.language_code;
-        detectedLang = getValidLang(tgLang, 'Telegram initDataUnsafe');
-        if (detectedLang) console.log(`[LangDebug] Picked Priority 1 (TG): ${detectedLang}`);
-
-        // b) Priority 2: URL parametri (Fallback)
-        if (!detectedLang) {
-            const urlLang = urlParams.get('lang');
-            detectedLang = getValidLang(urlLang, 'URL ?lang=');
-            if (detectedLang) console.log(`[LangDebug] Picked Priority 2 (URL): ${detectedLang}`);
-        }
-
-        // c) Priority 3: localStorage
-        if (!detectedLang) {
-            const lsLang = localStorage.getItem('saved_language');
-            detectedLang = getValidLang(lsLang, 'localStorage saved_language');
-            if (detectedLang) console.log(`[LangDebug] Picked Priority 3 (Storage): ${detectedLang}`);
-        }
-
-        // d) Priority 4: Default
-        currentLang = detectedLang || 'en';
-        console.log(`[LangDebug] Final initialized language: ${currentLang}`);
-        localStorage.setItem('saved_language', currentLang); // Yadda saxla
-
-        // Splash tagline-ni aktiv dilə uyğun dərhal yenilə
         const taglineEl = document.querySelector('.splash-tagline');
-        if (taglineEl) taglineEl.textContent = t('splashTagline');
+        if (taglineEl) {
+            taglineEl.textContent = t('splashTagline'); 
+        }
 
         // Backend-dən istifadəçi məlumatlarını çək
         await fetchUserData();
 
-        // ── WEBAPP LANGUAGE SYNC: If the user already has a language set in the DB
-        //    (guaranteed after passing through the bot's /start), override the local
-        //    detected language with the authoritative server value and skip onboarding.
+        // Phase 2 (Post-Network Hydration Sync)
+        let finalLang = bootLang;
         if (userData && userData.language && SUPPORTED_LANGS.includes(userData.language)) {
-            const serverLang = userData.language;
-            console.log(`[LangDebug] userData.language from backend: ${serverLang} — overriding local detection.`);
-            currentLang = serverLang;
-            localStorage.setItem('saved_language', currentLang);
-            // Mark onboarding as already completed so the modal is never shown again
+            finalLang = userData.language;
+            localStorage.setItem('saved_language', finalLang);
+            localStorage.setItem('user_lang', finalLang);
             localStorage.setItem('onboarding_completed', 'true');
+        }
+
+        if (finalLang !== bootLang) {
+            console.log(`[LangDebug] Dual-phase sync: User language updated from ${bootLang} to ${finalLang}`);
+            currentLang = finalLang;
+            if (taglineEl) {
+                taglineEl.textContent = t('splashTagline');
+            }
         }
 
         // UI-ı yenilə
