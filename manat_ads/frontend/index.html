@@ -502,14 +502,20 @@
         }
 
         .watch-btn:disabled {
-            background: var(--bg-secondary);
-            color: var(--text-muted);
-            box-shadow: none;
-            cursor: not-allowed;
+            background: #1f293d !important;
+            color: #6b7280 !important;
+            box-shadow: none !important;
+            cursor: not-allowed !important;
+            pointer-events: none !important;
+            transform: none !important;
+            filter: none !important;
+            opacity: 1 !important;
+            text-shadow: none !important;
         }
 
         .watch-btn:disabled::before {
-            display: none;
+            display: none !important;
+            opacity: 0 !important;
         }
 
         /* Seans 2 Active Button State: Match Seans 1 Premium Orange Branding */
@@ -521,11 +527,18 @@
             text-shadow: 0 1px 2px rgba(0,0,0,0.2) !important;
         }
 
+        /* Hard-lock disabled states for both session buttons during cooldown */
+        #session-1-btn:disabled,
         #session-2-btn:disabled {
-            background: var(--bg-secondary) !important;
-            color: var(--text-muted) !important;
+            background: #1f293d !important;
             box-shadow: none !important;
-            cursor: not-allowed;
+            color: #6b7280 !important;
+            cursor: not-allowed !important;
+            pointer-events: none !important;
+            transform: none !important;
+            filter: none !important;
+            opacity: 1 !important;
+            text-shadow: none !important;
         }
 
         .watch-reward-hint {
@@ -1639,7 +1652,7 @@
         </div>
     </div>
 
-    <script src="/static/app.js?v=3.2.0"></script>
+    <script src="/static/app.js?v=3.3.0"></script>
 </body>
 </html>
 <!-- trigger vercel build v8 - AZ translation -->

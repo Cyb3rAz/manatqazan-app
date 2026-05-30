@@ -1050,14 +1050,37 @@ function startButtonCooldown(sessionNum, seconds = 7) {
     }
 
     // ── 3. Hard DOM lock — browser-level click/touch rejection ───────
-    btn.disabled = true;
-    btn.style.pointerEvents = 'none';
-    btn.style.opacity = '0.6';
-    if (otherBtn) {
-        otherBtn.disabled = true;
-        otherBtn.style.pointerEvents = 'none';
-        otherBtn.style.opacity = '0.6';
+    //    Also explicitly strip any orange inline styles that renderDashboard()
+    //    may have applied just before this call (inside the finally block),
+    //    so the CSS :disabled rule is never visually overridden during countdown.
+    function applyDisabledStyles(el) {
+        if (!el) return;
+        el.disabled = true;
+        el.style.background = '#1f293d';
+        el.style.boxShadow  = 'none';
+        el.style.color      = '#6b7280';
+        el.style.opacity    = '1';
+        el.style.pointerEvents = 'none';
+        el.style.transform  = 'none';
+        el.style.filter     = 'none';
+        el.style.textShadow = 'none';
     }
+
+    function clearDisabledStyles(el) {
+        if (!el) return;
+        el.disabled = false;
+        el.style.background    = '';
+        el.style.boxShadow     = '';
+        el.style.color         = '';
+        el.style.opacity       = '';
+        el.style.pointerEvents = '';
+        el.style.transform     = '';
+        el.style.filter        = '';
+        el.style.textShadow    = '';
+    }
+
+    applyDisabledStyles(btn);
+    applyDisabledStyles(otherBtn);
 
     // ── 4. Countdown — stored in module-level handle ─────────────────
     let remaining = seconds;
@@ -1066,19 +1089,18 @@ function startButtonCooldown(sessionNum, seconds = 7) {
     _btnCooldownTimerId = setInterval(() => {
         remaining--;
         if (remaining > 0) {
+            // Strictly enforce disabled appearance on every tick
+            applyDisabledStyles(btn);
             btn.textContent = `${t('waitSec')} (${remaining}s)...`;
         } else {
             // ── 5. Strict zero — release everything ──────────────────
             clearInterval(_btnCooldownTimerId);
             _btnCooldownTimerId = null;
 
-            // Restore DOM to premium active state
-            btn.disabled = false;
-            btn.style.pointerEvents = '';
-            btn.style.opacity = '';
+            // Clear all inline overrides so CSS active state takes over cleanly
+            clearDisabledStyles(btn);
             if (otherBtn) {
-                otherBtn.style.pointerEvents = '';
-                otherBtn.style.opacity = '';
+                clearDisabledStyles(otherBtn);
             }
 
             // Release mutex
