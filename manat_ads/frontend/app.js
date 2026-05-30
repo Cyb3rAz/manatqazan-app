@@ -61,11 +61,11 @@ const LOCALES = {
         spamTooOften: "Upps! Reklamlara çox tez-tez baxmağa çalışırsınız. Zəhmət olmasa, bir neçə saniyə gözləyin 🙏",
         spamNoAd: "Hazırda göstəriləcək reklam tapılmadı. Bir az sonra təkrar yoxlayın.",
         spamLongSession: "Sessiyanız çox uzun çəkdi. Zəhmət olmasa, səhifəni yeniləyin.",
-        leagueBronze: "🟤 Bürünc Liqa",
-        leagueSilver: "⚪ Gümüş Liqa",
-        leagueGold: "🟡 Qızıl Liqa",
-        leaguePlatinum: "🔵 Platin Liqa",
-        leagueDiamond: "💎 Almaz Liqa",
+        leagueBronze: "Bürünc Liqa",
+        leagueSilver: "Gümüş Liqa",
+        leagueGold: "Qızıl Liqa",
+        leaguePlatinum: "Platin Liqa",
+        leagueDiamond: "Almaz Liqa",
         upgradeSilverTitle: "🎉 TƏBRİKLƏR! 🎉",
         upgradeSilverText: "Sən rəsmən ⚪ Gümüş Liqasına yüksəldin! Sürətin mükəmməldir, belə də davam et! 🚀",
         upgradeGoldTitle: "🔥 MÖHTƏŞƏM! 🔥",
@@ -127,11 +127,11 @@ const LOCALES = {
         spamTooOften: "Oops! Reklamları çok sık izlemeye çalışıyorsunuz. Lütfen birkaç saniye bekleyin 🙏",
         spamNoAd: "Şu anda gösterilecek reklam bulunamadı. Biraz sonra tekrar deneyin.",
         spamLongSession: "Oturumunuz çok uzun sürdü. Lütfen sayfayı yenileyin.",
-        leagueBronze: "🟤 Bronz Lig",
-        leagueSilver: "⚪ Gümüş Lig",
-        leagueGold: "🟡 Altın Lig",
-        leaguePlatinum: "🔵 Platin Lig",
-        leagueDiamond: "💎 Elmas Lig",
+        leagueBronze: "Bronz Lig",
+        leagueSilver: "Gümüş Lig",
+        leagueGold: "Altın Lig",
+        leaguePlatinum: "Platin Lig",
+        leagueDiamond: "Elmas Lig",
         upgradeSilverTitle: "🎉 TEBRİKLER! 🎉",
         upgradeSilverText: "Resmen ⚪ Gümüş Lig'e yükseldin! Hızın mükemmel, böyle devam et! 🚀",
         upgradeGoldTitle: "🔥 MUHTEŞEM! 🔥",
@@ -193,11 +193,11 @@ const LOCALES = {
         spamTooOften: "Oops! You're watching ads too often. Please wait a few seconds 🙏",
         spamNoAd: "No ads available right now. Please try again later.",
         spamLongSession: "Your session took too long. Please refresh the page.",
-        leagueBronze: "🟤 Bronze League",
-        leagueSilver: "⚪ Silver League",
-        leagueGold: "🟡 Gold League",
-        leaguePlatinum: "🔵 Platinum League",
-        leagueDiamond: "💎 Diamond League",
+        leagueBronze: "Bronze League",
+        leagueSilver: "Silver League",
+        leagueGold: "Gold League",
+        leaguePlatinum: "Platinum League",
+        leagueDiamond: "Diamond League",
         upgradeSilverTitle: "🎉 CONGRATULATIONS! 🎉",
         upgradeSilverText: "You've been promoted to ⚪ Silver League! Your pace is amazing, keep going! 🚀",
         upgradeGoldTitle: "🔥 AMAZING! 🔥",
@@ -259,11 +259,11 @@ const LOCALES = {
         spamTooOften: "Упс! Вы слишком часто смотрите рекламу. Пожалуйста, подождите несколько секунд 🙏",
         spamNoAd: "Сейчас нет доступной рекламы. Попробуйте позже.",
         spamLongSession: "Ваша сессия слишком долгая. Пожалуйста, обновите страницу.",
-        leagueBronze: "🟤 Бронзовая Лига",
-        leagueSilver: "⚪ Серебряная Лига",
-        leagueGold: "🟡 Золотая Лига",
-        leaguePlatinum: "🔵 Платиновая Лига",
-        leagueDiamond: "💎 Алмазная Лига",
+        leagueBronze: "Бронзовая Лига",
+        leagueSilver: "Серебряная Лига",
+        leagueGold: "Золотая Лига",
+        leaguePlatinum: "Платиновая Лига",
+        leagueDiamond: "Алмазная Лига",
         upgradeSilverTitle: "🎉 ПОЗДРАВЛЯЕМ! 🎉",
         upgradeSilverText: "Вы перешли в ⚪ Серебряную Лигу! Ваш темп превосходен, продолжайте! 🚀",
         upgradeGoldTitle: "🔥 ПОТРЯСАЮЩЕ! 🔥",
@@ -849,8 +849,14 @@ function renderDashboard() {
 
     const leagueNameEl  = document.getElementById("league-name-label");
     const leagueBadgeEl = document.getElementById("league-badge");
-    if (leagueNameEl)  leagueNameEl.textContent = leagueName;           // pure text, no emoji prefix
-    if (leagueBadgeEl) leagueBadgeEl.textContent = TIER_ICONS[newLeagueIndex] || '🥉';
+    if (leagueNameEl)  leagueNameEl.textContent = leagueName; // pure locale name, no emoji
+    if (leagueBadgeEl) {
+        // DOM sanity reset: strip any inline style overrides before re-applying
+        leagueBadgeEl.removeAttribute('style');
+        leagueBadgeEl.style.fontSize  = '15px';
+        leagueBadgeEl.style.lineHeight = '1';
+        leagueBadgeEl.textContent = TIER_ICONS[newLeagueIndex] || '🥉';
+    }
 
 
     const withdrawalPctEl = document.getElementById("withdrawal-pct");
