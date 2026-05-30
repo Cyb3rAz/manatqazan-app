@@ -76,6 +76,7 @@ const LOCALES = {
         upgradeDiamondText: "Vəssalam! Sən 💎 Almaz Liqasındasan! Çıxarış qapısı sənin üçün açıldı, son addımı at! 💰",
         upgradeBtn: "Uğurlar! 🚀",
         nav_main: "Əsas",
+        splashTagline: "İzlə • Qazan • Çevir",
         nav_tasks: "Tapşırıqlar",
         task_sub: "Kanallara abunə ol və qazan",
         btn_verify: "Yoxla 🔄",
@@ -142,6 +143,7 @@ const LOCALES = {
         upgradeDiamondText: "İşte bu! 💎 Elmas Lig'desin! Çekim kapısı senin için açıldı, son adımı at! 💰",
         upgradeBtn: "Başarılar! 🚀",
         nav_main: "Ana Sayfa",
+        splashTagline: "İzle • Kazan • Dönüştür",
         nav_tasks: "Görevler",
         task_sub: "Kanallara abone ol ve kazan",
         btn_verify: "Kontrol Et 🔄",
@@ -208,6 +210,7 @@ const LOCALES = {
         upgradeDiamondText: "That's it! You're in 💎 Diamond League! The withdrawal gate is open for you! 💰",
         upgradeBtn: "Let's Go! 🚀",
         nav_main: "Home",
+        splashTagline: "Watch • Earn • Convert",
         nav_tasks: "Tasks",
         task_sub: "Subscribe to channels and earn",
         btn_verify: "Verify 🔄",
@@ -274,6 +277,7 @@ const LOCALES = {
         upgradeDiamondText: "Вот это да! Вы в 💎 Алмазной Лиге! Ворота вывода открыты для вас! 💰",
         upgradeBtn: "Вперёд! 🚀",
         nav_main: "Главная",
+        splashTagline: "Смотри • Зарабатывай • Обменивай",
         nav_tasks: "Задания",
         task_sub: "Подписывайся на каналы и зарабатывай",
         btn_verify: "Проверить 🔄",
@@ -499,6 +503,10 @@ async function initApp() {
         currentLang = detectedLang || 'en';
         console.log(`[LangDebug] Final initialized language: ${currentLang}`);
         localStorage.setItem('saved_language', currentLang); // Yadda saxla
+
+        // Splash tagline-ni aktiv dilə uyğun dərhal yenilə
+        const taglineEl = document.querySelector('.splash-tagline');
+        if (taglineEl) taglineEl.textContent = t('splashTagline');
 
         // Backend-dən istifadəçi məlumatlarını çək
         await fetchUserData();
