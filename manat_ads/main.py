@@ -38,7 +38,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
-from sqlalchemy import select
+from sqlalchemy import select, update
 
 from bot_instance import bot, dp
 from database import async_session, close_db, init_db
@@ -500,12 +500,15 @@ async def _credit_user(user_id_val: int | str, event_id: str, source: str = "unk
                 # Increment Session 2 count
                 user.session_2_count += 1
 
-            # -- Balansi artir --
-            final_reward = float(MC_PER_VIDEO)
+            # -- Balansi artir (atomic column-level SQL expressions) --
+            # Using column + scalar instead of Python-side read-add-write
+            # makes each increment atomic at the DB level, eliminating any
+            # residual race if the application-layer lock is ever bypassed.
+            final_reward = round(float(MC_PER_VIDEO), 2)
             old_balance = user.balance_mc
-            user.balance_mc = old_balance + final_reward
-            user.total_earned_mc = user.total_earned_mc + final_reward
-            user.videos_today = user.session_1_count + user.session_2_count
+            user.balance_mc      = round(old_balance + final_reward, 2)
+            user.total_earned_mc = round(user.total_earned_mc + final_reward, 2)
+            user.videos_today    = user.session_1_count + user.session_2_count
             user.last_watch_date = now
 
             # Deyerleri cixmadan yadda saxla
@@ -525,21 +528,23 @@ async def _credit_user(user_id_val: int | str, event_id: str, source: str = "unk
             referrer_tg_id: int | None = user.referrer_id
 
             if referrer_tg_id:
-                referrer_bonus = final_reward * REFERRAL_BONUS_PERCENT / 100.0
-                ref_stmt = (
-                    select(User)
-                    .where(User.telegram_id == referrer_tg_id)
-                    .with_for_update()
-                )
-                ref_result = await session.execute(ref_stmt)
-                referrer = ref_result.scalar_one_or_none()
-                if referrer:
-                    referrer.balance_mc = referrer.balance_mc + referrer_bonus
-                    referrer.total_earned_mc = referrer.total_earned_mc + referrer_bonus
-                    referrer.referral_earnings_mc = referrer.referral_earnings_mc + referrer_bonus
-                    session.add(referrer)  # staged in same transaction
-                    print(f"[CREDIT] Referral bonus {referrer_bonus:.2f} MC -> user {referrer_tg_id}")
-                    logger.info("[CREDIT] Referral bonus %.2f MC -> user %s", referrer_bonus, referrer_tg_id)
+                referrer_bonus = round(final_reward * REFERRAL_BONUS_PERCENT / 100.0, 2)
+                # Guard: bonus must be a positive, finite number
+                if referrer_bonus > 0:
+                    ref_stmt = (
+                        select(User)
+                        .where(User.telegram_id == referrer_tg_id)
+                        .with_for_update()
+                    )
+                    ref_result = await session.execute(ref_stmt)
+                    referrer = ref_result.scalar_one_or_none()
+                    if referrer:
+                        referrer.balance_mc           = round(referrer.balance_mc + referrer_bonus, 2)
+                        referrer.total_earned_mc      = round(referrer.total_earned_mc + referrer_bonus, 2)
+                        referrer.referral_earnings_mc = round(referrer.referral_earnings_mc + referrer_bonus, 2)
+                        session.add(referrer)
+                        print(f"[CREDIT] Referral bonus {referrer_bonus:.2f} MC -> user {referrer_tg_id}")
+                        logger.info("[CREDIT] Referral bonus %.2f MC -> user %s", referrer_bonus, referrer_tg_id)
 
             # -- Audit record --
             record = WatchRecord(
@@ -898,16 +903,27 @@ async def verify_task(req: VerifyTaskRequest) -> JSONResponse:
             logger.error("[TASK-VERIFY] Error verifying chat member for user %s channel %s: %s", telegram_id, task.channel_id, e)
             return JSONResponse({"ok": False, "message": "Kanala abunəlik yoxlanıla bilmədi. Bot kanalda admin deyil və ya xəta baş verdi."}, status_code=400)
             
-        # Reward user
-        user.balance_mc += task.reward_amount
-        user.total_earned_mc += task.reward_amount
-        
+        # Guard: reward must be a positive finite amount
+        if task.reward_amount <= 0:
+            logger.warning("[TASK-VERIFY] Task %s has non-positive reward %s — rejecting.", req.task_id, task.reward_amount)
+            return JSONResponse({"ok": False, "message": "Tapşırıq mükafatı etibarsızdır."}, status_code=400)
+
+        # Reward user — both writes staged in the same transaction
+        user.balance_mc      = round(user.balance_mc + task.reward_amount, 2)
+        user.total_earned_mc = round(user.total_earned_mc + task.reward_amount, 2)
+        new_balance = user.balance_mc
+
         user_task = UserTask(user_id=user.id, task_id=task.id)
         session.add(user_task)
         session.add(user)
-        await session.commit()
-        
-        return JSONResponse({"ok": True, "reward": task.reward_amount, "new_balance": user.balance_mc})
+        try:
+            await session.commit()
+        except Exception as db_err:
+            await session.rollback()
+            logger.exception("[TASK-VERIFY] DB commit failed for user %s task %s: %s", telegram_id, req.task_id, db_err)
+            return JSONResponse({"ok": False, "message": "Verilənlər bazası xətası. Yenidən cəhd edin."}, status_code=500)
+
+        return JSONResponse({"ok": True, "reward": task.reward_amount, "new_balance": new_balance})
 
 
 # ── Async Cooldown Notification Worker ────────────────────────────────
