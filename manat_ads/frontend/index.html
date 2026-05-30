@@ -239,46 +239,24 @@
             text-shadow: 0 0 12px rgba(255, 255, 255, 0.7);
         }
 
-        /* ── Metallic League Badges ────────────────────────────── */
-        .league-badge {
-            display: inline-block;
-            width: 14px;
-            height: 14px;
-            border-radius: 50%;
-            margin-right: 6px;
-            vertical-align: middle;
-            flex-shrink: 0;
-            box-shadow: 0 0 8px rgba(255, 255, 255, 0.4);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        /* ── League Tier Icon — emoji only, NO background circle ───── */
+        /* All radial-gradient metallic dot rules are intentionally removed.  */
+        /* The badge is rendered exclusively as an emoji via JS textContent.  */
+        #league-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 15px;
+            line-height: 1;
+            width: auto;
+            height: auto;
+            background: none !important;
+            border: none !important;
+            border-radius: 0 !important;
+            box-shadow: none !important;
+            padding: 0;
         }
-        .league-badge:hover {
-            transform: scale(1.15);
-        }
-        .league-badge.bronze {
-            background: radial-gradient(circle at 30% 30%, #df9c6e 0%, #b86b32 60%, #804015 100%);
-            border: 1px solid #e5a67d;
-            box-shadow: 0 0 6px rgba(183, 107, 50, 0.6);
-        }
-        .league-badge.silver {
-            background: radial-gradient(circle at 30% 30%, #ffffff 0%, #b0b0b0 60%, #696969 100%);
-            border: 1px solid #ffffff;
-            box-shadow: 0 0 6px rgba(192, 192, 192, 0.7);
-        }
-        .league-badge.gold {
-            background: radial-gradient(circle at 30% 30%, #fff3a1 0%, #ffd700 60%, #b8860b 100%);
-            border: 1px solid #fff7c2;
-            box-shadow: 0 0 8px rgba(255, 215, 0, 0.75);
-        }
-        .league-badge.platinum {
-            background: radial-gradient(circle at 30% 30%, #e8f4fd 0%, #74b9e8 55%, #2563a8 100%);
-            border: 1px solid #aad4f5;
-            box-shadow: 0 0 8px rgba(59, 130, 246, 0.65);
-        }
-        .league-badge.diamond {
-            background: radial-gradient(circle at 30% 30%, #e0fffe 0%, #06b6d4 55%, #0e7490 100%);
-            border: 1px solid #a5f3fc;
-            box-shadow: 0 0 10px rgba(6, 182, 212, 0.75);
-        }
+
 
         .withdrawal-bar-track {
             width: 100%;
