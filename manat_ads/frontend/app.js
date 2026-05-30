@@ -950,7 +950,16 @@ function initAdsgram() {
  */
 let currentWatchingSession = 1;
 
+// ── Mutex lock: prevents re-entry during the 7-second post-ad cooldown ──
+let isCooldownActive = false;
+
+// Module-level handle so we can always clear the previous interval before
+// starting a new one, eliminating any stacked-interval race condition.
+let _btnCooldownTimerId = null;
+
 async function watchAd(sessionNum = 1) {
+    // Hard mutex guard — bail out immediately if cooldown is running
+    if (isCooldownActive) return;
     currentWatchingSession = sessionNum;
     const watchBtn = document.getElementById(`session-${sessionNum}-btn`);
     const otherBtn = document.getElementById(`session-${sessionNum === 1 ? 2 : 1}-btn`);
@@ -1012,21 +1021,53 @@ async function watchAd(sessionNum = 1) {
 
 // ── Düymə Cooldown ────────────────────────────────────────────────────
 function startButtonCooldown(sessionNum, seconds = 7) {
-    const btn = document.getElementById(`session-${sessionNum}-btn`);
+    const btn    = document.getElementById(`session-${sessionNum}-btn`);
     const otherBtn = document.getElementById(`session-${sessionNum === 1 ? 2 : 1}-btn`);
 
-    btn.disabled = true;
-    if (otherBtn) otherBtn.disabled = true;
+    // ── 1. Acquire mutex ─────────────────────────────────────────────
+    isCooldownActive = true;
 
+    // ── 2. Destroy any stacked/hanging interval before creating a new one
+    if (_btnCooldownTimerId !== null) {
+        clearInterval(_btnCooldownTimerId);
+        _btnCooldownTimerId = null;
+    }
+
+    // ── 3. Hard DOM lock — browser-level click/touch rejection ───────
+    btn.disabled = true;
+    btn.style.pointerEvents = 'none';
+    btn.style.opacity = '0.6';
+    if (otherBtn) {
+        otherBtn.disabled = true;
+        otherBtn.style.pointerEvents = 'none';
+        otherBtn.style.opacity = '0.6';
+    }
+
+    // ── 4. Countdown — stored in module-level handle ─────────────────
     let remaining = seconds;
     btn.textContent = `${t('waitSec')} (${remaining}s)...`;
 
-    const interval = setInterval(() => {
+    _btnCooldownTimerId = setInterval(() => {
         remaining--;
         if (remaining > 0) {
             btn.textContent = `${t('waitSec')} (${remaining}s)...`;
         } else {
-            clearInterval(interval);
+            // ── 5. Strict zero — release everything ──────────────────
+            clearInterval(_btnCooldownTimerId);
+            _btnCooldownTimerId = null;
+
+            // Restore DOM to premium active state
+            btn.disabled = false;
+            btn.style.pointerEvents = '';
+            btn.style.opacity = '';
+            if (otherBtn) {
+                otherBtn.style.pointerEvents = '';
+                otherBtn.style.opacity = '';
+            }
+
+            // Release mutex
+            isCooldownActive = false;
+
             renderDashboard();
         }
     }, 1000);
