@@ -139,7 +139,7 @@
         /* ── Header ────────────────────────────────────────────────── */
         .header {
             text-align: center;
-            padding: 20px 0 16px;
+            padding: 8px 0 4px !important;
             position: relative;
             z-index: 10000;
         }
@@ -155,26 +155,30 @@
         }
 
         .header-subtitle {
-            font-size: 13px;
-            color: var(--text-muted);
-            margin-top: 4px;
+            font-size: 11px !important;
+            opacity: 0.6 !important;
+            margin-top: 2px !important;
             font-weight: 500;
+            color: var(--text-muted);
+            letter-spacing: 0.5px;
         }
 
         .header-greeting {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            display: flex !important;
+            justify-content: space-between !important;
+            align-items: center !important;
             width: 100%;
             box-sizing: border-box;
-            padding: 0 16px;
-            font-size: 15px;
+            padding: 0 4px !important;
+            font-size: 13px !important;
+            font-weight: 500 !important;
             color: var(--text-secondary);
-            margin-top: 8px;
+            margin-top: 12px !important; /* tight distance from tagline */
         }
 
         .header-greeting strong {
             color: var(--text-primary);
+            font-weight: 700;
         }
 
         /* ── Balance Hero Card ──────────────────────────────────── */
@@ -1672,7 +1676,7 @@
         </div>
     </div>
 
-    <script src="/static/app.js?v=3.5.0"></script>
+    <script src="/static/app.js?v=3.6.0"></script>
 </body>
 </html>
 <!-- trigger vercel build v8 - AZ translation -->
