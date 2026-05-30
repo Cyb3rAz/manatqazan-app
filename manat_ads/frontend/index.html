@@ -1005,10 +1005,11 @@
             bottom: 0;
             left: 0;
             width: 100%;
-            background: rgba(17, 19, 24, 0.75);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(17, 24, 39, 0.75) !important; 
+            border-top: 1px solid rgba(255, 255, 255, 0.08) !important; /* Ultra-thin elegant upper dividing line */
+            backdrop-filter: blur(20px) !important;
+            -webkit-backdrop-filter: blur(20px) !important;
+            box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.45) !important;
             display: flex;
             justify-content: space-around;
             padding: 10px 0 14px 0;
@@ -1031,7 +1032,19 @@
         }
 
         .nav-tab.active {
-            color: #ff9900;
+            color: #ff9900 !important;
+        }
+
+        .nav-tab.active::after {
+            content: '' !important;
+            display: block !important;
+            width: 4px !important;
+            height: 4px !important;
+            background: #ff9900 !important;
+            border-radius: 50% !important;
+            margin: 4px auto 0 auto !important;
+            box-shadow: 0 0 8px #ff9900, 0 0 16px rgba(255, 153, 0, 0.6) !important;
+            transition: all 0.3s ease !important;
         }
         
         .nav-tab:hover {
@@ -1066,20 +1079,7 @@
         }
 
         .nav-indicator {
-            width: 12px;
-            height: 3px;
-            background: #ff9900;
-            border-radius: 99px;
-            margin-top: 4px;
-            opacity: 0;
-            transform: scaleX(0);
-            box-shadow: 0 0 10px rgba(255, 153, 0, 0.8), 0 0 5px rgba(255, 153, 0, 0.4);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .nav-tab.active .nav-indicator {
-            opacity: 1;
-            transform: scaleX(1);
+            display: none !important;
         }
 
         /* ── Tasks Header Refactoring ──────────────────────────────── */
@@ -1618,7 +1618,7 @@
         </div>
     </div>
 
-    <script src="/static/app.js?v=2.5.0"></script>
+    <script src="/static/app.js?v=2.6.0"></script>
 </body>
 </html>
 <!-- trigger vercel build v8 - AZ translation -->
