@@ -486,6 +486,21 @@
             display: none;
         }
 
+        /* Seans 2 Active Button State: Premium Emerald Gradient */
+        #session-2-btn {
+            background: linear-gradient(135deg, #00cc66 0%, #00994d 100%);
+            box-shadow: 0 4px 14px rgba(0, 204, 102, 0.25);
+            color: #ffffff;
+            font-weight: 700;
+        }
+
+        #session-2-btn:disabled {
+            background: var(--bg-secondary) !important;
+            color: var(--text-muted) !important;
+            box-shadow: none !important;
+            cursor: not-allowed;
+        }
+
         .watch-reward-hint {
             text-align: center;
             font-size: 12px;
@@ -1440,9 +1455,9 @@
                     <span class="progress-count" id="session-2-progress-text">0/12 video</span>
                 </div>
                 <div class="progress-bar" style="margin-bottom: 12px;">
-                    <div class="progress-fill" id="session-2-progress-fill" style="width: 0%; background: linear-gradient(135deg, #10b981, #059669);"></div>
+                    <div class="progress-fill" id="session-2-progress-fill" style="width: 0%; background: linear-gradient(135deg, #00cc66, #00994d);"></div>
                 </div>
-                <button class="watch-btn" id="session-2-btn" onclick="watchAd(2)" style="background: linear-gradient(135deg, #10b981, #059669); box-shadow: 0 4px 20px rgba(16, 185, 129, 0.25);">
+                <button class="watch-btn" id="session-2-btn" onclick="watchAd(2)">
                     🎬 Video İzlə & 300 MC Qazan
                 </button>
                 <div class="watch-reward-hint" id="session-2-cooldown-hint" style="margin-top: 8px; font-weight: 600; color: #f43f5e; display: none;"></div>
@@ -1602,7 +1617,7 @@
         </div>
     </div>
 
-    <script src="/static/app.js?v=2.3.0"></script>
+    <script src="/static/app.js?v=2.4.0"></script>
 </body>
 </html>
 <!-- trigger vercel build v8 - AZ translation -->
