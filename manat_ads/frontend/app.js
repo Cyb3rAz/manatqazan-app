@@ -844,8 +844,14 @@ function renderDashboard() {
 
     const pctStr = progressPct.toFixed(1);
 
-    const leagueNameEl = document.getElementById("league-name-text");
-    if (leagueNameEl) leagueNameEl.textContent = leagueName;
+    const BADGE_CLASSES = ['bronze', 'silver', 'gold', 'platinum', 'diamond'];
+
+    const leagueNameEl  = document.getElementById("league-name-label");
+    const leagueBadgeEl = document.getElementById("league-badge");
+    if (leagueNameEl)  leagueNameEl.textContent = leagueName;
+    if (leagueBadgeEl) {
+        leagueBadgeEl.className = `league-badge ${BADGE_CLASSES[newLeagueIndex] || 'bronze'}`;
+    }
 
     const withdrawalPctEl = document.getElementById("withdrawal-pct");
     if (withdrawalPctEl) withdrawalPctEl.textContent = pctStr;
