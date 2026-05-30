@@ -888,9 +888,11 @@ function renderDashboard() {
     if (s1Count >= 12) {
         s1Btn.disabled = true;
         s1Btn.textContent = t('completedS1');
+        s1Btn.classList.add("completed");
     } else {
         s1Btn.disabled = false;
         s1Btn.textContent = `${t('watchBtn')} ${userData.mc_per_video || 300} ${t('watchBtnSuffix')}`;
+        s1Btn.classList.remove("completed");
     }
 
     if (isCooldownActive) {
@@ -918,6 +920,7 @@ function renderDashboard() {
 
     if (userData.session_2_locked) {
         s2Btn.disabled = true;
+        s2Btn.classList.remove("completed");
         if (userData.unlock_at) {
             s2Btn.textContent = t('locked');
             s2Hint.style.display = "block";
@@ -933,7 +936,9 @@ function renderDashboard() {
         if (s2Count >= 12) {
             s2Btn.disabled = true;
             s2Btn.textContent = t('completedS2');
+            s2Btn.classList.add("completed");
         } else {
+            s2Btn.classList.remove("completed");
             if (s1Count < 12) {
                 s2Btn.disabled = true;
                 s2Btn.textContent = t('finishFirst');

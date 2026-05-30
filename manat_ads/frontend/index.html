@@ -419,12 +419,14 @@
 
         /* ── Progress Bar ──────────────────────────────────────────── */
         .progress-section {
-            background: var(--bg-card);
-            backdrop-filter: blur(12px);
-            border: 1px solid var(--border-glass);
+            background: rgba(255, 255, 255, 0.03) !important;
+            border: 1px solid rgba(255, 255, 255, 0.08) !important;
+            backdrop-filter: blur(10px) !important;
+            -webkit-backdrop-filter: blur(10px) !important;
             border-radius: var(--radius-lg);
             padding: 16px;
             margin: 12px 0;
+            box-shadow: 0 4px 30px rgba(255, 153, 0, 0.1) !important;
         }
 
         .progress-header {
@@ -436,29 +438,31 @@
 
         .progress-title {
             font-size: 13px;
-            font-weight: 600;
-            color: var(--text-secondary);
+            font-weight: 700 !important;
+            color: #f59e0b !important; /* Gold text */
         }
 
         .progress-count {
             font-size: 13px;
-            font-weight: 700;
-            color: var(--accent-gold);
+            font-weight: 700 !important;
+            color: #f59e0b !important; /* Gold text */
         }
 
         .progress-bar {
             width: 100%;
             height: 8px;
-            background: rgba(255, 255, 255, 0.06);
+            background: rgba(255, 255, 255, 0.04) !important;
             border-radius: var(--radius-full);
             overflow: hidden;
+            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.4), 0 0 10px rgba(255, 153, 0, 0.05) !important; /* ultra-subtle amber aura */
         }
 
         .progress-fill {
             height: 100%;
-            background: var(--gradient-gold);
+            background: linear-gradient(90deg, #ff9900 0%, #e67300 100%) !important;
             border-radius: var(--radius-full);
             transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 0 8px rgba(255, 153, 0, 0.4) !important; /* subtle amber glow for the fill */
         }
 
         /* ── Watch Button ──────────────────────────────────────────── */
@@ -471,14 +475,14 @@
             padding: 18px;
             border: none;
             border-radius: var(--radius-lg);
-            background: var(--gradient-gold);
+            background: linear-gradient(135deg, #ff9900 0%, #e67300 100%);
             color: #fff;
             font-family: 'Inter', sans-serif;
             font-size: 16px;
             font-weight: 700;
             cursor: pointer;
             transition: var(--transition);
-            box-shadow: 0 4px 20px var(--accent-gold-glow);
+            box-shadow: 0 4px 20px rgba(255, 153, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.2);
             position: relative;
             overflow: hidden;
             letter-spacing: 0.3px;
@@ -518,13 +522,28 @@
             opacity: 0 !important;
         }
 
-        /* Seans 2 Active Button State: Match Seans 1 Premium Orange Branding */
+        /* Standardize active state on both session buttons */
+        #session-1-btn:not(:disabled),
         #session-2-btn:not(:disabled) {
             background: linear-gradient(135deg, #ff9900 0%, #e67300 100%) !important;
-            box-shadow: 0 4px 14px rgba(255, 153, 0, 0.35) !important;
+            box-shadow: 0 4px 20px rgba(255, 153, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
             color: #ffffff !important;
             font-weight: 700 !important;
             text-shadow: 0 1px 2px rgba(0,0,0,0.2) !important;
+        }
+
+        /* "Tamamlandı" Status Overlay state */
+        .watch-btn.completed {
+            background: rgba(255, 153, 0, 0.08) !important;
+            border: 1px solid rgba(255, 153, 0, 0.2) !important;
+            backdrop-filter: blur(8px) !important;
+            -webkit-backdrop-filter: blur(8px) !important;
+            color: #f59e0b !important; /* Gold text */
+            font-weight: 700 !important;
+            box-shadow: inset 0 1px 1px rgba(255, 153, 0, 0.1), 0 4px 15px rgba(0, 0, 0, 0.2) !important;
+            text-shadow: none !important;
+            cursor: not-allowed !important;
+            pointer-events: none !important;
         }
 
         /* Hard-lock disabled states for both session buttons during cooldown */
@@ -540,6 +559,7 @@
             opacity: 1 !important;
             text-shadow: none !important;
         }
+
 
         .watch-reward-hint {
             text-align: center;
@@ -1652,7 +1672,7 @@
         </div>
     </div>
 
-    <script src="/static/app.js?v=3.4.0"></script>
+    <script src="/static/app.js?v=2.3.0"></script>
 </body>
 </html>
 <!-- trigger vercel build v8 - AZ translation -->
