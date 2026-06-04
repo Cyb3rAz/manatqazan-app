@@ -1476,7 +1476,29 @@ async def cmd_setvip(message: types.Message) -> None:
             
         user.vip_status = status
         user.vip_expires_at = datetime.utcnow() + timedelta(days=7)
+        user_lang = user.language if user.language in ['az', 'tr', 'en', 'ru'] else 'en'
         await session.commit()
+        
+        VIP_NOTIFS = {
+            "pro": {
+                "az": "Sənə bomba bir xəbərim var! Hesabın PRO Nitro-ya qaldırıldı! 🚀\n\nQazanc sürətin artıq **130% Turbo** gücündə uçur! ⚡ Videoların hazırdır, gir dərhal pulunu yığmağa başla!",
+                "tr": "Sana bomba gibi bir haberim var! Hesabın PRO Nitro seviyesine uçuruldu! 🚀\n\nKazanç hızın artık **130% Turbo** güçte! ⚡ Görevlerin hazır, hemen gir ve toplamaya başla!",
+                "en": "Got some hype news for you! Your account is now PRO Nitro! 🚀\n\nYour earnings velocity is zooming at **130% Turbo Power**! ⚡ Daily tasks are ready, jump in and start stacking!",
+                "ru": "Есть бомбическая новость! Твой аккаунт прокачан до PRO Nitro! 🚀\n\nСкорость заработка взлетает на **130% Турбо**! ⚡ Видосы готовы, залетай и начинай рубить кэш!"
+            },
+            "elite": {
+                "az": "Vəssalam, sən artıq ən zirvədəsən! Hesabın ELITE Ultra-ya uçuruldu! 🔥\n\nSürətiniz maksimumda: **170% Ultra Sürət** və **0% komissiya**! Sənin üçün bütün qapılar açıldı, daxil ol və rekordları darmadağın elə!",
+                "tr": "Ve bitti! Artık zirvedesin! Hesabın ELITE Ultra statüsüne yükseltildi! 🔥\n\nKazanç hızın maksimumda: **170% Ultra Hız** ve **%0 komisyon**! Tüm kapılar açıldı, gir ve rekorları darmadağın et!",
+                "en": "Boom! You are at the absolute top now! Account upgraded to ELITE Ultra! 🔥\n\nMax velocity engaged: **170% Ultra Speed** & **0% commission**! All gateways unlocked, go smash some records!",
+                "ru": "Изи! Ты теперь на самом пике! Твой аккаунт взлетел до ELITE Ultra! 🔥\n\nСкорость на максимуме: **170% Ультра** и **0% комиссия**! Все шлюзы открыты, залетай и разноси рекорды в щепки!"
+            }
+        }
+        
+        try:
+            notif_text = VIP_NOTIFS[status][user_lang]
+            await message.bot.send_message(chat_id=tg_id, text=notif_text, parse_mode="Markdown")
+        except Exception as e:
+            logger.error("Failed to notify user %s of VIP upgrade: %s", tg_id, e)
         
         await message.answer(
             f"✅ <b>VIP Uğurla Təyin Edildi!</b>\n"
