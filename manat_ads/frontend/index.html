@@ -1911,8 +1911,18 @@
             </div>
         </div>
     </div>
+    <!-- VIP Purchase Modal -->
+    <div id="vip-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(10, 26, 34, 0.9); z-index: 10000; justify-content: center; align-items: center; backdrop-filter: blur(5px);">
+        <div style="background: #11222c; border: 1px solid #06b6d4; box-shadow: 0 0 20px rgba(6, 182, 212, 0.3); border-radius: 16px; padding: 24px; max-width: 90%; width: 350px; text-align: center;">
+            <p id="vip-modal-text" style="color: white; font-size: 16px; margin-bottom: 20px;"></p>
+            <div class="modal-buttons" style="display: flex; gap: 10px; justify-content: center; margin-top: 20px;">
+                <button id="vip-cancel-btn" style="background: transparent; color: white; border: 1px solid #4facfe; padding: 10px 20px; border-radius: 8px; cursor: pointer;">Cancel</button>
+                <button id="vip-confirm-btn" style="background: linear-gradient(90deg, #00f2fe 0%, #4facfe 100%); color: #000; font-weight: bold; padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer;">Confirm</button>
+            </div>
+        </div>
+    </div>
 
-      <script src="/static/app.js?v=5.0.0"></script>
+      <script src="/static/app.js?v=5.1.0"></script>
 </body>
 </html>
 <!-- trigger vercel build v8 - AZ translation -->

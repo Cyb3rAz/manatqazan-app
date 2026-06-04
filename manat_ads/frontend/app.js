@@ -146,6 +146,10 @@ const LOCALES = {
         vip_elite_perk2: "Hər video +85 MC",
         vip_elite_perk3: "1.7x Ultra sürət və 0% komissiyalı çıxarış",
         vip_buy_btn: "Satın Al",
+        Modal_Confirm_Text: "Siz bu paketi almaq istədiyinizi təsdiqləyirsiniz?", 
+        Modal_Btn_Cancel: "İmtina", 
+        Modal_Btn_Confirm: "Təsdiqlə",
+        Modal_Order_Msg: "Salam! Mən {package} paketi almaq istəyirəm. Mənim İD-m: {id}",
     },
     tr: {
         subtitle: "İzle • Kazan • Çevir",
@@ -230,6 +234,10 @@ const LOCALES = {
         vip_elite_perk2: "Her video +85 MC",
         vip_elite_perk3: "1.7x Ultra hız ve 0% komisyonlu çekim",
         vip_buy_btn: "Satın Al",
+        Modal_Confirm_Text: "Bu paketi almak istediğinizi onaylıyor musunuz?", 
+        Modal_Btn_Cancel: "İptal", 
+        Modal_Btn_Confirm: "Onayla",
+        Modal_Order_Msg: "Merhaba! Ben {package} paketi almak istiyorum. Benim ID'm: {id}",
     },
     en: {
         subtitle: "Watch • Earn • Convert",
@@ -314,6 +322,10 @@ const LOCALES = {
         vip_elite_perk2: "+85 MC per video",
         vip_elite_perk3: "1.7x Ultra speed & 0% withdrawal fee",
         vip_buy_btn: "Buy Now",
+        Modal_Confirm_Text: "Do you confirm buying this package?", 
+        Modal_Btn_Cancel: "Cancel", 
+        Modal_Btn_Confirm: "Confirm",
+        Modal_Order_Msg: "Hello! I want to buy the {package} package. My ID: {id}",
     },
     ru: {
         subtitle: "Смотри • Зарабатывай • Конвертируй",
@@ -398,6 +410,10 @@ const LOCALES = {
         vip_elite_perk2: "+85 MC за видео",
         vip_elite_perk3: "1.7x Ультраскорость и 0% комиссии при выводе",
         vip_buy_btn: "Купить",
+        Modal_Confirm_Text: "Вы подтверждаете покупку этого пакета?", 
+        Modal_Btn_Cancel: "Отмена", 
+        Modal_Btn_Confirm: "Подтвердить",
+        Modal_Order_Msg: "Здравствуйте! Я хочу купить пакет {package}. Мой ID: {id}",
     }
 };
 
@@ -1728,8 +1744,41 @@ async function submitAdminTask() {
 // ── VIP Purchase Handler ─────────────────────────────────────────────
 function handleVipPurchase(tier) {
     const tierName = tier === 'pro' ? t('vip_pro_title') : t('vip_elite_title');
-    const price    = tier === 'pro' ? t('vip_pro_price') : t('vip_elite_price');
-    // TODO: integrate payment gateway (Telegram Stars / Stripe / PayTR)
-    showToast(`💎 ${tierName} — ${price}`, 'success');
+    selectedVipPackage = tierName;
+    
+    document.getElementById('vip-modal-text').textContent = t('Modal_Confirm_Text');
+    document.getElementById('vip-cancel-btn').textContent = t('Modal_Btn_Cancel');
+    document.getElementById('vip-confirm-btn').textContent = t('Modal_Btn_Confirm');
+    
+    document.getElementById('vip-modal').style.display = 'flex';
 }
+
+let selectedVipPackage = "";
+
+function closeVipModal() {
+    document.getElementById('vip-modal').style.display = 'none';
+    selectedVipPackage = "";
+}
+
+function confirmVipPurchase() {
+    const msgTemplate = t('Modal_Order_Msg');
+    const formattedMsg = msgTemplate.replace('{package}', selectedVipPackage).replace('{id}', userData?.telegram_id || currentUser?.id || "Unknown");
+    const msg = encodeURIComponent(formattedMsg);
+    const tgUrl = "https://t.me/NoYouOkk?text=" + msg;
+    
+    if (window.Telegram && window.Telegram.WebApp) {
+        window.Telegram.WebApp.openTelegramLink(tgUrl);
+    } else {
+        window.open(tgUrl, "_blank");
+    }
+    closeVipModal();
+}
+
+// Bind modal buttons when DOM is loaded
+document.addEventListener("DOMContentLoaded", () => {
+    const cancelBtn = document.getElementById('vip-cancel-btn');
+    const confirmBtn = document.getElementById('vip-confirm-btn');
+    if (cancelBtn) cancelBtn.addEventListener('click', closeVipModal);
+    if (confirmBtn) confirmBtn.addEventListener('click', confirmVipPurchase);
+});
 
