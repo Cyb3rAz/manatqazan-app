@@ -134,16 +134,16 @@ const LOCALES = {
         store_subtitle_soon: "VIP Statuslar tezliklə aktiv olacaq!",
         vip_free_label: "Standart Sürət",
         vip_free_price: "Pulsuz",
-        vip_free_perk: "Hər video +50 MC",
+        vip_free_perk: "Hər video +200 MC",
         vip_pro_title: "PRO Nitro",
         vip_elite_title: "ELITE Ultra",
         Pro_Price: "3.99 AZN / 1 Həftə",
         Elite_Price: "7.99 AZN / 1 Həftə",
         Pro_Line_1: "Gündəlik: 45 video (Daha az yorucu)",
-        Pro_Line_2: "Hər gün +3,000 MC-yə qədər böyük qazanc",
+        Pro_Line_2: "Hər gün +11,700 MC-yə qədər böyük qazanc",
         Pro_Line_3: "🚀 130% Turbo Sürətli qazanc gücü",
         Elite_Line_1: "Gündəlik: 40 video (Maksimum qənaət)",
-        Elite_Line_2: "Hər gün +3,500 MC-yə qədər rekord qazanc",
+        Elite_Line_2: "Hər gün +14,000 MC-yə qədər rekord qazanc",
         Elite_Line_3: "🔥 170% Ultra Sürət və 0% komissiyalı çıxarış",
         vip_buy_btn: "Satın Al",
         Modal_Confirm_Text: "Siz bu paketi almaq istədiyinizi təsdiqləyirsiniz?", 
@@ -224,16 +224,16 @@ const LOCALES = {
         store_subtitle_soon: "VIP Statüler yakında aktif olacak!",
         vip_free_label: "Standart Hız",
         vip_free_price: "Ücretsiz",
-        vip_free_perk: "Her video +50 MC",
+        vip_free_perk: "Her video +200 MC",
         vip_pro_title: "PRO Nitro",
         vip_elite_title: "ELITE Ultra",
         Pro_Price: "109.99 TL / 1 Hafta",
         Elite_Price: "219.99 TL / 1 Hafta",
         Pro_Line_1: "Günlük: 45 video (Daha az yorucu)",
-        Pro_Line_2: "Her gün +3,000 MC'ye varan büyük kazanç",
+        Pro_Line_2: "Her gün +11.700 MC'ye varan büyük kazanç",
         Pro_Line_3: "🚀 130% Turbo Hızlı kazanç gücü",
         Elite_Line_1: "Günlük: 40 video (Maksimum tasarruf)",
-        Elite_Line_2: "Her gün +3,500 MC'ye varan rekor kazanç",
+        Elite_Line_2: "Her gün +14.000 MC'ye varan rekor kazanç",
         Elite_Line_3: "🔥 170% Ultra Hız ve 0% komisyonlu çekim",
         vip_buy_btn: "Satın Al",
         Modal_Confirm_Text: "Bu paketi almak istediğinizi onaylıyor musunuz?", 
@@ -314,16 +314,16 @@ const LOCALES = {
         store_subtitle_soon: "VIP Statuses will be active soon!",
         vip_free_label: "Standard Speed",
         vip_free_price: "Free",
-        vip_free_perk: "+50 MC per video",
+        vip_free_perk: "+200 MC per video",
         vip_pro_title: "PRO Nitro",
         vip_elite_title: "ELITE Ultra",
         Pro_Price: "2.35 USDT / 1 Week",
         Elite_Price: "4.70 USDT / 1 Week",
         Pro_Line_1: "Daily: 45 videos (Less exhausting)",
-        Pro_Line_2: "Earn up to +3,000 MC massive daily drop",
+        Pro_Line_2: "Earn up to +11,700 MC massive daily drop",
         Pro_Line_3: "🚀 130% Turbo Earnings velocity multiplier",
         Elite_Line_1: "Daily: 40 videos (Maximum savings)",
-        Elite_Line_2: "Earn up to +3,500 MC record daily drop",
+        Elite_Line_2: "Earn up to +14,000 MC record daily drop",
         Elite_Line_3: "🔥 170% Ultra Speed & 0% withdrawal commission",
         vip_buy_btn: "Buy Now",
         Modal_Confirm_Text: "Do you confirm buying this package?", 
@@ -404,16 +404,16 @@ const LOCALES = {
         store_subtitle_soon: "VIP Статусы будут активны скоро!",
         vip_free_label: "Стандартная скорость",
         vip_free_price: "Бесплатно",
-        vip_free_perk: "+50 MC за видео",
+        vip_free_perk: "+200 MC за видео",
         vip_pro_title: "PRO Nitro",
         vip_elite_title: "ELITE Ultra",
         Pro_Price: "2.35 USDT / 1 Неделя",
         Elite_Price: "4.70 USDT / 1 Неделя",
         Pro_Line_1: "Ежедневно: 45 видео (Меньше усталости)",
-        Pro_Line_2: "До +3,000 MC крупного заработка каждый день",
+        Pro_Line_2: "До +11 700 MC крупного заработка каждый день",
         Pro_Line_3: "🚀 130% Турбо Скорость генерации прибыли",
         Elite_Line_1: "Ежедневно: 40 видео (Максимальная экономия)",
-        Elite_Line_2: "До +3,500 MC рекордного заработка каждый день",
+        Elite_Line_2: "До +14 000 MC рекордного заработка каждый день",
         Elite_Line_3: "🔥 170% Ультра Скорость и 0% комиссия на вывод",
         vip_buy_btn: "Купить",
         Modal_Confirm_Text: "Вы подтверждаете покупку этого пакета?", 
@@ -873,7 +873,7 @@ function createDefaultUserData() {
         daily_limit: 24,
         referral_count: 0,
         referral_earnings_mc: 0,
-        mc_per_video: 50,
+        mc_per_video: 200,
     };
 }
 
@@ -1036,7 +1036,7 @@ function renderDashboard() {
     let progressPct = 0;
     let newLeagueIndex = 0;
 
-    // ── League Thresholds (300 MC/video × 50 videos/day = 15,000 MC/day max) ──
+    // ── League Thresholds (350 MC/video × 50 videos/day = 17,500 MC/day max; Free=200×50=10,000 MC/day) ──
     //   Bronze   :      0 –  49,999 MC
     //   Silver   : 50,000 – 149,999 MC
     //   Gold     :150,000 – 399,999 MC
@@ -1226,7 +1226,7 @@ function renderDashboard() {
         s1Btn.style.textShadow = 'none';
     } else {
         s1Btn.disabled = false;
-        s1Btn.innerHTML = `${t('watchBtn')} ${userData.mc_per_video || 300} ${t('watchBtnSuffix')}`;
+        s1Btn.innerHTML = `${t('watchBtn')} ${userData.mc_per_video || 200} ${t('watchBtnSuffix')}`;
         s1Btn.classList.remove("completed");
         s1Btn.style.cssText = '';
     }
@@ -1286,7 +1286,7 @@ function renderDashboard() {
             s2Btn.style.textShadow = 'none';
         } else {
             s2Btn.disabled = false;
-            s2Btn.innerHTML = `${t('watchBtn')} ${userData.mc_per_video || 300} ${t('watchBtnSuffix')}`;
+            s2Btn.innerHTML = `${t('watchBtn')} ${userData.mc_per_video || 200} ${t('watchBtnSuffix')}`;
             s2Btn.classList.remove("completed");
             s2Btn.style.cssText = '';
         }
@@ -1397,7 +1397,7 @@ async function watchAd(sessionNum = 1) {
         watchBtn.textContent = t('rewardCalc');
         await executeAdSuccessReward(sessionNum);
         spawnCoinBurst();
-        showToast(t('toastEarned').replace('{amount}', userData.mc_per_video || 300), "success");
+        showToast(t('toastEarned').replace('{amount}', userData.mc_per_video || 200), "success");
     } catch (e) {
         console.log('[Onclicka] Ad dismissed or error:', e);
         showToast(t('toastWatchFull'), "error");
@@ -1479,7 +1479,7 @@ async function executeAdSuccessReward(sessionNum) {
     // Set reward syncing flag to true
     isRewardSyncing = true;
 
-    const reward = userData.mc_per_video || 300;
+    const reward = userData.mc_per_video || 200;
 
     // ── 1. Optimistic UI update ────────────────────────────────────────
     userData.balance_mc      += reward;

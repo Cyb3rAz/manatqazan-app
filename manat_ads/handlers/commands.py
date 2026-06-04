@@ -73,10 +73,30 @@ router.message.outer_middleware(BanCheckMiddleware())
 router.callback_query.outer_middleware(BanCheckMiddleware())
 
 # ── Config ──────────────────────────────────────────────────────────────
-MC_TO_AZN_RATE = int(os.getenv("MC_TO_AZN_RATE", "125000"))
+MC_TO_AZN_RATE = int(os.getenv("MC_TO_AZN_RATE", "140000"))
 MIN_WITHDRAWAL_TRY = float(os.getenv("MIN_WITHDRAWAL_TRY", "135.00"))
 MC_PER_VIDEO = int(os.getenv("MC_PER_VIDEO", "300"))
 DAILY_LIMIT = int(os.getenv("DAILY_VIDEO_LIMIT", "24"))
+# Withdrawal threshold = 5 AZN = 700,000 MC (at 140,000 MC/AZN)
+_WITHDRAWAL_THRESHOLD_MC: float = 700_000.0
+
+
+def _get_mc_for_tier(vip_status: str | None) -> int:
+    """Return the MC-per-video reward for a given VIP tier string.
+
+    Mirrors _get_vip_params() in main.py but is self-contained so
+    command handlers need no cross-module import.
+    MC_TO_AZN_RATE=140,000 | Withdrawal threshold=700,000 MC = 5 AZN:
+      free  -> 200 MC  (50 clicks/day → 70 days to withdraw)
+      pro   -> 260 MC  (45 clicks/day → ~60 days to withdraw)
+      elite -> 350 MC  (40 clicks/day → 50 days to withdraw)
+    """
+    tier = (vip_status or "free").lower().strip()
+    if tier == "pro":
+        return 260
+    if tier == "elite":
+        return 350
+    return 200  # free / fallback
 
 raw_webhook_url = os.getenv("WEBHOOK_URL", "").strip()
 if not raw_webhook_url or "your-domain" in raw_webhook_url:
@@ -112,13 +132,13 @@ BOT_LOCALES = {
             "🎉 <b>ManatAds-a xoş gəlmisiniz!</b>\n\n"
             "Salam, <b>{name}</b>! 👋\n\n"
             "📺 Qısa videolar izləyin və hər video üçün <b>{mc} MC</b> qazanın.\n"
-            "📊 Gündəlik limit: <b>24 video klik</b> (hər mərhələ 12 video klik)\n"
+            "📊 Gündəlik limit: <b>50 video klik</b> (hər mərhələ 25 video klik)\n"
             "👥 Dostlarınızı dəvət edin və <b>ömürlük 10% bonus</b> qazanın!"
             "\n\n💡 İpucu: Sistemi yeniləmək üçün /start yaza bilərsiniz!"
         ),
         'welcome_back':   "👋 <b>Yenidən xoş gəldiniz, {name}!</b>\n\n🪙 Balans: <b>{balance} MC</b>\n📈 Ümumi qazanc: <b>{total} MC</b>\n\nDaha çox qazanmağa hazırsınız? Aşağıdakı düyməyə toxunun! 👇\n\n💡 İpucu: Sistemi yeniləmək üçün /start yaza bilərsiniz!",
         'referral_msg':   "\n\n🤝 <b>Sizi dostunuz dəvət edib!</b> Onlar sizin qazancınızdan ömürlük 10% bonus qazanacaqlar.",
-        'btn_video':      "🎬 Video İzlə & Qazan",
+        'btn_video':      "🎬 Video İzlə & 200 MC Qazan",
         'btn_balance':    "💰 Balansım",
         'btn_referral':   "👥 Referal Proqramı",
         'btn_how':        "ℹ️ Necə İşləyir?",
@@ -137,17 +157,17 @@ BOT_LOCALES = {
         # ── Referral screen ──
         'referral_title':   "👥 <b>Referal Proqramı</b>",
         'referral_desc':    "Dəvət linkinizi paylaşın və dostlarınızın izlədiyi hər videodan <b>ömürlük 10% bonus</b> qazanın!",
-        'referral_link_lbl':"🔗 <b>Sizin Referal Linkiniz:</b>",
-        'referral_invited': "👤 <b>Dəvət Olunanlar:</b>",
+        'referral_link_lbl':"🔗 <b>Referal Linkiniiz:</b>",
+        'referral_invited': "👤 <b>Dəvət Edilənlər:</b>",
         'referral_earned':  "🪙 <b>Referal Qazancı:</b>",
-        'referral_azn':     "💵 <b>Referal AZN:</b>      {amount:,.4f} AZN",
-        'referral_tip':     "💡 <i>Dəvət etdiyiniz hər bir şəxsin izlədiyi video üçün ({mc} MC), siz avtomatik olaraq {bonus} MC əldə edirsiniz!</i>",
+        'referral_azn':     "💵 <b>Referal AZN:</b>     {amount:,.4f} AZN",
+        'referral_tip':     "💡 <i>Dəvət etdiyiniz hər şəxsin izlədiyi video üçün ({mc} MC), siz avtomatik {bonus} MC qazanırsınız!</i>",
         # ── How it works ──
         'how_title':        "ℹ️ <b>ManatAds Layihəsi Haqqında Məlumat</b>",
         'how_body':         (
             "Platformamızın işləmə məntiqi çox bəsitdir:\n"
-            "1️⃣ '<b>🎬 Video İzlə & Qazan</b>' düyməsinə toxunaraq qısa video reklamlar izliyirsiniz.\n"
-            "2️⃣ Hər uğurlu izləmə üçün balansınıza anında <b>65 MC</b> (Manat Coin) əlavə olunur.\n"
+            "1️⃣ '<b>🎬 Video İzlə & 200 MC Qazan</b>' düyməsinə toxunaraq qısa video reklamlar izliyirsiniz.\n"
+            "2️⃣ Hər uğurlu izləmə üçün balansınıza anında <b>{mc} MC</b> (Manat Coin) əlavə olunur.\n"
             "3️⃣ Dostlarınızı dəvət edərək onların qazancından da əlavə bonuslar əldə edirsiniz.\n\n"
             "💰 <b>Çıxarış və Balans Mexanizmi:</b>\n"
             "Yığılan MC xalları sistem daxilində real Azərbaycan Manatına (AZN) konvertasiya olunur. "
@@ -179,7 +199,7 @@ BOT_LOCALES = {
             "🎉 <b>ManatAds'a hoş geldiniz!</b>\n\n"
             "Merhaba, <b>{name}</b>! 👋\n\n"
             "📺 Kısa videolar izleyin ve her video için <b>{mc} MC</b> kazanın.\n"
-            "📊 Günlük limit: <b>24 video klik</b> (her aşama 12 video klik)\n"
+            "📊 Günlük limit: <b>50 video klik</b> (her aşama 25 video klik)\n"
             "👥 Arkadaşlarınızı davet edin ve <b>ömür boyu %10 bonus</b> kazanın!"
             "\n\n💡 İpucu: Sistemi yenilemek için /start yazabilirsiniz!"
         ),
@@ -214,7 +234,7 @@ BOT_LOCALES = {
         'how_body':         (
             "Platformamızın çalışma mantığı çok basittir:\n"
             "1️⃣ '<b>🎬 Video İzle & Kazan</b>' butonuna dokunarak kısa video reklamlar izliyorsunuz.\n"
-            "2️⃣ Her başarılı izleme için bakiyenize anında <b>65 MC</b> (Manat Coin) ekleniyor.\n"
+            "2️⃣ Her başarılı izleme için bakiyenize anında <b>{mc} MC</b> (Manat Coin) ekleniyor.\n"
             "3️⃣ Arkadaşlarınızı davet ederek onun kazançlarından da ek bonuslar elde ediyorsunuz.\n\n"
             "💰 <b>Çekim ve Bakiye Mekanizması:</b>\n"
             "Biriktirilen MC puanları sistem içinde gerçek Türk Lirası (TRY) para birimine dönüştürülür. "
@@ -246,7 +266,7 @@ BOT_LOCALES = {
             "🎉 <b>Welcome to ManatAds!</b>\n\n"
             "Hello, <b>{name}</b>! 👋\n\n"
             "📺 Watch short videos and earn <b>{mc} MC</b> per video.\n"
-            "📊 Daily limit: <b>24 video klik</b> (12 video klik per level)\n"
+            "📊 Daily limit: <b>50 video clicks</b> (25 video clicks per level)\n"
             "👥 Invite your friends and earn a <b>lifetime 10% bonus</b>!"
             "\n\n💡 Tip: You can type /start at any time to refresh the system!"
         ),
@@ -281,7 +301,7 @@ BOT_LOCALES = {
         'how_body':         (
             "Our platform's logic is very simple:\n"
             "1️⃣ Tap the '<b>🎬 Watch Videos & Earn</b>' button to watch short video ads.\n"
-            "2️⃣ For each successful watch, <b>65 MC</b> (Manat Coin) is instantly added to your balance.\n"
+            "2️⃣ For each successful watch, <b>{mc} MC</b> (Manat Coin) is instantly added to your balance.\n"
             "3️⃣ Invite your friends and earn extra bonuses from their activity too.\n\n"
             "💰 <b>Withdrawal & Balance Mechanism:</b>\n"
             "Accumulated MC points are converted to USDT (Crypto) within the system. "
@@ -313,7 +333,7 @@ BOT_LOCALES = {
             "🎉 <b>Добро пожаловать в ManatAds!</b>\n\n"
             "Привет, <b>{name}</b>! 👋\n\n"
             "📺 Смотрите короткие видео и зарабатывайте <b>{mc} MC</b> за каждое видео.\n"
-            "📊 Ежедневный лимит: <b>24 video klik</b> (12 video klik за уровень)\n"
+            "📊 Ежедневный лимит: <b>50 video klik</b> (25 video klik за уровень)\n"
             "👥 Приглашайте друзей и зарабатывайте <b>пожизненный бонус 10%</b>!"
             "\n\n💡 Подсказка: Вы можете написать /start в любое время, чтобы обновить систему!"
         ),
@@ -348,7 +368,7 @@ BOT_LOCALES = {
         'how_body':         (
             "Логика работы нашей платформы очень проста:\n"
             "1️⃣ Нажмите на кнопку '<b>🎬 Смотреть видео & Зарабатывать</b>', чтобы смотреть короткую видеорекламу.\n"
-            "2️⃣ За каждый успешный просмотр на ваш баланс мгновенно зачисляется <b>65 MC</b> (Manat Coin).\n"
+            "2️⃣ За каждый успешный просмотр на ваш баланс мгновенно зачисляется <b>{mc} MC</b> (Manat Coin).\n"
             "3️⃣ Приглашайте друзей и получайте дополнительные бонусы с их активности.\n\n"
             "💰 <b>Механизм вывода и баланса:</b>\n"
             "Накопленные MC-баллы конвертируются в USDT (Крипто) внутри системы. "
@@ -770,10 +790,11 @@ async def cb_set_bot_lang(callback: types.CallbackQuery) -> None:
     except Exception:
         pass
 
-    # Build welcome message
+    # Build welcome message — use tier-aware MC for new users (always free at first pick)
     name = tg_user.first_name or "friend"
+    tier_mc = _get_mc_for_tier(getattr(db_user, 'vip_status', 'free') if db_user else 'free')
     welcome_text = loc['welcome_new'].format(
-        name=name, mc=MC_PER_VIDEO, limit=DAILY_LIMIT
+        name=name, mc=tier_mc, limit=DAILY_LIMIT
     )
 
     # Edit the language selection message → welcome + main keyboard
@@ -897,12 +918,15 @@ async def _show_referral(tg_user: types.User, message: types.Message) -> None:
     referral_link = f"https://t.me/{bot_username}?start={tg_user.id}"
     
     # Dynamic fiat calculation according to selected language
+    # MC_TO_AZN_RATE=140,000 | Threshold=700,000 MC = 5 AZN
+    # TRY divisor: 700,000 MC / 135 TRY = ~5,185.19 MC/TRY
+    # USDT divisor: 700,000 MC / 3 USDT = ~233,333.33 MC/USDT
     if lang == 'az':
         ref_fiat = user.referral_earnings_mc / MC_TO_AZN_RATE
     elif lang == 'tr':
-        ref_fiat = user.referral_earnings_mc / (625000.0 / MIN_WITHDRAWAL_TRY)
-    else:  # en, ru
-        ref_fiat = user.referral_earnings_mc / 125000.0
+        ref_fiat = user.referral_earnings_mc / (_WITHDRAWAL_THRESHOLD_MC / MIN_WITHDRAWAL_TRY)
+    else:  # en, ru — USDT
+        ref_fiat = user.referral_earnings_mc / (_WITHDRAWAL_THRESHOLD_MC / 3.0)
 
     bonus_per_video = MC_PER_VIDEO * 10 // 100
 
@@ -1014,7 +1038,7 @@ async def handle_user_text_message(message: types.Message) -> None:
         return
         
     # If the user has enough balance to withdraw, we forward the message to admin
-    if user.balance_mc >= 625000.0:
+    if user.balance_mc >= _WITHDRAWAL_THRESHOLD_MC:
         if ADMIN_ID:
             uname_display = f"@{user.username}" if user.username else "Yoxdur"
             name_display = user.first_name or "Namelum"
@@ -1095,7 +1119,8 @@ async def _show_how_it_works(tg_user: types.User, message: types.Message) -> Non
 
     hint = SYSTEM_REFRESH_HINT.get(lang, SYSTEM_REFRESH_HINT['en'])
 
-    text = loc['how_title'] + "\n\n" + loc['how_body'].format(mc=MC_PER_VIDEO) + hint
+    tier_mc = _get_mc_for_tier(getattr(user, 'vip_status', 'free') if user else 'free')
+    text = loc['how_title'] + "\n\n" + loc['how_body'].format(mc=tier_mc) + hint
     await message.answer(text, parse_mode="HTML")
 
 
@@ -1114,14 +1139,14 @@ async def _handle_withdraw(tg_user: types.User, message: types.Message) -> None:
 
     hint = SYSTEM_REFRESH_HINT.get(lang, SYSTEM_REFRESH_HINT['en'])
 
-    # Hardcoded minimum threshold (625,000 MC) check to prevent floating-point rounding bypasses
-    if user.balance_mc < 625000.0:
+    # Global hardcoded minimum threshold (700,000 MC = 5 AZN at 140,000 MC/AZN)
+    if user.balance_mc < _WITHDRAWAL_THRESHOLD_MC:
         if lang == 'az':
             fiat_value = user.balance_mc / MC_TO_AZN_RATE
         elif lang == 'tr':
-            fiat_value = user.balance_mc / (625000.0 / MIN_WITHDRAWAL_TRY)
-        else:  # en, ru
-            fiat_value = user.balance_mc / 125000.0
+            fiat_value = user.balance_mc / (_WITHDRAWAL_THRESHOLD_MC / MIN_WITHDRAWAL_TRY)
+        else:  # en, ru — USDT
+            fiat_value = user.balance_mc / (_WITHDRAWAL_THRESHOLD_MC / 3.0)
         await message.answer(
             loc['withdraw_below_limit'].format(amount=fiat_value) + hint,
             parse_mode="HTML",

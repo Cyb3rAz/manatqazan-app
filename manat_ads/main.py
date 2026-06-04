@@ -60,7 +60,7 @@ WEBHOOK_URL: str = os.getenv("WEBHOOK_URL", "").rstrip("/")
 ADSGRAM_SECRET: str = os.getenv("ADSGRAM_SECRET", "")
 MC_PER_VIDEO: int = int(os.getenv("MC_PER_VIDEO", "50"))
 DAILY_VIDEO_LIMIT: int = int(os.getenv("DAILY_VIDEO_LIMIT", "50"))
-MC_TO_AZN_RATE: int = int(os.getenv("MC_TO_AZN_RATE", "125000"))
+MC_TO_AZN_RATE: int = int(os.getenv("MC_TO_AZN_RATE", "140000"))
 MIN_WITHDRAWAL_TRY: float = float(os.getenv("MIN_WITHDRAWAL_TRY", "135.00"))
 REFERRAL_BONUS_PERCENT: int = int(os.getenv("REFERRAL_BONUS_PERCENT", "10"))
 
@@ -94,17 +94,17 @@ def _get_vip_params(vip_status: str, now: datetime) -> tuple[int, int, int]:
     """
     Return (session_limit, daily_limit, mc_reward) for a given VIP tier.
 
-    Tiers:
-      free  -> session=25, daily=50, reward=50 MC
-      pro   -> session=22, daily=45, reward=65 MC  (less fatigue, higher pay-per-video)
-      elite -> session=20, daily=40, reward=85 MC  (peak efficiency mode)
+    Tiers (MC_TO_AZN_RATE=140,000 | Withdrawal threshold=700,000 MC = 5 AZN):
+      free  -> session=25, daily=50, reward=200 MC  (50×200=10,000 MC/day → 70 days)
+      pro   -> session=22, daily=45, reward=260 MC  (45×260=11,700 MC/day → ~60 days)
+      elite -> session=20, daily=40, reward=350 MC  (40×350=14,000 MC/day → 50 days)
     """
     tier = (vip_status or "free").lower().strip()
     if tier == "pro":
-        return (22, 45, 65)
+        return (22, 45, 260)
     if tier == "elite":
-        return (20, 40, 85)
-    return (25, 50, 50)  # free / fallback
+        return (20, 40, 350)
+    return (25, 50, 200)  # free / fallback
 
 if not commands_router.parent_router:
     dp.include_router(commands_router)
