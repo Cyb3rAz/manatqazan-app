@@ -21,7 +21,7 @@ import uuid
 import urllib.parse
 import json
 from contextlib import asynccontextmanager
-from datetime import datetime, timedelta, timezone
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
@@ -74,6 +74,13 @@ FRONTEND_DIR = Path(__file__).resolve().parent / "frontend"
 # sequentially so the DB row is never written from two coroutines at once.
 _user_credit_locks: dict[str, asyncio.Lock] = {}
 _user_credit_locks_meta: asyncio.Lock = asyncio.Lock()
+
+def _get_utc_date(dt: datetime | None) -> date | None:
+    if dt is None:
+        return None
+    if dt.tzinfo is None:
+        return dt.replace(tzinfo=timezone.utc).date()
+    return dt.astimezone(timezone.utc).date()
 
 async def _get_user_lock(user_key: str) -> asyncio.Lock:
     """Return (or create) a per-user asyncio.Lock keyed by user identifier."""
@@ -451,7 +458,7 @@ async def _credit_user(user_id_val: int | str, event_id: str, source: str = "unk
             today = now.date()
 
             # Dynamic daily reset
-            if user.last_watch_date and user.last_watch_date.date() != today:
+            if user.last_watch_date and _get_utc_date(user.last_watch_date) != today:
                 print(f"[CREDIT] New day for user {user_telegram_id} - resetting session stats")
                 logger.info("[CREDIT] New day for user %s - resetting session stats", user_telegram_id)
                 user.session_1_count = 0
@@ -626,7 +633,7 @@ async def get_user_info(telegram_id: str) -> JSONResponse:
         #      reset clears completion_time → S2 unlocks at 00:00 (exploit).
         #   B) User in mid-cooldown → reset strands them in a permanent lock
         #      because session_1_count resets to 0 but completion_time is gone.
-        if user.last_watch_date and user.last_watch_date.date() != today:
+        if user.last_watch_date and _get_utc_date(user.last_watch_date) != today:
             user.session_1_count = 0
             user.session_2_count = 0
             user.videos_today = 0

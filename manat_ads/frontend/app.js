@@ -683,13 +683,8 @@ async function fetchUserData() {
         console.log(`[fetchUserData] Backend data: balance_mc=${newData.balance_mc}, videos_today=${newData.videos_today}`);
 
         if (newData && typeof newData.session_1_count === 'number' && typeof newData.session_2_count === 'number') {
-            const s1Count = newData.session_1_count;
-            const s2Count = newData.session_2_count;
-            const serverClicks = currentLevel === 1 ? s1Count : s2Count;
-            const isDailyReset = (s1Count === 0 && s2Count === 0 && !isRewardSyncing);
-
-            if ((isRewardSyncing || serverClicks < levelClicks) && !isDailyReset) {
-                console.log(`[fetchUserData-GUARD] Stale server data ignored. isRewardSyncing=${isRewardSyncing}, serverClicks=${serverClicks}, levelClicks=${levelClicks}`);
+            if (isRewardSyncing) {
+                console.log(`[fetchUserData-GUARD] Stale server data ignored during active reward sync.`);
                 if (userData) {
                     userData.referral_count = newData.referral_count;
                     userData.referral_earnings_mc = newData.referral_earnings_mc;

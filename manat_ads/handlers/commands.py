@@ -12,7 +12,7 @@ from __future__ import annotations
 import os
 import asyncio
 import logging
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 from typing import Callable, Dict, Any, Awaitable
 
 from aiogram import Router, types, BaseMiddleware
@@ -27,6 +27,13 @@ from database import async_session, DB_IS_POSTGRES
 from models import User
 
 logger = logging.getLogger("manatads.commands")
+
+def _get_utc_date(dt: datetime | None) -> date | None:
+    if dt is None:
+        return None
+    if dt.tzinfo is None:
+        return dt.replace(tzinfo=timezone.utc).date()
+    return dt.astimezone(timezone.utc).date()
 
 # ── Admin Config ──
 ADMIN_IDS_RAW = os.getenv("ADMIN_IDS", "1970477419")
@@ -804,7 +811,7 @@ async def _show_balance(tg_user: types.User, message: types.Message) -> None:
     today = now.date()
 
     # Dynamic daily reset
-    if user.last_watch_date and user.last_watch_date.date() != today:
+    if user.last_watch_date and _get_utc_date(user.last_watch_date) != today:
         async with async_session() as reset_session:
             stmt = select(User).where(User.telegram_id == tg_user.id)
             res = await reset_session.execute(stmt)
@@ -1265,7 +1272,7 @@ async def cmd_info(message: types.Message) -> None:
     username_display = f"@{user.username}" if user.username else "Yoxdur"
     
     today = datetime.now(timezone.utc).date()
-    last_date = user.last_watch_date.date() if user.last_watch_date else None
+    last_date = _get_utc_date(user.last_watch_date) if user.last_watch_date else None
     
     session_1 = user.session_1_count if last_date == today else 0
     session_2 = user.session_2_count if last_date == today else 0
