@@ -647,9 +647,14 @@ async def _credit_user(user_id_val: int | str, event_id: str, source: str = "unk
 # ── Leaderboard API (for Mini App) ─────────────────────────────────────
 @app.get("/api/leaderboard", summary="Get Top 45 users for Gamification Leaderboard")
 async def get_leaderboard():
+    from handlers.commands import ADMIN_ID
     async with async_session() as session:
-        # Fetch top 45 users ordered by balance_mc DESC
-        stmt = select(User.first_name, User.balance_mc, User.vip_status).order_by(User.balance_mc.desc()).limit(45)
+        # Fetch top 45 users ordered by balance_mc DESC, excluding the admin
+        stmt = select(User.first_name, User.balance_mc, User.vip_status)
+        if ADMIN_ID is not None:
+            stmt = stmt.where(User.telegram_id != ADMIN_ID)
+        stmt = stmt.order_by(User.balance_mc.desc()).limit(45)
+        
         result = await session.execute(stmt)
         users = result.fetchall()
         
