@@ -12,7 +12,7 @@ from __future__ import annotations
 import os
 import asyncio
 import logging
-from datetime import date, datetime, timezone
+from datetime import date, datetime, timezone, timedelta
 from typing import Callable, Dict, Any, Awaitable
 
 from aiogram import Router, types, BaseMiddleware
@@ -1186,7 +1186,8 @@ ADMIN_HELP_TEXT = (
     "• /give [ID/Username] [Miqdar] — Balansa manual MC əlavə edir/silir (Məs: /give CVb3rAz 500).\n"
     "• /ban [ID] — Şübhəli şəxsi dondurur, botu və Mini App-i onun üçün bağlayır.\n"
     "• /unban [ID] — Ban olunmuş şəxsin blokunu qaldırır.\n"
-    "• /broadcast [Mesaj] — Bazardakı BÜTÜN istifadəçilərə kütləvi bildiriş göndərir."
+    "• /broadcast [Mesaj] — Bazardakı BÜTÜN istifadəçilərə kütləvi bildiriş göndərir.\n"
+    "• /setvip [ID] [pro/elite] — 7 Günlük VIP təyin edər."
 )
 
 ADMIN_PANEL_KB = InlineKeyboardMarkup(inline_keyboard=[
@@ -1439,3 +1440,47 @@ async def cmd_broadcast(message: types.Message) -> None:
         f"✅ Uğurlu: {success_count}\n"
         f"❌ Uğursuz: {fail_count}"
     )
+
+
+@router.message(Command("setvip"))
+async def cmd_setvip(message: types.Message) -> None:
+    if not message.from_user or message.from_user.id != 1970477419:
+        return
+        
+    parts = message.text.split()
+    if len(parts) < 3:
+        await message.answer("⚠️ Format: <code>/setvip <telegram_id> <pro/elite></code>")
+        return
+        
+    target = parts[1].strip()
+    status = parts[2].strip().lower()
+    
+    if status not in ['pro', 'elite']:
+        await message.answer("⚠️ Format: <code>/setvip <telegram_id> <pro/elite></code>")
+        return
+        
+    if not target.isdigit():
+        await message.answer("⚠️ Telegram ID rəqəm olmalıdır.")
+        return
+        
+    tg_id = int(target)
+    
+    async with async_session() as session:
+        stmt = select(User).where(User.telegram_id == tg_id)
+        res = await session.execute(stmt)
+        user = res.scalar_one_or_none()
+        
+        if not user:
+            await message.answer("❌ İstifadəçi tapılmadı!")
+            return
+            
+        user.vip_status = status
+        user.vip_expires_at = datetime.utcnow() + timedelta(days=7)
+        await session.commit()
+        
+        await message.answer(
+            f"✅ <b>VIP Uğurla Təyin Edildi!</b>\n"
+            f"İstifadəçi: <code>{tg_id}</code>\n"
+            f"Status: <b>{status.upper()}</b>\n"
+            f"Müddət: 7 Gün"
+        )
