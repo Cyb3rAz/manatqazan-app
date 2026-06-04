@@ -15,7 +15,7 @@ const MAX_LEVELS  = 2;            // Total levels
 const COOLDOWN_MS = 3 * 60 * 60 * 1000; // 3 hours in milliseconds
 
 // ── Onclicka TMA SDK Bootstrap ────────────────────────────────────────
-window.initCdTma?.({ id: 443591 })
+window.initCdTma?.({ id: 6120549 })
     .then(show => window.show = show)
     .catch(e => console.log('[Onclicka] Init error:', e));
 
