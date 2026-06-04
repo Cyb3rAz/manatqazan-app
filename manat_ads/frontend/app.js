@@ -651,9 +651,10 @@ async function initApp() {
 
 // ── İstifadəçi Məlumatlarını Çək (cache-busting ilə) ─────────────────
 async function fetchUserData() {
+    const currentFetchId = ++lastFetchId;
     const cacheBuster = Date.now();
     const url = `${API_BASE}/api/user/${currentUser.id}?_t=${cacheBuster}`;
-    console.log(`[fetchUserData] Sorgu göndərilir: ${url}`);
+    console.log(`[fetchUserData] Sorgu #${currentFetchId} göndərilir: ${url}`);
 
     try {
         const resp = await fetch(url, {
@@ -665,22 +666,31 @@ async function fetchUserData() {
             }
         });
 
-        console.log(`[fetchUserData] Cavab alındı: status=${resp.status}`);
+        console.log(`[fetchUserData] Cavab #${currentFetchId} alındı: status=${resp.status}`);
 
         if (!resp.ok) {
             if (resp.status === 404) {
                 console.warn(`[fetchUserData] 404 - İstifadəçi ID=${currentUser.id} tapılmadı.`);
-                if (!userData) userData = createDefaultUserData();
-                return;
+                if (currentFetchId === lastFetchId && !userData) {
+                    userData = createDefaultUserData();
+                }
+                return null;
             }
             const errText = await resp.text();
             console.error(`[fetchUserData] API xətası: ${resp.status} | ${errText}`);
-            if (!userData) userData = createDefaultUserData();
-            return;
+            if (currentFetchId === lastFetchId && !userData) {
+                userData = createDefaultUserData();
+            }
+            return null;
         }
 
         const newData = await resp.json();
-        console.log(`[fetchUserData] Backend data: balance_mc=${newData.balance_mc}, videos_today=${newData.videos_today}`);
+        console.log(`[fetchUserData] Backend data #${currentFetchId}: balance_mc=${newData.balance_mc}, videos_today=${newData.videos_today}`);
+
+        if (currentFetchId !== lastFetchId) {
+            console.log(`[fetchUserData] Sorgu #${currentFetchId} köhnəldiyi üçün imtina edildi (cari=${lastFetchId}).`);
+            return newData;
+        }
 
         if (newData && typeof newData.session_1_count === 'number' && typeof newData.session_2_count === 'number') {
             if (isRewardSyncing) {
@@ -701,7 +711,9 @@ async function fetchUserData() {
 
     } catch (err) {
         console.error("[fetchUserData] Şəbəkə xətası:", err);
-        if (!userData) userData = createDefaultUserData();
+        if (currentFetchId === lastFetchId && !userData) {
+            userData = createDefaultUserData();
+        }
         return null;
     }
 }
@@ -1134,6 +1146,7 @@ let currentWatchingSession = 1;
 // Mutex: prevents re-entry during the 7-second post-ad cooldown
 let isBtnCooldownActive = false;
 let isRewardSyncing = false;
+let lastFetchId = 0;
 let cooldownRemaining = 0;
 let _btnCooldownTimerId = null;
 
