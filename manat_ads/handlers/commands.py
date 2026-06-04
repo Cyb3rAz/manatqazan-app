@@ -147,7 +147,7 @@ BOT_LOCALES = {
         'how_body':         (
             "Platformamızın işləmə məntiqi çox bəsitdir:\n"
             "1️⃣ '<b>🎬 Video İzlə & Qazan</b>' düyməsinə toxunaraq qısa video reklamlar izliyirsiniz.\n"
-            "2️⃣ Hər uğurlu izləmə üçün balansınıza anında <b>{mc} MC</b> (Manat Coin) əlavə olunur.\n"
+            "2️⃣ Hər uğurlu izləmə üçün balansınıza anında <b>65 MC</b> (Manat Coin) əlavə olunur.\n"
             "3️⃣ Dostlarınızı dəvət edərək onların qazancından da əlavə bonuslar əldə edirsiniz.\n\n"
             "💰 <b>Çıxarış və Balans Mexanizmi:</b>\n"
             "Yığılan MC xalları sistem daxilində real Azərbaycan Manatına (AZN) konvertasiya olunur. "
@@ -214,7 +214,7 @@ BOT_LOCALES = {
         'how_body':         (
             "Platformamızın çalışma mantığı çok basittir:\n"
             "1️⃣ '<b>🎬 Video İzle & Kazan</b>' butonuna dokunarak kısa video reklamlar izliyorsunuz.\n"
-            "2️⃣ Her başarılı izleme için bakiyenize anında <b>{mc} MC</b> (Manat Coin) ekleniyor.\n"
+            "2️⃣ Her başarılı izleme için bakiyenize anında <b>65 MC</b> (Manat Coin) ekleniyor.\n"
             "3️⃣ Arkadaşlarınızı davet ederek onun kazançlarından da ek bonuslar elde ediyorsunuz.\n\n"
             "💰 <b>Çekim ve Bakiye Mekanizması:</b>\n"
             "Biriktirilen MC puanları sistem içinde gerçek Türk Lirası (TRY) para birimine dönüştürülür. "
@@ -281,7 +281,7 @@ BOT_LOCALES = {
         'how_body':         (
             "Our platform's logic is very simple:\n"
             "1️⃣ Tap the '<b>🎬 Watch Videos & Earn</b>' button to watch short video ads.\n"
-            "2️⃣ For each successful watch, <b>{mc} MC</b> (Manat Coin) is instantly added to your balance.\n"
+            "2️⃣ For each successful watch, <b>65 MC</b> (Manat Coin) is instantly added to your balance.\n"
             "3️⃣ Invite your friends and earn extra bonuses from their activity too.\n\n"
             "💰 <b>Withdrawal & Balance Mechanism:</b>\n"
             "Accumulated MC points are converted to USDT (Crypto) within the system. "
@@ -348,7 +348,7 @@ BOT_LOCALES = {
         'how_body':         (
             "Логика работы нашей платформы очень проста:\n"
             "1️⃣ Нажмите на кнопку '<b>🎬 Смотреть видео & Зарабатывать</b>', чтобы смотреть короткую видеорекламу.\n"
-            "2️⃣ За каждый успешный просмотр на ваш баланс мгновенно зачисляется <b>{mc} MC</b> (Manat Coin).\n"
+            "2️⃣ За каждый успешный просмотр на ваш баланс мгновенно зачисляется <b>65 MC</b> (Manat Coin).\n"
             "3️⃣ Приглашайте друзей и получайте дополнительные бонусы с их активности.\n\n"
             "💰 <b>Механизм вывода и баланса:</b>\n"
             "Накопленные MC-баллы конвертируются в USDT (Крипто) внутри системы. "
