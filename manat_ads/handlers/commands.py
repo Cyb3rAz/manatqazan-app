@@ -138,7 +138,7 @@ BOT_LOCALES = {
         ),
         'welcome_back':   "👋 <b>Yenidən xoş gəldiniz, {name}!</b>\n\n🪙 Balans: <b>{balance} MC</b>\n📈 Ümumi qazanc: <b>{total} MC</b>\n\nDaha çox qazanmağa hazırsınız? Aşağıdakı düyməyə toxunun! 👇\n\n💡 İpucu: Sistemi yeniləmək üçün /start yaza bilərsiniz!",
         'referral_msg':   "\n\n🤝 <b>Sizi dostunuz dəvət edib!</b> Onlar sizin qazancınızdan ömürlük 10% bonus qazanacaqlar.",
-        'btn_video':      "🎬 Video İzlə & 200 MC Qazan",
+        'btn_video':      "🎬 Video İzlə & {mc} MC Qazan",
         'btn_balance':    "💰 Balansım",
         'btn_referral':   "👥 Referal Proqramı",
         'btn_how':        "ℹ️ Necə İşləyir?",
@@ -205,7 +205,7 @@ BOT_LOCALES = {
         ),
         'welcome_back':   "👋 <b>Tekrar hoş geldiniz, {name}!</b>\n\n🪙 Bakiye: <b>{balance} MC</b>\n📈 Toplam kazanç: <b>{total} MC</b>\n\nDaha fazla kazanmaya hazır mısınız? Aşağıdaki butona dokunun! 👇\n\n💡 İpucu: Sistemi yenilemek için /start yazabilirsiniz!",
         'referral_msg':   "\n\n🤝 <b>Sizi bir arkadaşınız davet etti!</b> Kazancınızdan ömür boyu %10 bonus alacaklar.",
-        'btn_video':      "🎬 Video İzle & Kazan",
+        'btn_video':      "🎬 Video İzle & {mc} MC Kazan",
         'btn_balance':    "💰 Bakiyem",
         'btn_referral':   "👥 Referans Programı",
         'btn_how':        "ℹ️ Nasıl Çalışır?",
@@ -272,7 +272,7 @@ BOT_LOCALES = {
         ),
         'welcome_back':   "👋 <b>Welcome back, {name}!</b>\n\n🪙 Balance: <b>{balance} MC</b>\n📈 Total earned: <b>{total} MC</b>\n\nReady to earn more? Tap the button below! 👇\n\n💡 Tip: You can type /start at any time to refresh the system!",
         'referral_msg':   "\n\n🤝 <b>You were invited by a friend!</b> They will earn a lifetime 10% bonus from your earnings.",
-        'btn_video':      "🎬 Watch Videos & Earn",
+        'btn_video':      "🎬 Watch Videos & Earn {mc} MC",
         'btn_balance':    "💰 My Balance",
         'btn_referral':   "👥 Referral Program",
         'btn_how':        "ℹ️ How It Works?",
@@ -339,7 +339,7 @@ BOT_LOCALES = {
         ),
         'welcome_back':   "👋 <b>С возвращением, {name}!</b>\n\n🪙 Баланс: <b>{balance} MC</b>\n📈 Всего заработано: <b>{total} MC</b>\n\nГотовы зарабатывать больше? Нажмите на кнопку ниже! 👇\n\n💡 Подсказка: Вы можете написать /start в любое время, чтобы обновить систему!",
         'referral_msg':   "\n\n🤝 <b>Вас пригласил друг!</b> Они будут получать пожизненный бонус 10% с ваших заработков.",
-        'btn_video':      "🎬 Смотреть видео & Зарабатывать",
+        'btn_video':      "🎬 Смотреть видео & Заработать {mc} MC",
         'btn_balance':    "💰 Мой баланс",
         'btn_referral':   "👥 Реферальная программа",
         'btn_how':        "ℹ️ Как это работает?",
@@ -424,12 +424,14 @@ def get_lang_select_keyboard() -> InlineKeyboardMarkup:
     ])
 
 
-def get_main_keyboard(lang: str) -> InlineKeyboardMarkup:
+def get_main_keyboard(lang: str, vip_status: str | None = None) -> InlineKeyboardMarkup:
     """Returns the main InlineKeyboard in the specified language."""
     loc = BOT_LOCALES.get(lang, BOT_LOCALES['en'])
+    tier_mc = _get_mc_for_tier(vip_status)
+    btn_video_text = loc['btn_video'].format(mc=tier_mc)
     webapp_url = f"https://manatqazan.vercel.app/?lang={lang}&v={int(datetime.now().timestamp())}"
     return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text=loc['btn_video'], web_app=types.WebAppInfo(url=webapp_url))],
+        [InlineKeyboardButton(text=btn_video_text, web_app=types.WebAppInfo(url=webapp_url))],
         [
             InlineKeyboardButton(text=loc['btn_balance'], callback_data="balance"),
             InlineKeyboardButton(text=loc['btn_referral'], callback_data="referral"),
@@ -799,9 +801,10 @@ async def cb_set_bot_lang(callback: types.CallbackQuery) -> None:
 
     # Edit the language selection message → welcome + main keyboard
     if callback.message and isinstance(callback.message, types.Message):
+        vip_status = getattr(db_user, 'vip_status', 'free') if db_user else 'free'
         await callback.message.edit_text(
             welcome_text,
-            reply_markup=get_main_keyboard(chosen_lang),
+            reply_markup=get_main_keyboard(chosen_lang, vip_status=vip_status),
         )
 
 
@@ -1106,7 +1109,7 @@ async def _send_welcome_back(message: types.Message, user: User) -> None:
 
     await message.answer(
         welcome_text,
-        reply_markup=get_main_keyboard(lang),
+        reply_markup=get_main_keyboard(lang, vip_status=user.vip_status),
     )
 
 
