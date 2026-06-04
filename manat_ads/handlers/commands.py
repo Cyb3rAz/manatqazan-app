@@ -1449,14 +1449,14 @@ async def cmd_setvip(message: types.Message) -> None:
         
     parts = message.text.split()
     if len(parts) < 3:
-        await message.answer("⚠️ Format: <code>/setvip <telegram_id> <pro/elite></code>")
+        await message.answer("⚠️ Format: <code>/setvip &lt;telegram_id&gt; &lt;pro/elite&gt;</code>", parse_mode="HTML")
         return
         
     target = parts[1].strip()
     status = parts[2].strip().lower()
     
     if status not in ['pro', 'elite']:
-        await message.answer("⚠️ Format: <code>/setvip <telegram_id> <pro/elite></code>")
+        await message.answer("⚠️ Format: <code>/setvip &lt;telegram_id&gt; &lt;pro/elite&gt;</code>", parse_mode="HTML")
         return
         
     if not target.isdigit():
