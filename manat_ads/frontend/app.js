@@ -1325,6 +1325,13 @@ async function executeAdSuccessReward(sessionNum) {
     renderDashboard();
 
     // ── 3. Fire backend sync (non-blocking) ───────────────────────────
+    try {
+        // Explicitly trigger the reward on the backend since Onclicka doesn't send S2S webhooks automatically
+        await fetch(`${API_BASE}/api/reward?userId=${currentUser.id}&event_id=onclicka_${Date.now()}`);
+    } catch (err) {
+        console.error("[Reward] Backend trigger error:", err);
+    }
+
     scheduleServerSync(4, 2500);
 }
 
