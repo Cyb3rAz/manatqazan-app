@@ -118,6 +118,21 @@ async def lifespan(application: FastAPI):
     await init_db()
     logger.info("Database initialised.")
 
+    # ── Database Migration for VIP ──
+    try:
+        from database import DB_IS_POSTGRES
+        from sqlalchemy import text
+        if DB_IS_POSTGRES:
+            async with async_session() as session:
+                await session.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS vip_status VARCHAR(255) DEFAULT 'free';"))
+                await session.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS vip_expires_at TIMESTAMP WITH TIME ZONE;"))
+                await session.commit()
+            logger.info("PostgreSQL database auto-migration completed successfully (vip_status, vip_expires_at).")
+        else:
+            logger.info("SQLite database detected; auto-migration for PostgreSQL columns skipped.")
+    except Exception as e:
+        logger.warning("Database auto-migration warning/failed: %s", e)
+
     # ── Launch async cooldown notification worker ──
     notification_task = asyncio.create_task(_cooldown_notification_worker())
     application.state.notification_task = notification_task
