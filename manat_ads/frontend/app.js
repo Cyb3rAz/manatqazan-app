@@ -1772,13 +1772,13 @@ async function fetchLeaderboard() {
             let rankDisplay = `${index + 1}`;
             if (index === 0) {
                 rankClass = "rank-gold";
-                rankDisplay = "🥇";
+                rankDisplay = `<svg viewBox="0 0 24 24" width="20" height="20" fill="#FFD700" style="display:inline-block;vertical-align:middle;"><circle cx="12" cy="9" r="6"/><path d="M9 14.2L5 22l4-2 4 2-2.3-4.5"/><path d="M15 14.2l4 7.8-4-2-4 2 2.3-4.5"/></svg>`;
             } else if (index === 1) {
                 rankClass = "rank-silver";
-                rankDisplay = "🥈";
+                rankDisplay = `<svg viewBox="0 0 24 24" width="20" height="20" fill="#E2E8F0" style="display:inline-block;vertical-align:middle;"><circle cx="12" cy="9" r="6"/><path d="M9 14.2L5 22l4-2 4 2-2.3-4.5"/><path d="M15 14.2l4 7.8-4-2-4 2 2.3-4.5"/></svg>`;
             } else if (index === 2) {
                 rankClass = "rank-bronze";
-                rankDisplay = "🥉";
+                rankDisplay = `<svg viewBox="0 0 24 24" width="20" height="20" fill="#FF7F50" style="display:inline-block;vertical-align:middle;"><circle cx="12" cy="9" r="6"/><path d="M9 14.2L5 22l4-2 4 2-2.3-4.5"/><path d="M15 14.2l4 7.8-4-2-4 2 2.3-4.5"/></svg>`;
             }
             
             if (rankClass) {
