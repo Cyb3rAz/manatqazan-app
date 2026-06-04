@@ -10,7 +10,7 @@
 // ── Konfiqurasiya ─────────────────────────────────────────────────────
 const API_BASE = "";
 // ── 2-Level Ad Pool Configuration ───────────────────────────────────────
-const LEVEL_LIMIT = 35;           // Ads per level
+const LEVEL_LIMIT = 25;           // Ads per level
 const MAX_LEVELS  = 2;            // Total levels
 const COOLDOWN_MS = 3 * 60 * 60 * 1000; // 3 hours in milliseconds
 
@@ -927,19 +927,18 @@ function renderDashboard() {
     let progressPct = 0;
     let newLeagueIndex = 0;
 
-    // ── League Thresholds (300 MC/video × 24 videos/day = 7,200 MC/day max) ──
-    // Each tier is calibrated to take ≥48 hours at full earning velocity.
-    //   Bronze   :      0 –  15,000 MC  (span  15,000 ~ 2 days)
-    //   Silver   : 15,000 –  75,000 MC  (span  60,000 ~ 8 days)
-    //   Gold     : 75,000 – 225,000 MC  (span 150,000 ~21 days)
-    //   Platinum :225,000 – 525,000 MC  (span 300,000 ~42 days)
-    //   Diamond  :525,000 –1,050,000 MC (span 525,000 ~73 days)
+    // ── League Thresholds (300 MC/video × 50 videos/day = 15,000 MC/day max) ──
+    //   Bronze   :      0 –  49,999 MC
+    //   Silver   : 50,000 – 149,999 MC
+    //   Gold     :150,000 – 399,999 MC
+    //   Platinum :400,000 – 799,999 MC
+    //   Diamond  :800,000+ MC
     const LEAGUE_THRESHOLDS = [
-        { limit: 15000,   base: 0,      span: 15000  }, // 0 → Bronze
-        { limit: 75000,   base: 15000,  span: 60000  }, // 1 → Silver
-        { limit: 225000,  base: 75000,  span: 150000 }, // 2 → Gold
-        { limit: 525000,  base: 225000, span: 300000 }, // 3 → Platinum
-        { limit: 1050000, base: 525000, span: 525000 }, // 4 → Diamond
+        { limit: 50000,   base: 0,      span: 50000  }, // 0 → Bronze
+        { limit: 150000,  base: 50000,  span: 100000 }, // 1 → Silver
+        { limit: 400000,  base: 150000, span: 250000 }, // 2 → Gold
+        { limit: 800000,  base: 400000, span: 400000 }, // 3 → Platinum
+        { limit: 1600000, base: 800000, span: 800000 }, // 4 → Diamond
     ];
 
     const LEAGUE_NAMES = [
