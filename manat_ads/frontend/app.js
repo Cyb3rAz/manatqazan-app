@@ -682,15 +682,12 @@ async function fetchUserData() {
         const newData = await resp.json();
         console.log(`[fetchUserData] Backend data: balance_mc=${newData.balance_mc}, videos_today=${newData.videos_today}`);
 
-        if (userData && userData.balance_mc > newData.balance_mc) {
-            console.log(`[fetchUserData] Lokal balans > Server. Lokal saxlanılır.`);
-            userData.referral_count = newData.referral_count;
-            userData.referral_earnings_mc = newData.referral_earnings_mc;
-            return;
+        if (newData && typeof newData.session_1_count === 'number' && typeof newData.session_2_count === 'number') {
+            userData = newData;
+            syncAdStateFromUserData();
+        } else {
+            userData = newData;
         }
-
-        userData = newData;
-        syncAdStateFromUserData();
 
     } catch (err) {
         console.error("[fetchUserData] Şəbəkə xətası:", err);

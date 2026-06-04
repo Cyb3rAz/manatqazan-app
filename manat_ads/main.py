@@ -153,7 +153,7 @@ async def lifespan(application: FastAPI):
         await bot.set_chat_menu_button(
             menu_button=aio_types.MenuButtonWebApp(
                 text="🚀 Aç",
-                web_app=aio_types.WebAppInfo(url="https://manatqazan.vercel.app")
+                web_app=aio_types.WebAppInfo(url="https://manatqazan.vercel.app/?v=4.8.0")
             )
         )
         logger.info("Chat menu button (WebApp) restored.")
@@ -740,7 +740,7 @@ async def update_user_language(telegram_id: int, body: LanguageUpdate) -> JSONRe
         'ru': "🚀 Запустить"
     }
     btn_text = btn_start_texts.get(lang, "🚀 Start")
-    webapp_url = f"https://manatqazan.vercel.app/?lang={lang}"
+    webapp_url = f"https://manatqazan.vercel.app/?lang={lang}&v=4.8.0"
     try:
         from aiogram.types import MenuButtonWebApp, WebAppInfo
         await bot.set_chat_menu_button(
@@ -1033,7 +1033,7 @@ _MIDNIGHT_BROADCAST = {
         "button": "Watch Videos 🎬",
     },
 }
-_WEBAPP_URL = "https://manatqazan.vercel.app"
+_WEBAPP_URL = "https://manatqazan.vercel.app/?v=4.8.0"
 
 
 async def _midnight_broadcast_scheduler() -> None:

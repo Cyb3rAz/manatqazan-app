@@ -400,7 +400,7 @@ def get_lang_select_keyboard() -> InlineKeyboardMarkup:
 def get_main_keyboard(lang: str) -> InlineKeyboardMarkup:
     """Returns the main InlineKeyboard in the specified language."""
     loc = BOT_LOCALES.get(lang, BOT_LOCALES['en'])
-    webapp_url = f"https://manatqazan.vercel.app/?lang={lang}"
+    webapp_url = f"https://manatqazan.vercel.app/?lang={lang}&v=4.8.0"
     return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text=loc['btn_video'], web_app=types.WebAppInfo(url=webapp_url))],
         [
@@ -751,7 +751,7 @@ async def cb_set_bot_lang(callback: types.CallbackQuery) -> None:
     await callback.answer(loc['lang_set'], show_alert=False)
 
     # Set menu button WebApp URL with chosen lang
-    webapp_url = f"https://manatqazan.vercel.app/?lang={chosen_lang}"
+    webapp_url = f"https://manatqazan.vercel.app/?lang={chosen_lang}&v=4.8.0"
     try:
         await callback.bot.set_chat_menu_button(
             chat_id=tg_user.id,
@@ -1049,7 +1049,7 @@ async def _send_welcome_back(message: types.Message, user: User) -> None:
     """Greet a returning user with their current stats in their chosen language."""
     lang = user.language if user.language in BOT_LOCALES else 'en'
     loc = BOT_LOCALES[lang]
-    webapp_url = f"https://manatqazan.vercel.app/?lang={lang}"
+    webapp_url = f"https://manatqazan.vercel.app/?lang={lang}&v=4.8.0"
 
     # Update menu button to match user's language
     try:
