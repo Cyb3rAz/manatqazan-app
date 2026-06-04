@@ -980,9 +980,10 @@ async def _cooldown_notification_worker() -> None:
                 stmt = (
                     select(User)
                     .where(
-                        User.session_1_count >= 12,
+                        User.session_1_count >= 35,
                         User.cooldown_notified == False,  # noqa: E712
                         User.session_1_completion_time <= cutoff,
+                        User.is_active == True,
                     )
                 )
                 result = await session.execute(stmt)
@@ -1074,9 +1075,9 @@ async def _midnight_broadcast_scheduler() -> None:
             )
             await asyncio.sleep(wait_seconds)
 
-            # ── Fetch all users (telegram_id + language only) ────────────
+            # ── Fetch all active users (telegram_id + language only) ────────────
             async with async_session() as session:
-                stmt = select(User.telegram_id, User.language)
+                stmt = select(User.telegram_id, User.language).where(User.is_active == True)
                 result = await session.execute(stmt)
                 rows = result.all()  # list of (telegram_id, language)
 
