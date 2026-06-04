@@ -1079,18 +1079,102 @@ function renderDashboard() {
 
     const pctStr = progressPct.toFixed(1);
 
-    // Tier icon matrix — one distinct gamified emoji per league level
-    const TIER_ICONS = ['🥉', '🥈', '🥇', '🛡️', '💎'];
+    // Configuration map for high-tech minimalist shield/medal SVG vectors for each tier
+    const LEAGUE_SVGS = {
+        bronze: `<svg viewBox="0 0 24 24" width="100%" height="100%" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bronze-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f59e0b" stop-opacity="0.8" />
+      <stop offset="50%" stop-color="#b45309" />
+      <stop offset="100%" stop-color="#78350f" />
+    </linearGradient>
+    <filter id="bronze-glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="1.5" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+  <path d="M12 2L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-3z" fill="url(#bronze-grad)" filter="url(#bronze-glow)" stroke="#f59e0b" stroke-width="1" />
+  <path d="M12 5l6 2v4c0 3.9-2.5 7.5-6 8.5-3.5-1-6-4.6-6-8.5V7l6-2z" fill="#78350f" opacity="0.3" />
+  <circle cx="12" cy="12" r="3" fill="#f59e0b" opacity="0.9" />
+</svg>`,
+        silver: `<svg viewBox="0 0 24 24" width="100%" height="100%" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="silver-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f3f4f6" />
+      <stop offset="50%" stop-color="#9ca3af" />
+      <stop offset="100%" stop-color="#4b5563" />
+    </linearGradient>
+    <filter id="silver-glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="1.5" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+  <path d="M12 2L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-3z" fill="url(#silver-grad)" filter="url(#silver-glow)" stroke="#e5e7eb" stroke-width="1" />
+  <path d="M12 5l6 2v4c0 3.9-2.5 7.5-6 8.5-3.5-1-6-4.6-6-8.5V7l6-2z" fill="#4b5563" opacity="0.3" />
+  <circle cx="12" cy="12" r="3" fill="#f3f4f6" opacity="0.9" />
+</svg>`,
+        gold: `<svg viewBox="0 0 24 24" width="100%" height="100%" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="gold-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fef08a" />
+      <stop offset="50%" stop-color="#eab308" />
+      <stop offset="100%" stop-color="#854d0e" />
+    </linearGradient>
+    <filter id="gold-glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="1.5" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+  <path d="M12 2L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-3z" fill="url(#gold-grad)" filter="url(#gold-glow)" stroke="#facc15" stroke-width="1" />
+  <path d="M12 5l6 2v4c0 3.9-2.5 7.5-6 8.5-3.5-1-6-4.6-6-8.5V7l6-2z" fill="#854d0e" opacity="0.3" />
+  <polygon points="12,8 14,12 18,12 15,14 16,18 12,16 8,18 9,14 6,12 10,12" fill="#fff" opacity="0.95" />
+</svg>`,
+        platinum: `<svg viewBox="0 0 24 24" width="100%" height="100%" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="plat-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#a5f3fc" />
+      <stop offset="50%" stop-color="#06b6d4" />
+      <stop offset="100%" stop-color="#083344" />
+    </linearGradient>
+    <filter id="plat-glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="2" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+  <path d="M12 2L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-3z" fill="url(#plat-grad)" filter="url(#plat-glow)" stroke="#22d3ee" stroke-width="1.5" />
+  <path d="M12 5l6 2v4c0 3.9-2.5 7.5-6 8.5-3.5-1-6-4.6-6-8.5V7l6-2z" fill="#083344" opacity="0.4" />
+  <path d="M9 11l2 2 4-4" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+</svg>`,
+        diamond: `<svg viewBox="0 0 24 24" width="100%" height="100%" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="diamond-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#e0f2fe" />
+      <stop offset="30%" stop-color="#38bdf8" />
+      <stop offset="70%" stop-color="#0284c7" />
+      <stop offset="100%" stop-color="#0f172a" />
+    </linearGradient>
+    <filter id="diamond-glow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="2" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+  <path d="M12 2L2 12l10 10 10-10L12 2z" fill="url(#diamond-grad)" filter="url(#diamond-glow)" stroke="#34d399" stroke-width="1.5" />
+  <path d="M12 6L6 12l6 6 6-6-6-6z" fill="#0f172a" opacity="0.4" stroke="#38bdf8" stroke-width="0.5" />
+  <polygon points="12,9 13.5,12 12,15 10.5,12" fill="#fff" />
+</svg>`,
+        default: `<svg viewBox="0 0 24 24" width="100%" height="100%" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M12 2L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-3z" fill="#4b5563" stroke="#9ca3af" stroke-width="1" />
+</svg>`
+    };
 
-    const leagueNameEl  = document.getElementById("league-name-label");
-    const leagueBadgeEl = document.getElementById("league-badge");
-    if (leagueNameEl)  leagueNameEl.textContent = leagueName; // pure locale name, no emoji
-    if (leagueBadgeEl) {
-        // DOM sanity reset: strip any inline style overrides before re-applying
-        leagueBadgeEl.removeAttribute('style');
-        leagueBadgeEl.style.fontSize  = '15px';
-        leagueBadgeEl.style.lineHeight = '1';
-        leagueBadgeEl.textContent = TIER_ICONS[newLeagueIndex] || '🥉';
+    const LEAGUE_KEYS = ['bronze', 'silver', 'gold', 'platinum', 'diamond'];
+    const currentLeagueKey = LEAGUE_KEYS[newLeagueIndex] || 'bronze';
+
+    const leagueNameEl = document.getElementById("league-name-label");
+    const leagueIconContainer = document.getElementById("league-icon-container");
+    if (leagueNameEl) leagueNameEl.textContent = leagueName;
+    if (leagueIconContainer) {
+        leagueIconContainer.innerHTML = LEAGUE_SVGS[currentLeagueKey] || LEAGUE_SVGS['default'];
     }
 
 
