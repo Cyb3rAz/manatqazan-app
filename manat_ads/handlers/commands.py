@@ -105,7 +105,7 @@ BOT_LOCALES = {
             "🎉 <b>ManatAds-a xoş gəlmisiniz!</b>\n\n"
             "Salam, <b>{name}</b>! 👋\n\n"
             "📺 Qısa videolar izləyin və hər video üçün <b>{mc} MC</b> qazanın.\n"
-            "📊 Gündəlik limit: <b>24 video klik</b> (hər seans 12 video klik)\n"
+            "📊 Gündəlik limit: <b>24 video klik</b> (hər mərhələ 12 video klik)\n"
             "👥 Dostlarınızı dəvət edin və <b>ömürlük 10% bonus</b> qazanın!"
             "\n\n💡 İpucu: Sistemi yeniləmək üçün /start yaza bilərsiniz!"
         ),
@@ -122,8 +122,8 @@ BOT_LOCALES = {
         'balance_title':    "💰 <b>Balansınız</b>",
         'balance_mc_row':   "🪙 <b>Manat Coins:</b>",
         'balance_earn_row': "📈 <b>Ümumi Qazanc:</b>",
-        'balance_s1_row':   "1️⃣ <b>Seans 1:</b>",
-        'balance_s2_row':   "2️⃣ <b>Seans 2:</b>",
+        'balance_s1_row':   "1️⃣ <b>Mərhələ 1:</b>",
+        'balance_s2_row':   "2️⃣ <b>Mərhələ 2:</b>",
         'balance_locked':   "Kilidli 🔒",
         'balance_active':   "Aktiv 🟢",
         'balance_lock_rem': "🔒 Kilidli ({h:02d}s {m:02d}d qalıb)",
@@ -172,7 +172,7 @@ BOT_LOCALES = {
             "🎉 <b>ManatAds'a hoş geldiniz!</b>\n\n"
             "Merhaba, <b>{name}</b>! 👋\n\n"
             "📺 Kısa videolar izleyin ve her video için <b>{mc} MC</b> kazanın.\n"
-            "📊 Günlük limit: <b>24 video klik</b> (her seans 12 video klik)\n"
+            "📊 Günlük limit: <b>24 video klik</b> (her aşama 12 video klik)\n"
             "👥 Arkadaşlarınızı davet edin ve <b>ömür boyu %10 bonus</b> kazanın!"
             "\n\n💡 İpucu: Sistemi yenilemek için /start yazabilirsiniz!"
         ),
@@ -189,8 +189,8 @@ BOT_LOCALES = {
         'balance_title':    "💰 <b>Bakiyeniz</b>",
         'balance_mc_row':   "🪙 <b>Manat Coins:</b>",
         'balance_earn_row': "📈 <b>Toplam Kazanç:</b>",
-        'balance_s1_row':   "1️⃣ <b>Seans 1:</b>",
-        'balance_s2_row':   "2️⃣ <b>Seans 2:</b>",
+        'balance_s1_row':   "1️⃣ <b>Aşama 1:</b>",
+        'balance_s2_row':   "2️⃣ <b>Aşama 2:</b>",
         'balance_locked':   "Kilitli 🔒",
         'balance_active':   "Aktif 🟢",
         'balance_lock_rem': "🔒 Kilitli ({h:02d}s {m:02d}d kaldı)",
@@ -239,7 +239,7 @@ BOT_LOCALES = {
             "🎉 <b>Welcome to ManatAds!</b>\n\n"
             "Hello, <b>{name}</b>! 👋\n\n"
             "📺 Watch short videos and earn <b>{mc} MC</b> per video.\n"
-            "📊 Daily limit: <b>24 video klik</b> (12 video klik per session)\n"
+            "📊 Daily limit: <b>24 video klik</b> (12 video klik per level)\n"
             "👥 Invite your friends and earn a <b>lifetime 10% bonus</b>!"
             "\n\n💡 Tip: You can type /start at any time to refresh the system!"
         ),
@@ -256,8 +256,8 @@ BOT_LOCALES = {
         'balance_title':    "💰 <b>Your Balance</b>",
         'balance_mc_row':   "🪙 <b>Manat Coins:</b>",
         'balance_earn_row': "📈 <b>Total Earned:</b>",
-        'balance_s1_row':   "1️⃣ <b>Session 1:</b>",
-        'balance_s2_row':   "2️⃣ <b>Session 2:</b>",
+        'balance_s1_row':   "1️⃣ <b>Level 1:</b>",
+        'balance_s2_row':   "2️⃣ <b>Level 2:</b>",
         'balance_locked':   "Locked 🔒",
         'balance_active':   "Active 🟢",
         'balance_lock_rem': "🔒 Locked ({h:02d}h {m:02d}m remaining)",
@@ -306,7 +306,7 @@ BOT_LOCALES = {
             "🎉 <b>Добро пожаловать в ManatAds!</b>\n\n"
             "Привет, <b>{name}</b>! 👋\n\n"
             "📺 Смотрите короткие видео и зарабатывайте <b>{mc} MC</b> за каждое видео.\n"
-            "📊 Ежедневный лимит: <b>24 video klik</b> (12 video klik за сессию)\n"
+            "📊 Ежедневный лимит: <b>24 video klik</b> (12 video klik за уровень)\n"
             "👥 Приглашайте друзей и зарабатывайте <b>пожизненный бонус 10%</b>!"
             "\n\n💡 Подсказка: Вы можете написать /start в любое время, чтобы обновить систему!"
         ),
@@ -323,8 +323,8 @@ BOT_LOCALES = {
         'balance_title':    "💰 <b>Ваш баланс</b>",
         'balance_mc_row':   "🪙 <b>Manat Coins:</b>",
         'balance_earn_row': "📈 <b>Всего заработано:</b>",
-        'balance_s1_row':   "1️⃣ <b>Сеанс 1:</b>",
-        'balance_s2_row':   "2️⃣ <b>Сеанс 2:</b>",
+        'balance_s1_row':   "1️⃣ <b>Уровень 1:</b>",
+        'balance_s2_row':   "2️⃣ <b>Уровень 2:</b>",
         'balance_locked':   "Заблокировано 🔒",
         'balance_active':   "Активно 🟢",
         'balance_lock_rem': "🔒 Заблок. ({h:02d}ч {m:02d}м осталось)",

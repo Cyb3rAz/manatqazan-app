@@ -74,15 +74,15 @@ const LOCALES = {
         dailyVideos: "BUGÜNKÜ VİDEOLAR",
         invitedLabel: "DƏVƏT OLUNANLAR",
         refEarnings: "REFERAL QAZANCI",
-        session1Title: "<svg class=\"session-title-icon\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"12\" cy=\"12\" r=\"4\"></circle><path d=\"M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41\"></svg> Səans 1",
-        session2Title: "<svg class=\"session-title-icon\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z\"></svg> Səans 2",
+        session1Title: "🔆 Mərhələ 1",
+        session2Title: "🌙 Mərhələ 2",
         videoUnit: "video",
         watchBtn: "<svg class=\"btn-inline-icon\" style=\"fill: #0a1a22; stroke: #0a1a22;\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\"><polygon points=\"6 4 20 12 6 20 6 4\"></polygon></svg> Video İzlə &",
         watchBtnSuffix: "MC Qazan",
         completedS1: "<svg class=\"btn-inline-icon\" style=\"stroke: #06b6d4;\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M22 11.08V12a10 10 0 1 1-5.93-9.14\"></path><polyline points=\"22 4 12 14.01 9 11.01\"></polyline></svg> Tamamlandı",
         completedS2: "<svg class=\"btn-inline-icon\" style=\"stroke: #06b6d4;\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M22 11.08V12a10 10 0 1 1-5.93-9.14\"></path><polyline points=\"22 4 12 14.01 9 11.01\"></polyline></svg> Tamamlandı",
-        locked: "🔒 Səans 2 Kilidlidir",
-        finishFirst: "⏳ Əvvəlcə Səans 1-i bitirin",
+        locked: "🔒 Mərhələ 2 Kilidlidir",
+        finishFirst: "⏳ Əvvəlcə Mərhələ 1-i bitirin",
         cooldownHint: "Kilid açılmasına:",
         lock_countdown: "Kilid açılmasına: ",
         adLoading: "⏳ Reklam yüklənir...",
@@ -101,9 +101,9 @@ const LOCALES = {
         toastAdNotAvail: "⚠️ Reklam xidməti mövcud deyil. Sonra cəhd edin.",
         toastAdFailed: "⚠️ Reklam yüklənmədi. Yenidən cəhd edin.",
         toastWatchFull: "⏭️ Mükafat almaq üçün videonu tam izləyin.",
-        toastS1Done: "🌅 Səans 1 tamamlanıb!",
-        toastS2Locked: "🔒 Səans 2 hələ kilidlidir!",
-        toastS2Done: "🌌 Səans 2 tamamlanıb!",
+        toastS1Done: "🌅 Mərhələ 1 tamamlanıb!",
+        toastS2Locked: "🔒 Mərhələ 2 hələ kilidlidir!",
+        toastS2Done: "🌌 Mərhələ 2 tamamlanıb!",
         toastLoadFail: "⚠️ Məlumatlar yüklənə bilmədi. Yenidən cəhd edin.",
         spamTooOften: "Upps! Reklamlara çox tez-tez baxmağa çalışırsınız. Zəhmət olmasa, bir neçə saniyə gözləyin 🙏",
         spamNoAd: "Hazırda göstəriləcək reklam tapılmadı. Bir az sonra təkrar yoxlayın.",
@@ -141,15 +141,15 @@ const LOCALES = {
         dailyVideos: "BUGÜNKÜ VİDEOLAR",
         invitedLabel: "DAVET EDİLENLER",
         refEarnings: "REFERANS KAZANCI",
-        session1Title: "<svg class=\"session-title-icon\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"12\" cy=\"12\" r=\"4\"></circle><path d=\"M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41\"></svg> Oturum 1",
-        session2Title: "<svg class=\"session-title-icon\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z\"></svg> Oturum 2",
+        session1Title: "🔆 Aşama 1",
+        session2Title: "🌙 Aşama 2",
         videoUnit: "video",
         watchBtn: "<svg class=\"btn-inline-icon\" style=\"fill: #0a1a22; stroke: #0a1a22;\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\"><polygon points=\"6 4 20 12 6 20 6 4\"></polygon></svg> Video İzle &",
         watchBtnSuffix: "MC Kazan",
         completedS1: "<svg class=\"btn-inline-icon\" style=\"stroke: #06b6d4;\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M22 11.08V12a10 10 0 1 1-5.93-9.14\"></path><polyline points=\"22 4 12 14.01 9 11.01\"></polyline></svg> Tamamlandı",
         completedS2: "<svg class=\"btn-inline-icon\" style=\"stroke: #06b6d4;\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M22 11.08V12a10 10 0 1 1-5.93-9.14\"></path><polyline points=\"22 4 12 14.01 9 11.01\"></polyline></svg> Tamamlandı",
-        locked: "🔒 Oturum 2 Kilitli",
-        finishFirst: "⏳ Önce Oturum 1'i bitirin",
+        locked: "🔒 Aşama 2 Kilitli",
+        finishFirst: "⏳ Önce Aşama 1'i bitirin",
         cooldownHint: "Kilit açılmasına:",
         lock_countdown: "Kilidin açılmasına: ",
         adLoading: "⏳ Reklam yükleniyor...",
@@ -168,9 +168,9 @@ const LOCALES = {
         toastAdNotAvail: "⚠️ Reklam servisi mevcut değil. Daha sonra deneyin.",
         toastAdFailed: "⚠️ Reklam yüklenemedi. Tekrar deneyin.",
         toastWatchFull: "⏭️ Ödül almak için videoyu tamamen izleyin.",
-        toastS1Done: "🌅 Oturum 1 tamamlandı!",
-        toastS2Locked: "🔒 Oturum 2 henüz kilitli!",
-        toastS2Done: "🌌 Oturum 2 tamamlandı!",
+        toastS1Done: "🌅 Aşama 1 tamamlandı!",
+        toastS2Locked: "🔒 Aşama 2 henüz kilitli!",
+        toastS2Done: "🌌 Aşama 2 tamamlandı!",
         toastLoadFail: "⚠️ Veriler yüklenemedi. Tekrar deneyin.",
         spamTooOften: "Oops! Reklamları çok sık izlemeye çalışıyorsunuz. Lütfen birkaç saniye bekleyin 🙏",
         spamNoAd: "Şu anda gösterilecek reklam bulunamadı. Biraz sonra tekrar deneyin.",
@@ -208,15 +208,15 @@ const LOCALES = {
         dailyVideos: "TODAY'S VIDEOS",
         invitedLabel: "INVITED",
         refEarnings: "REFERRAL EARNINGS",
-        session1Title: "<svg class=\"session-title-icon\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"12\" cy=\"12\" r=\"4\"></circle><path d=\"M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41\"></svg> Session 1",
-        session2Title: "<svg class=\"session-title-icon\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z\"></svg> Session 2",
+        session1Title: "🔆 Level 1",
+        session2Title: "🌙 Level 2",
         videoUnit: "videos",
         watchBtn: "<svg class=\"btn-inline-icon\" style=\"fill: #0a1a22; stroke: #0a1a22;\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\"><polygon points=\"6 4 20 12 6 20 6 4\"></polygon></svg> Watch Video &",
         watchBtnSuffix: "MC Earn",
         completedS1: "<svg class=\"btn-inline-icon\" style=\"stroke: #06b6d4;\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M22 11.08V12a10 10 0 1 1-5.93-9.14\"></path><polyline points=\"22 4 12 14.01 9 11.01\"></polyline></svg> Completed",
         completedS2: "<svg class=\"btn-inline-icon\" style=\"stroke: #06b6d4;\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M22 11.08V12a10 10 0 1 1-5.93-9.14\"></path><polyline points=\"22 4 12 14.01 9 11.01\"></polyline></svg> Completed",
-        locked: "🔒 Session 2 Locked",
-        finishFirst: "⏳ Complete Session 1 first",
+        locked: "🔒 Level 2 Locked",
+        finishFirst: "⏳ Complete Level 1 first",
         cooldownHint: "Unlocks in:",
         lock_countdown: "Unlocks in: ",
         adLoading: "⏳ Loading ad...",
@@ -235,9 +235,9 @@ const LOCALES = {
         toastAdNotAvail: "⚠️ Ad service unavailable. Try later.",
         toastAdFailed: "⚠️ Ad failed to load. Try again.",
         toastWatchFull: "⏭️ Watch the full video to earn rewards.",
-        toastS1Done: "🌅 Session 1 completed!",
-        toastS2Locked: "🔒 Session 2 is still locked!",
-        toastS2Done: "🌌 Session 2 completed!",
+        toastS1Done: "🌅 Level 1 completed!",
+        toastS2Locked: "🔒 Level 2 is still locked!",
+        toastS2Done: "🌌 Level 2 completed!",
         toastLoadFail: "⚠️ Failed to load data. Please try again.",
         spamTooOften: "Oops! You're watching ads too often. Please wait a few seconds 🙏",
         spamNoAd: "No ads available right now. Please try again later.",
@@ -275,15 +275,15 @@ const LOCALES = {
         dailyVideos: "ВИДЕО СЕГОДНЯ",
         invitedLabel: "ПРИГЛАШЁННЫЕ",
         refEarnings: "РЕФЕРАЛЬНЫЙ ДОХОД",
-        session1Title: "<svg class=\"session-title-icon\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"12\" cy=\"12\" r=\"4\"></circle><path d=\"M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41\"></svg> Сессия 1",
-        session2Title: "<svg class=\"session-title-icon\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z\"></svg> Сессия 2",
+        session1Title: "🔆 Уровень 1",
+        session2Title: "🌙 Уровень 2",
         videoUnit: "видео",
         watchBtn: "<svg class=\"btn-inline-icon\" style=\"fill: #0a1a22; stroke: #0a1a22;\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\"><polygon points=\"6 4 20 12 6 20 6 4\"></polygon></svg> Смотреть видео &",
         watchBtnSuffix: "MC Заработать",
         completedS1: "<svg class=\"btn-inline-icon\" style=\"stroke: #06b6d4;\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M22 11.08V12a10 10 0 1 1-5.93-9.14\"></path><polyline points=\"22 4 12 14.01 9 11.01\"></polyline></svg> Завершено",
         completedS2: "<svg class=\"btn-inline-icon\" style=\"stroke: #06b6d4;\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M22 11.08V12a10 10 0 1 1-5.93-9.14\"></path><polyline points=\"22 4 12 14.01 9 11.01\"></polyline></svg> Завершено",
-        locked: "🔒 Сессия 2 заблокирована",
-        finishFirst: "⏳ Сначала завершите Сессию 1",
+        locked: "🔒 Уровень 2 заблокирован",
+        finishFirst: "⏳ Сначала завершите Уровень 1",
         cooldownHint: "Разблокировка через:",
         lock_countdown: "До разблокировки: ",
         adLoading: "⏳ Загрузка рекламы...",
@@ -302,9 +302,9 @@ const LOCALES = {
         toastAdNotAvail: "⚠️ Рекламный сервис недоступен. Попробуйте позже.",
         toastAdFailed: "⚠️ Не удалось загрузить рекламу. Попробуйте ещё раз.",
         toastWatchFull: "⏭️ Посмотрите видео полностью, чтобы получить награду.",
-        toastS1Done: "🌅 Сессия 1 завершена!",
-        toastS2Locked: "🔒 Сессия 2 ещё заблокирована!",
-        toastS2Done: "🌌 Сессия 2 завершена!",
+        toastS1Done: "🌅 Уровень 1 завершен!",
+        toastS2Locked: "🔒 Уровень 2 ещё заблокирован!",
+        toastS2Done: "🌌 Уровень 2 завершен!",
         toastLoadFail: "⚠️ Не удалось загрузить данные. Попробуйте ещё раз.",
         spamTooOften: "Упс! Вы слишком часто смотрите рекламу. Пожалуйста, подождите несколько секунд 🙏",
         spamNoAd: "Сейчас нет доступной рекламы. Попробуйте позже.",
@@ -945,7 +945,7 @@ function renderDashboard() {
     const isCooling = currentLevel === 1 && levelClicks >= LEVEL_LIMIT && cooldownEndTime > 0 && now < cooldownEndTime;
 
     // ── Session 1 / Mərhələ 1 Card ───────────────────────────────────
-    document.getElementById("session-1-progress-text").textContent = `Mərhələ 1: ${Math.min(s1Count, LEVEL_LIMIT)}/${LEVEL_LIMIT} Video`;
+    document.getElementById("session-1-progress-text").textContent = `${Math.min(s1Count, LEVEL_LIMIT)} / ${LEVEL_LIMIT} Video`;
     document.getElementById("session-1-progress-fill").style.width = `${Math.min((s1Count / LEVEL_LIMIT) * 100, 100)}%`;
     const s1Btn = document.getElementById("session-1-btn");
 
@@ -1005,7 +1005,7 @@ function renderDashboard() {
     } else if (currentLevel === 2 || (s1Count >= LEVEL_LIMIT && cooldownEndTime === 0)) {
         // Level 2 is active (cooldown cleared)
         stopLevel2CooldownTicker();
-        document.getElementById("session-2-progress-text").textContent = `Mərhələ 2: ${Math.min(s2Count, LEVEL_LIMIT)}/${LEVEL_LIMIT} Video`;
+        document.getElementById("session-2-progress-text").textContent = `${Math.min(s2Count, LEVEL_LIMIT)} / ${LEVEL_LIMIT} Video`;
         document.getElementById("session-2-progress-fill").style.width = `${Math.min((s2Count / LEVEL_LIMIT) * 100, 100)}%`;
         s2Hint.style.display = 'none';
 
@@ -1034,7 +1034,7 @@ function renderDashboard() {
     } else {
         // Level 2 locked — Level 1 not yet complete
         stopLevel2CooldownTicker();
-        document.getElementById("session-2-progress-text").textContent = `Mərhələ 2: 0/${LEVEL_LIMIT} Video`;
+        document.getElementById("session-2-progress-text").textContent = `0 / ${LEVEL_LIMIT} Video`;
         document.getElementById("session-2-progress-fill").style.width = '0%';
         s2Btn.disabled = true;
         s2Btn.innerHTML = t('finishFirst');

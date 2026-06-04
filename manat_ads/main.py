@@ -487,7 +487,7 @@ async def _credit_user(user_id_val: int | str, event_id: str, source: str = "unk
                     print(f"[CREDIT] Session 2 is LOCKED for user {user_telegram_id} until {unlock_time.isoformat()}")
                     logger.warning("[CREDIT] Session 2 is LOCKED for user %s until %s", user_telegram_id, unlock_time.isoformat())
                     return JSONResponse(
-                        {"ok": False, "message": "Növbəti seans hələ kilidlidir.", "unlock_at": unlock_time.isoformat()},
+                        {"ok": False, "message": "Növbəti mərhələ hələ kilidlidir.", "unlock_at": unlock_time.isoformat()},
                         status_code=403
                     )
 
