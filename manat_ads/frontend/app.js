@@ -137,8 +137,8 @@ const LOCALES = {
         vip_free_perk: "Hər video +50 MC",
         vip_pro_title: "PRO Nitro",
         vip_elite_title: "ELITE Ultra",
-        vip_pro_price: "3.99 AZN / 1 Həftə",
-        vip_elite_price: "7.99 AZN / 1 Həftə",
+        Pro_Price: "3.99 AZN / 1 Həftə",
+        Elite_Price: "7.99 AZN / 1 Həftə",
         vip_pro_perk1: "Gündəlik: 45 video (Daha az yorucu)",
         vip_pro_perk2: "Hər video +65 MC",
         vip_pro_perk3: "1.3x Daha sürətli qazanc",
@@ -225,8 +225,8 @@ const LOCALES = {
         vip_free_perk: "Her video +50 MC",
         vip_pro_title: "PRO Nitro",
         vip_elite_title: "ELITE Ultra",
-        vip_pro_price: "3.99 AZN / 1 Hafta",
-        vip_elite_price: "7.99 AZN / 1 Hafta",
+        Pro_Price: "109.99 TL / 1 Hafta",
+        Elite_Price: "219.99 TL / 1 Hafta",
         vip_pro_perk1: "Günlük: 45 video (Daha az yorucu)",
         vip_pro_perk2: "Her video +65 MC",
         vip_pro_perk3: "1.3x Daha hızlı kazanç",
@@ -313,8 +313,8 @@ const LOCALES = {
         vip_free_perk: "+50 MC per video",
         vip_pro_title: "PRO Nitro",
         vip_elite_title: "ELITE Ultra",
-        vip_pro_price: "3.99 AZN / 1 Week",
-        vip_elite_price: "7.99 AZN / 1 Week",
+        Pro_Price: "2.35 USDT / 1 Week",
+        Elite_Price: "4.70 USDT / 1 Week",
         vip_pro_perk1: "Daily: 45 videos (Less fatigue)",
         vip_pro_perk2: "+65 MC per video",
         vip_pro_perk3: "1.3x Faster earnings",
@@ -401,8 +401,8 @@ const LOCALES = {
         vip_free_perk: "+50 MC за видео",
         vip_pro_title: "PRO Nitro",
         vip_elite_title: "ELITE Ultra",
-        vip_pro_price: "3.99 AZN / 1 Неделя",
-        vip_elite_price: "7.99 AZN / 1 Неделя",
+        Pro_Price: "2.35 USDT / 1 Неделя",
+        Elite_Price: "4.70 USDT / 1 Неделя",
         vip_pro_perk1: "В день: 45 видео (Меньше усталости)",
         vip_pro_perk2: "+65 MC за видео",
         vip_pro_perk3: "1.3x Быстрее зарабатываешь",
@@ -450,6 +450,12 @@ function setLanguage(lang) {
             }
         }
     });
+
+    const proPriceEl = document.getElementById('pro-price-tag');
+    if (proPriceEl) proPriceEl.innerText = LOCALES[currentLang].Pro_Price;
+    
+    const elitePriceEl = document.getElementById('elite-price-tag');
+    if (elitePriceEl) elitePriceEl.innerText = LOCALES[currentLang].Elite_Price;
 
     // Manually translate tasks-empty-msg if present in DOM
     const emptyMsgEl = document.getElementById('tasks-empty-msg');
@@ -1743,8 +1749,7 @@ async function submitAdminTask() {
 
 // ── VIP Purchase Handler ─────────────────────────────────────────────
 function handleVipPurchase(tier) {
-    const tierName = tier === 'pro' ? t('vip_pro_title') : t('vip_elite_title');
-    selectedVipPackage = tierName;
+    selectedVipPackage = tier;
     
     document.getElementById('vip-modal-text').textContent = t('Modal_Confirm_Text');
     document.getElementById('vip-cancel-btn').textContent = t('Modal_Btn_Cancel');
@@ -1761,8 +1766,12 @@ function closeVipModal() {
 }
 
 function confirmVipPurchase() {
+    const tierName = selectedVipPackage === 'pro' ? t('vip_pro_title') : t('vip_elite_title');
+    const priceStr = selectedVipPackage === 'pro' ? LOCALES[currentLang].Pro_Price : LOCALES[currentLang].Elite_Price;
+    const packageInfo = `${tierName} (${priceStr})`;
+    
     const msgTemplate = t('Modal_Order_Msg');
-    const formattedMsg = msgTemplate.replace('{package}', selectedVipPackage).replace('{id}', userData?.telegram_id || currentUser?.id || "Unknown");
+    const formattedMsg = msgTemplate.replace('{package}', packageInfo).replace('{id}', userData?.telegram_id || currentUser?.id || "Unknown");
     const msg = encodeURIComponent(formattedMsg);
     const tgUrl = "https://t.me/NoYouOkk?text=" + msg;
     
