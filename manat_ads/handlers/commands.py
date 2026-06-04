@@ -285,14 +285,14 @@ BOT_LOCALES = {
             "3️⃣ Invite your friends and earn extra bonuses from their activity too.\n\n"
             "💰 <b>Withdrawal & Balance Mechanism:</b>\n"
             "Accumulated MC points are converted to USDT (Crypto) within the system. "
-            "The minimum withdrawal amount is 5 USDT. Once you reach this limit, you can easily "
+            "The minimum withdrawal amount is 3 USDT. Once you reach this limit, you can easily "
             "cash out to your crypto wallets (e.g., TRC-20, BEP-20) or global payment systems!\n\n"
             "If you have any questions, feel free to contact the support team. "
             "Watch your first video now and start earning! 🚀"
         ),
         # ── Withdraw ──
         'withdraw_below_limit': (
-            "❌ Withdrawal failed. Minimum withdrawal amount is 5 USDT.\n\n"
+            "❌ Withdrawal failed. Minimum withdrawal amount is 3 USDT.\n\n"
             "💰 Your current balance: <b>{amount:.4f} USDT</b>\n\n"
             "🚀 <b>How to reach the limit faster?</b>\n"
             "Watch more videos and <b>invite your friends</b> to earn larger amounts! "
