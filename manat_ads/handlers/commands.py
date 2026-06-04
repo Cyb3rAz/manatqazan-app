@@ -183,7 +183,8 @@ BOT_LOCALES = {
             "🚀 <b>Limiti necə daha sürətli tamamlamaq olar?</b>\n"
             "Daha çox video izləməklə yanaşı, <b>dostlarınızı dəvət edərək</b> daha böyük məbləğlər qazana bilərsiniz! "
             "Dəvət etdiyiniz hər dostunuzun izlədiyi reklamlardan sizə avtomatik <b>ömürlük 10% bonus</b> gələcək. "
-            "Linkinizi paylaşın və hədəfə sürətlə çatın! 👥💸"
+            "Linkinizi paylaşın və hədəfə sürətlə çatın! 👥💸\n\n"
+            "Həmçinin Mağaza bölməsindən PRO Nitro (260 MC/klik, ~60 günə çıxarış) və ya ELITE Ultra (350 MC/klik, tam 50 günə çıxarış) paketlərinə keçid edərək qazancınızı kosmik sürətlə artıra bilərsiniz! 🚀"
         ),
         'withdraw_ok': (
             "✅ Təbriklər! Çıxarış limitini keçmisiniz. Zəhmət olmasa pulu köçürmək "
@@ -250,7 +251,8 @@ BOT_LOCALES = {
             "🚀 <b>Limiti nasıl daha hızlı tamamlarsınız?</b>\n"
             "Daha fazla video izlemenin yanı sıra, <b>arkadaşlarınızı davet ederek</b> daha büyük miktarlar kazanabilirsiniz! "
             "Davet ettiğiniz her arkadaşınızın izlediği reklamlardan size otomatik <b>ömür boyu %10 bonus</b> gelecek. "
-            "Bağlantınızı paylaşın ve hedefe hızla ulaşın! 👥💸"
+            "Bağlantınızı paylaşın ve hedefe hızla ulaşın! 👥💸\n\n"
+            "Ayrıca Mağaza bölümünden PRO Nitro (260 MC/tık, ~60 günde çekim) veya ELITE Ultra (350 MC/tık, tam 50 günde çekim) paketlerine geçerek kazancınızı kozmik hızla artırabilirsiniz! 🚀"
         ),
         'withdraw_ok': (
             "✅ Tebrikler! Çekim limitini aştınız. Lütfen parayı transfer etmek "
@@ -317,7 +319,8 @@ BOT_LOCALES = {
             "🚀 <b>How to reach the limit faster?</b>\n"
             "Watch more videos and <b>invite your friends</b> to earn larger amounts! "
             "You'll automatically earn a <b>lifetime 10% bonus</b> from every ad your referrals watch. "
-            "Share your link and reach your goal faster! 👥💸"
+            "Share your link and reach your goal faster! 👥💸\n\n"
+            "You can also upgrade to PRO Nitro (260 MC/click, withdraw in ~60 days) or ELITE Ultra (350 MC/click, withdraw in exactly 50 days) in the Store to boost your earnings at cosmic speed! 🚀"
         ),
         'withdraw_ok': (
             "✅ Congratulations! You've reached the withdrawal limit. Please provide your "
@@ -384,7 +387,8 @@ BOT_LOCALES = {
             "🚀 <b>Как быстрее достичь лимита?</b>\n"
             "Смотрите больше видео и <b>приглашайте друзей</b>, чтобы зарабатывать больше! "
             "Вы автоматически получите <b>пожизненный бонус 10%</b> с каждой рекламы, просмотренной вашими рефералами. "
-            "Поделитесь ссылкой и быстрее достигните цели! 👥💸"
+            "Поделитесь ссылкой и быстрее достигните цели! 👥💸\n\n"
+            "Вы также можете перейти на PRO Nitro (260 MC/клик, вывод ~60 дней) или ELITE Ultra (350 MC/клик, вывод ровно 50 дней) в Магазине, чтобы увеличить заработок на космической скорости! 🚀"
         ),
         'withdraw_ok': (
             "✅ Поздравляем! Вы достигли лимита вывода. Пожалуйста, укажите адрес своего "
