@@ -55,6 +55,11 @@ class User(Base):
     session_1_completion_time: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     cooldown_notified: Mapped[bool] = mapped_column(Boolean, default=True, server_default="1")
 
+    # ── VIP Subscription ──
+    # Values: "free" | "pro" | "elite"
+    vip_status: Mapped[str] = mapped_column(String(20), default="free", server_default="free")
+    vip_expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
     # ── Referral ──
     referrer_id: Mapped[int | None] = mapped_column(
         BigInteger, ForeignKey("users.telegram_id"), nullable=True, index=True

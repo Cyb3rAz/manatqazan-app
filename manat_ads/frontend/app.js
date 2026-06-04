@@ -151,6 +151,7 @@ const LOCALES = {
         Modal_Btn_Confirm: "Təsdiqlə",
         Modal_Order_Msg: "Salam! Mən {package} paketi almaq istəyirəm. Mənim İD-m: {id}",
         Withdraw_Range_Notice: "Birdəfəlik Çıxarış Limiti: 5.00 - 100.00 AZN",
+        Dashboard_Range: "Çıxarış: 5 - 100 AZN",
     },
     tr: {
         subtitle: "İzle • Kazan • Çevir",
@@ -240,6 +241,7 @@ const LOCALES = {
         Modal_Btn_Confirm: "Onayla",
         Modal_Order_Msg: "Merhaba! Ben {package} paketi almak istiyorum. Benim ID'm: {id}",
         Withdraw_Range_Notice: "Tek Seferlik Çekim Limiti: 135.00 - 2700.00 TL",
+        Dashboard_Range: "Çekim: 135 - 2700 TL",
     },
     en: {
         subtitle: "Watch • Earn • Convert",
@@ -329,6 +331,7 @@ const LOCALES = {
         Modal_Btn_Confirm: "Confirm",
         Modal_Order_Msg: "Hello! I want to buy the {package} package. My ID: {id}",
         Withdraw_Range_Notice: "Single Withdrawal Limit: 3.00 - 60.00 USDT",
+        Dashboard_Range: "Withdrawal: 3 - 60 USDT",
     },
     ru: {
         subtitle: "Смотри • Зарабатывай • Конвертируй",
@@ -418,6 +421,7 @@ const LOCALES = {
         Modal_Btn_Confirm: "Подтвердить",
         Modal_Order_Msg: "Здравствуйте! Я хочу купить пакет {package}. Мой ID: {id}",
         Withdraw_Range_Notice: "Лимит разового вывода: 3.00 - 60.00 USDT",
+        Dashboard_Range: "Вывод: 3 - 60 USDT",
     }
 };
 
@@ -463,6 +467,9 @@ function setLanguage(lang) {
 
     const withdrawNoticeEl = document.getElementById('store-withdraw-notice');
     if (withdrawNoticeEl) withdrawNoticeEl.innerText = LOCALES[currentLang].Withdraw_Range_Notice;
+
+    // Minimalist Withdrawal Range on dashboard card
+    document.getElementById('dashboard-target-text').innerText = LOCALES[currentLang].Dashboard_Range;
 
     // Manually translate tasks-empty-msg if present in DOM
     const emptyMsgEl = document.getElementById('tasks-empty-msg');
@@ -1094,8 +1101,8 @@ function renderDashboard() {
     if (withdrawalFillEl) withdrawalFillEl.style.width = `${progressPct}%`;
 
     // Withdrawal target label
-    const withdrawalTargetEl = document.getElementById("withdrawal-target-text");
-    if (withdrawalTargetEl) withdrawalTargetEl.textContent = t('withdrawalTarget');
+    const dashboardTargetEl = document.getElementById("dashboard-target-text");
+    if (dashboardTargetEl) dashboardTargetEl.innerText = LOCALES[currentLang].Dashboard_Range;
 
     // Statistika
     document.getElementById("total-earned").textContent = formatNumber(userData.total_earned_mc);
