@@ -850,6 +850,9 @@ async def _show_balance(tg_user: types.User, message: types.Message) -> None:
             await reset_session.commit()
             user = db_user
 
+    from main import _get_vip_params
+    session_limit, _, _ = _get_vip_params(user.vip_status, now)
+
     session_1_count = user.session_1_count
     session_2_count = user.session_2_count
     session_1_completion_time = user.session_1_completion_time
@@ -861,7 +864,7 @@ async def _show_balance(tg_user: types.User, message: types.Message) -> None:
 
     # Calculate lock text using localized strings
     s2_status = loc['balance_locked']
-    if session_1_count >= 12:
+    if session_1_count >= session_limit:
         if session_1_completion_time is None:
             s2_status = loc['balance_active']
         else:
@@ -882,8 +885,8 @@ async def _show_balance(tg_user: types.User, message: types.Message) -> None:
         f"│ {loc['balance_mc_row']}  {balance_mc:,.0f} MC\n"
         f"│ {loc['balance_earn_row']} {total_earned_mc:,.0f} MC\n"
         f"├─────────────────────────\n"
-        f"│ {loc['balance_s1_row']}  {session_1_count}/12 klik\n"
-        f"│ {loc['balance_s2_row']}  {session_2_count}/12 klik ({s2_status})\n"
+        f"│ {loc['balance_s1_row']}  {session_1_count}/{session_limit} klik\n"
+        f"│ {loc['balance_s2_row']}  {session_2_count}/{session_limit} klik ({s2_status})\n"
         f"└─────────────────────────"
         + hint,
         parse_mode="HTML",
@@ -1300,6 +1303,9 @@ async def cmd_info(message: types.Message) -> None:
     today = datetime.now(timezone.utc).date()
     last_date = _get_utc_date(user.last_watch_date) if user.last_watch_date else None
     
+    from main import _get_vip_params
+    session_limit, daily_limit, _ = _get_vip_params(user.vip_status, datetime.now(timezone.utc))
+    
     session_1 = user.session_1_count if last_date == today else 0
     session_2 = user.session_2_count if last_date == today else 0
     total_videos = session_1 + session_2
@@ -1310,7 +1316,7 @@ async def cmd_info(message: types.Message) -> None:
         f"• <b>Username:</b> {username_display}\n"
         f"• <b>Hazırkı Balans:</b> {user.balance_mc:,.0f} MC\n"
         f"• <b>Ümumi Qazanc:</b> {user.total_earned_mc:,.0f} MC\n"
-        f"• <b>Bugünkü Videolar:</b> {total_videos}/24 (S1: {session_1}/12 | S2: {session_2}/12)\n"
+        f"• <b>Bugünkü Videolar:</b> {total_videos}/{daily_limit} (S1: {session_1}/{session_limit} | S2: {session_2}/{session_limit})\n"
         f"• <b>Dəvət Etdiyi Şəxslər:</b> {user.referral_count} nəfər\n"
         f"• <b>Status:</b> {status_str}"
     )
