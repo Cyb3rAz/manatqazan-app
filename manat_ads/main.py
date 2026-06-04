@@ -442,6 +442,17 @@ async def _credit_user(user_id_val: int | str, event_id: str, source: str = "unk
                 logger.warning("[CREDIT] Inactive/banned user %s tried to watch video", user_telegram_id)
                 return JSONResponse({"ok": False, "message": "Hesab dondurulub."}, status_code=403)
 
+            now = datetime.now(timezone.utc)
+            today = now.date()
+
+            # -- Security: 5-second Rate Limit Check --
+            if user.last_watch_date:
+                last_time = user.last_watch_date if user.last_watch_date.tzinfo else user.last_watch_date.replace(tzinfo=timezone.utc)
+                delta_sec = (now - last_time).total_seconds()
+                if delta_sec < 5:
+                    logger.warning("[CREDIT] User %s hit 5-second rate limit! Delta: %.2fs", user_telegram_id, delta_sec)
+                    return JSONResponse({"error": "Too many requests. Please wait."}, status_code=429)
+
             # -- event_id ile dublikat yoxla --
             if event_id:
                 dup_stmt = select(WatchRecord).where(WatchRecord.adsgram_event_id == event_id)
@@ -454,9 +465,6 @@ async def _credit_user(user_id_val: int | str, event_id: str, source: str = "unk
                     return JSONResponse({"ok": True, "message": "Artiq kreditlenib.", "balance": existing_balance})
 
             # -- Gundelik limit ve ardicil seans yoxla --
-            now = datetime.now(timezone.utc)
-            today = now.date()
-
             # Dynamic daily reset
             if user.last_watch_date and _get_utc_date(user.last_watch_date) != today:
                 print(f"[CREDIT] New day for user {user_telegram_id} - resetting session stats")
