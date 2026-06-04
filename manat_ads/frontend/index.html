@@ -1564,6 +1564,26 @@
                 </div>
             </div> <!-- End Tab TASKS -->
 
+            <!-- Tab: STORE -->
+            <div id="tab-store-content" style="display: none;">
+                <div class="tasks-header animate-in">
+                    <svg class="tasks-header-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <path d="M16 10a4 4 0 0 1-8 0"></path>
+                    </svg>
+                    <div class="tasks-header-content">
+                        <span class="tasks-header-title" data-i18n="nav_store">Mağaza</span>
+                        <span class="tasks-header-subtitle" data-i18n="store_subtitle_soon">VIP Statuslar tezliklə aktiv olacaq!</span>
+                    </div>
+                </div>
+                <div class="progress-section animate-in delay-1" style="text-align: center; padding: 40px 20px; color: var(--text-muted);">
+                    <div style="font-size: 48px; margin-bottom: 16px;">🛍️</div>
+                    <div style="font-size: 16px; font-weight: 700; color: var(--text-primary); margin-bottom: 8px;" data-i18n="store_soon">Mağaza tezliklə...</div>
+                    <div style="font-size: 13px; color: var(--text-muted);" data-i18n="store_subtitle_soon">VIP Statuslar tezliklə aktiv olacaq!</div>
+                </div>
+            </div> <!-- End Tab STORE -->
+
             <!-- Bottom Navigation Bar -->
             <nav class="bottom-nav">
                 <button class="nav-tab active" id="nav-main" onclick="switchTab('main')">
@@ -1582,6 +1602,15 @@
                     </svg>
                     <span class="nav-indicator"></span>
                     <span class="nav-label" data-i18n="nav_tasks">Tapşırıqlar</span>
+                </button>
+                <button class="nav-tab" id="nav-store" onclick="switchTab('store')">
+                    <svg class="nav-icon" viewBox="0 0 24 24">
+                        <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <path d="M16 10a4 4 0 0 1-8 0"></path>
+                    </svg>
+                    <span class="nav-indicator"></span>
+                    <span class="nav-label" data-i18n="nav_store">Mağaza</span>
                 </button>
             </nav>
 
@@ -1674,7 +1703,7 @@
         </div>
     </div>
 
-     <script src="/static/app.js?v=4.9.0"></script>
+      <script src="/static/app.js?v=4.9.1"></script>
 </body>
 </html>
 <!-- trigger vercel build v8 - AZ translation -->

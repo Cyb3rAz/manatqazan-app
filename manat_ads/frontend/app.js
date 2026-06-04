@@ -129,6 +129,9 @@ const LOCALES = {
         btn_verify: "Yoxla 🔄",
         btn_join: "Abunə Ol 🚀",
         tasks_empty_msg: "Hazırda aktiv tapşırıq yoxdur.",
+        nav_store: "Mağaza",
+        store_soon: "Mağaza tezliklə...",
+        store_subtitle_soon: "VIP Statuslar tezliklə aktiv olacaq!",
     },
     tr: {
         subtitle: "İzle • Kazan • Çevir",
@@ -196,6 +199,9 @@ const LOCALES = {
         btn_verify: "Kontrol Et 🔄",
         btn_join: "Abone Ol 🚀",
         tasks_empty_msg: "Şu anda aktif görev bulunmamaktadır.",
+        nav_store: "Mağaza",
+        store_soon: "Mağaza yakında...",
+        store_subtitle_soon: "VIP Statüler yakında aktif olacak!",
     },
     en: {
         subtitle: "Watch • Earn • Convert",
@@ -263,6 +269,9 @@ const LOCALES = {
         btn_verify: "Verify 🔄",
         btn_join: "Join 🚀",
         tasks_empty_msg: "There are currently no active tasks.",
+        nav_store: "Store",
+        store_soon: "Store coming soon...",
+        store_subtitle_soon: "VIP Statuses will be active soon!",
     },
     ru: {
         subtitle: "Смотри • Зарабатывай • Конвертируй",
@@ -330,6 +339,9 @@ const LOCALES = {
         btn_verify: "Проверить 🔄",
         btn_join: "Подписаться 🚀",
         tasks_empty_msg: "На данный момент активных заданий нет.",
+        nav_store: "Магазин",
+        store_soon: "Магазин скоро...",
+        store_subtitle_soon: "VIP Статусы будут активны скоро!",
     }
 };
 
@@ -1468,22 +1480,35 @@ function formatNumber(num) {
 function switchTab(tabId) {
     const mainTab = document.getElementById("tab-main-content");
     const tasksTab = document.getElementById("tab-tasks-content");
+    const storeTab = document.getElementById("tab-store-content");
     const navMain = document.getElementById("nav-main");
     const navTasks = document.getElementById("nav-tasks");
+    const navStore = document.getElementById("nav-store");
 
-    if (!mainTab || !tasksTab) return;
+    if (!mainTab || !tasksTab || !storeTab) return;
 
     if (tabId === 'main') {
         mainTab.style.display = "block";
         tasksTab.style.display = "none";
+        storeTab.style.display = "none";
         if (navMain) navMain.classList.add("active");
         if (navTasks) navTasks.classList.remove("active");
+        if (navStore) navStore.classList.remove("active");
     } else if (tabId === 'tasks') {
         mainTab.style.display = "none";
         tasksTab.style.display = "block";
+        storeTab.style.display = "none";
         if (navTasks) navTasks.classList.add("active");
         if (navMain) navMain.classList.remove("active");
+        if (navStore) navStore.classList.remove("active");
         fetchTasks();
+    } else if (tabId === 'store') {
+        mainTab.style.display = "none";
+        tasksTab.style.display = "none";
+        storeTab.style.display = "block";
+        if (navStore) navStore.classList.add("active");
+        if (navMain) navMain.classList.remove("active");
+        if (navTasks) navTasks.classList.remove("active");
     }
 }
 
