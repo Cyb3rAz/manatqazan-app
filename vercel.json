@@ -1,6 +1,6 @@
 {
   "rewrites": [
-    { "source": "/api/(.*)", "destination": "https://norman-sat-idaho-saskatchewan.trycloudflare.com/api/$1" },
+    { "source": "/api/(.*)", "destination": "https://definition-specific-bath-proud.trycloudflare.com/api/$1" },
     { "source": "/static/(.*)", "destination": "/manat_ads/frontend/$1" },
     { "source": "/(.*)", "destination": "/manat_ads/frontend/$1" }
   ]
