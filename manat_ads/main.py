@@ -463,14 +463,14 @@ async def _credit_user(user_id_val: int | str, event_id: str, source: str = "unk
                         user.session_1_completion_time = None
 
             # Determine target session & enforce limits/cooldown
-            if user.session_1_count < 12:
-                # Active in Session 1
+            if user.session_1_count < 35:
+                # Active in Session 1 (Level 1: 0–35 ads)
                 user.session_1_count += 1
-                if user.session_1_count == 12:
+                if user.session_1_count == 35:
                     user.session_1_completion_time = now
                     user.cooldown_notified = False  # Flag: push notification pending
-                    print(f"[CREDIT] User {user_telegram_id} COMPLETED Session 1 at {now.isoformat()}")
-                    logger.info("[CREDIT] User %s COMPLETED Session 1 at %s", user_telegram_id, now.isoformat())
+                    print(f"[CREDIT] User {user_telegram_id} COMPLETED Level 1 (35 ads) at {now.isoformat()}")
+                    logger.info("[CREDIT] User %s COMPLETED Level 1 (35 ads) at %s", user_telegram_id, now.isoformat())
             else:
                 # Session 1 is completed. Check Session 2 status.
                 if user.session_1_completion_time is None:
@@ -491,13 +491,13 @@ async def _credit_user(user_id_val: int | str, event_id: str, source: str = "unk
                         status_code=403
                     )
 
-                # Session 2 is unlocked. Check if already completed Session 2.
-                if user.session_2_count >= 12:
-                    print(f"[CREDIT] User {user_telegram_id} completed both sessions today (24 clicks). Limit hit.")
-                    logger.warning("[CREDIT] User %s completed both sessions today (24 clicks). Limit hit.", user_telegram_id)
-                    return JSONResponse({"ok": False, "message": "Gündəlik limitiniz bitdi."}, status_code=429)
+                # Level 2 is unlocked. Check if already completed Level 2.
+                if user.session_2_count >= 35:
+                    print(f"[CREDIT] User {user_telegram_id} completed both levels today (70 clicks). Daily limit hit.")
+                    logger.warning("[CREDIT] User %s completed both levels today (70 clicks). Limit hit.", user_telegram_id)
+                    return JSONResponse({"ok": False, "message": "Gündəlik limitiniz bitdi. Sabah gəl."}, status_code=429)
 
-                # Increment Session 2 count
+                # Increment Level 2 count
                 user.session_2_count += 1
 
             # -- Balansi artir (atomic column-level SQL expressions) --
@@ -666,7 +666,7 @@ async def get_user_info(telegram_id: str) -> JSONResponse:
     session_2_locked = True
     unlock_at = None
 
-    if session_1_count >= 12:
+    if session_1_count >= 35:
         if session_1_completion_time is None:
             # Legacy or fallback: if completed but no timestamp, unlock immediately
             session_2_locked = False
@@ -696,7 +696,7 @@ async def get_user_info(telegram_id: str) -> JSONResponse:
         "balance_azn": round(balance_mc / MC_TO_AZN_RATE, 4),
         "total_earned_mc": total_earned_mc,
         "videos_today": videos_today,
-        "daily_limit": 24,
+        "daily_limit": 70,
         "session_1_count": session_1_count,
         "session_2_count": session_2_count,
         "session_2_locked": session_2_locked,

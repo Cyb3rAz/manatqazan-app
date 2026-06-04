@@ -3,13 +3,60 @@
  * ===========================================================
  * Integrates with:
  *   • Telegram Web App SDK (istifadəçi kimliyi + tema)
- *   • Adsgram SDK (video reklamlar – .show(), .then(), .catch())
+ *   • Onclicka TMA SDK (video reklamlar – Zone ID: 443591)
  *   • ManatAds Backend API (istifadəçi məlumatı + mükafat callback)
  */
 
 // ── Konfiqurasiya ─────────────────────────────────────────────────────
 const API_BASE = "";
-const ADSGRAM_BLOCK_ID = "31923";
+// ── 2-Level Ad Pool Configuration ───────────────────────────────────────
+const LEVEL_LIMIT = 35;           // Ads per level
+const MAX_LEVELS  = 2;            // Total levels
+const COOLDOWN_MS = 3 * 60 * 60 * 1000; // 3 hours in milliseconds
+
+// ── Onclicka TMA SDK Bootstrap ────────────────────────────────────────
+window.initCdTma?.({ id: 443591 })
+    .then(show => window.show = show)
+    .catch(e => console.log('[Onclicka] Init error:', e));
+
+// ── 2-Level Ad Pool State ─────────────────────────────────────────────
+// These are loaded from / persisted to localStorage so state survives refreshes.
+let currentLevel    = 1;    // 1 or 2
+let levelClicks     = 0;    // 0 to LEVEL_LIMIT
+let cooldownEndTime = 0;    // Unix ms timestamp; 0 = no cooldown
+
+function loadAdState() {
+    currentLevel    = parseInt(localStorage.getItem('ad_currentLevel')    || '1', 10);
+    levelClicks     = parseInt(localStorage.getItem('ad_levelClicks')     || '0', 10);
+    cooldownEndTime = parseInt(localStorage.getItem('ad_cooldownEndTime') || '0', 10);
+    // Validate
+    if (![1, 2].includes(currentLevel)) currentLevel = 1;
+    if (isNaN(levelClicks) || levelClicks < 0) levelClicks = 0;
+    if (isNaN(cooldownEndTime) || cooldownEndTime < 0) cooldownEndTime = 0;
+}
+
+function saveAdState() {
+    localStorage.setItem('ad_currentLevel',    currentLevel);
+    localStorage.setItem('ad_levelClicks',     levelClicks);
+    localStorage.setItem('ad_cooldownEndTime', cooldownEndTime);
+}
+
+/** Evaluate and advance cooldown state — called on boot and each render. */
+function evaluateAdState() {
+    const now = Date.now();
+    // If Level 1 filled and we're waiting for cooldown to expire → switch to Level 2
+    if (currentLevel === 1 && levelClicks >= LEVEL_LIMIT && cooldownEndTime > 0) {
+        if (now >= cooldownEndTime) {
+            // Cooldown expired → unlock Level 2
+            currentLevel    = 2;
+            levelClicks     = 0;
+            cooldownEndTime = 0;
+            saveAdState();
+        }
+        // else: still waiting
+    }
+}
+
 
 // ── i18n Dil Dəstəyi ─────────────────────────────────────────────────
 const SUPPORTED_LANGS = ['az', 'tr', 'en', 'ru'];
@@ -474,6 +521,10 @@ function getImmediateBootLanguage() {
 }
 
 async function initApp() {
+    // ── Load & evaluate 2-level ad state from localStorage ──────────────
+    loadAdState();
+    evaluateAdState();
+
     try {
         const urlParams = new URLSearchParams(window.location.search);
 
@@ -881,27 +932,30 @@ function renderDashboard() {
 
     // Statistika
     document.getElementById("total-earned").textContent = formatNumber(userData.total_earned_mc);
-    document.getElementById("videos-count").textContent = `${userData.videos_today}/${userData.daily_limit || 24}`;
+    document.getElementById("videos-count").textContent = `${(userData.session_1_count || 0) + (userData.session_2_count || 0)}/${LEVEL_LIMIT * MAX_LEVELS}`;
     document.getElementById("referral-count").textContent = userData.referral_count;
     document.getElementById("referral-earnings").textContent = formatNumber(userData.referral_earnings_mc);
 
-    // Səans 1 Card
+    // ── 2-Level Ad System Rendering ──────────────────────────────────
+    evaluateAdState();
+
     const s1Count = userData.session_1_count || 0;
-    document.getElementById("session-1-progress-text").textContent = `${s1Count}/12 ${t('videoUnit')}`;
-    document.getElementById("session-1-progress-fill").style.width = `${(s1Count / 12) * 100}%`;
+    const s2Count = userData.session_2_count || 0;
+    const now = Date.now();
+    const isCooling = currentLevel === 1 && levelClicks >= LEVEL_LIMIT && cooldownEndTime > 0 && now < cooldownEndTime;
+
+    // ── Session 1 / Mərhələ 1 Card ───────────────────────────────────
+    document.getElementById("session-1-progress-text").textContent = `Mərhələ 1: ${Math.min(s1Count, LEVEL_LIMIT)}/${LEVEL_LIMIT} Video`;
+    document.getElementById("session-1-progress-fill").style.width = `${Math.min((s1Count / LEVEL_LIMIT) * 100, 100)}%`;
     const s1Btn = document.getElementById("session-1-btn");
 
-    if (s1Count >= 12) {
+    if (s1Count >= LEVEL_LIMIT) {
+        // Level 1 complete
         s1Btn.disabled = true;
         s1Btn.innerHTML = t('completedS1');
         s1Btn.classList.add("completed");
-    } else {
-        s1Btn.disabled = false;
-        s1Btn.innerHTML = `${t('watchBtn')} ${userData.mc_per_video || 300} ${t('watchBtnSuffix')}`;
-        s1Btn.classList.remove("completed");
-    }
-
-    if (isCooldownActive) {
+        s1Btn.style.cssText = '';
+    } else if (isBtnCooldownActive) {
         s1Btn.disabled = true;
         s1Btn.style.background = '#1f293d';
         s1Btn.style.boxShadow = 'none';
@@ -911,52 +965,21 @@ function renderDashboard() {
         s1Btn.style.transform = 'none';
         s1Btn.style.filter = 'none';
         s1Btn.style.textShadow = 'none';
-        if (currentWatchingSession === 1 && cooldownRemaining > 0) {
-            s1Btn.innerHTML = `${t('waitSec')} (${cooldownRemaining}s)...`;
-        }
+    } else {
+        s1Btn.disabled = false;
+        s1Btn.innerHTML = `${t('watchBtn')} ${userData.mc_per_video || 300} ${t('watchBtnSuffix')}`;
+        s1Btn.classList.remove("completed");
+        s1Btn.style.cssText = '';
     }
 
-
-    // Səans 2 Card
-    const s2Count = userData.session_2_count || 0;
-    document.getElementById("session-2-progress-text").textContent = `${s2Count}/12 ${t('videoUnit')}`;
-    document.getElementById("session-2-progress-fill").style.width = `${(s2Count / 12) * 100}%`;
-    const s2Btn = document.getElementById("session-2-btn");
+    // ── Session 2 / Mərhələ 2 Card ───────────────────────────────────
+    const s2Btn  = document.getElementById("session-2-btn");
     const s2Hint = document.getElementById("session-2-cooldown-hint");
 
-    if (userData.session_2_locked) {
+    if (isCooling) {
+        // 3-hour inter-level cooldown is active
         s2Btn.disabled = true;
         s2Btn.classList.remove("completed");
-        if (userData.unlock_at) {
-            s2Btn.innerHTML = t('locked');
-            s2Hint.style.display = "block";
-            startCooldownTimer(userData.unlock_at);
-        } else {
-            s2Btn.innerHTML = t('finishFirst');
-            s2Hint.style.display = "none";
-            stopCooldownTimer();
-        }
-    } else {
-        s2Hint.style.display = "none";
-        stopCooldownTimer();
-        if (s2Count >= 12) {
-            s2Btn.disabled = true;
-            s2Btn.innerHTML = t('completedS2');
-            s2Btn.classList.add("completed");
-        } else {
-            s2Btn.classList.remove("completed");
-            if (s1Count < 12) {
-                s2Btn.disabled = true;
-                s2Btn.innerHTML = t('finishFirst');
-            } else {
-                s2Btn.disabled = false;
-                s2Btn.innerHTML = `${t('watchBtn')} ${userData.mc_per_video || 300} ${t('watchBtnSuffix')}`;
-            }
-        }
-    }
-
-    if (isCooldownActive) {
-        s2Btn.disabled = true;
         s2Btn.style.background = '#1f293d';
         s2Btn.style.boxShadow = 'none';
         s2Btn.style.color = '#6b7280';
@@ -965,9 +988,60 @@ function renderDashboard() {
         s2Btn.style.transform = 'none';
         s2Btn.style.filter = 'none';
         s2Btn.style.textShadow = 'none';
-        if (currentWatchingSession === 2 && cooldownRemaining > 0) {
-            s2Btn.innerHTML = `${t('waitSec')} (${cooldownRemaining}s)...`;
+
+        // Show ticking countdown inside the Level 2 button area
+        const remaining = cooldownEndTime - now;
+        const hh = Math.floor(remaining / 3600000);
+        const mm = Math.floor((remaining % 3600000) / 60000);
+        const ss = Math.floor((remaining % 60000) / 1000);
+        const pad = n => String(n).padStart(2, '0');
+        document.getElementById("session-2-progress-text").textContent = `Növbəti mərhələ: ${pad(hh)}:${pad(mm)}:${pad(ss)}`;
+        document.getElementById("session-2-progress-fill").style.width = '0%';
+        s2Btn.textContent = `⏳ Növbəti mərhələ: ${pad(hh)}:${pad(mm)}:${pad(ss)}`;
+        s2Hint.style.display = 'none';
+
+        // Start the live countdown ticker
+        startLevel2CooldownTicker();
+    } else if (currentLevel === 2 || (s1Count >= LEVEL_LIMIT && cooldownEndTime === 0)) {
+        // Level 2 is active (cooldown cleared)
+        stopLevel2CooldownTicker();
+        document.getElementById("session-2-progress-text").textContent = `Mərhələ 2: ${Math.min(s2Count, LEVEL_LIMIT)}/${LEVEL_LIMIT} Video`;
+        document.getElementById("session-2-progress-fill").style.width = `${Math.min((s2Count / LEVEL_LIMIT) * 100, 100)}%`;
+        s2Hint.style.display = 'none';
+
+        if (s2Count >= LEVEL_LIMIT) {
+            // All done for the day
+            s2Btn.disabled = true;
+            s2Btn.innerHTML = '<svg class="btn-inline-icon" style="stroke: #06b6d4;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> Gündəlik limit bitdi! Sabah gəl.';
+            s2Btn.classList.add("completed");
+            s2Btn.style.cssText = '';
+        } else if (isBtnCooldownActive) {
+            s2Btn.disabled = true;
+            s2Btn.style.background = '#1f293d';
+            s2Btn.style.boxShadow = 'none';
+            s2Btn.style.color = '#6b7280';
+            s2Btn.style.opacity = '1';
+            s2Btn.style.pointerEvents = 'none';
+            s2Btn.style.transform = 'none';
+            s2Btn.style.filter = 'none';
+            s2Btn.style.textShadow = 'none';
+        } else {
+            s2Btn.disabled = false;
+            s2Btn.innerHTML = `${t('watchBtn')} ${userData.mc_per_video || 300} ${t('watchBtnSuffix')}`;
+            s2Btn.classList.remove("completed");
+            s2Btn.style.cssText = '';
         }
+    } else {
+        // Level 2 locked — Level 1 not yet complete
+        stopLevel2CooldownTicker();
+        document.getElementById("session-2-progress-text").textContent = `Mərhələ 2: 0/${LEVEL_LIMIT} Video`;
+        document.getElementById("session-2-progress-fill").style.width = '0%';
+        s2Btn.disabled = true;
+        s2Btn.innerHTML = t('finishFirst');
+        s2Btn.classList.remove("completed");
+        s2Btn.style.cssText = '';
+        s2Hint.style.display = 'none';
+        stopCooldownTimer();
     }
 
     // Referal bölməsi
@@ -978,140 +1052,128 @@ function renderDashboard() {
     document.getElementById("ref-earned").textContent = formatNumber(userData.referral_earnings_mc);
 }
 
-// ── Adsgram İnteqrasiyası ────────────────────────────────────────────
-let adController = null;
+// ── Level 2 Countdown Ticker ─────────────────────────────────────────
+let _level2TickerInterval = null;
 
-function initAdsgram() {
-    if (window.Adsgram) {
-        adController = window.Adsgram.init({ blockId: ADSGRAM_BLOCK_ID });
-
-        adController.addEventListener("onNonStopShow", () => {
-            showToast(t('spamTooOften'), "error");
-        });
-
-        adController.addEventListener("onBannerNotFound", () => {
-            showToast(t('spamNoAd'), "error");
-        });
-
-        adController.addEventListener("onTooLongSession", () => {
-            showToast(t('spamLongSession'), "error");
-        });
-
-        return true;
-    }
-    console.warn("Adsgram SDK yüklənmədi.");
-    return false;
+function startLevel2CooldownTicker() {
+    if (_level2TickerInterval) return; // already running
+    _level2TickerInterval = setInterval(() => {
+        evaluateAdState();
+        renderDashboard();
+    }, 1000);
 }
 
+function stopLevel2CooldownTicker() {
+    if (_level2TickerInterval) {
+        clearInterval(_level2TickerInterval);
+        _level2TickerInterval = null;
+    }
+}
+
+// ── Onclicka TMA Ad Engine ────────────────────────────────────────────
 /**
- * Adsgram vasitəsilə mükafatlı video reklamı göstər.
+ * Dispaly a rewarded ad via the Onclicka TMA SDK.
+ * sessionNum: 1 → Mərhələ 1, 2 → Mərhələ 2
  */
 let currentWatchingSession = 1;
 
-// ── Mutex lock: prevents re-entry during the 7-second post-ad cooldown ──
-let isCooldownActive = false;
+// Mutex: prevents re-entry during the 7-second post-ad cooldown
+let isBtnCooldownActive = false;
 let cooldownRemaining = 0;
-
-// Module-level handle so we can always clear the previous interval before
-// starting a new one, eliminating any stacked-interval race condition.
 let _btnCooldownTimerId = null;
 
 async function watchAd(sessionNum = 1) {
-    // Hard mutex guard — bail out immediately if cooldown is running
-    if (isCooldownActive) return;
-    currentWatchingSession = sessionNum;
-    const watchBtn = document.getElementById(`session-${sessionNum}-btn`);
-    const otherBtn = document.getElementById(`session-${sessionNum === 1 ? 2 : 1}-btn`);
+    // Guard: mutex cooldown
+    if (isBtnCooldownActive) return;
 
-    if (!userData) return;
-
-    if (sessionNum === 1 && userData.session_1_count >= 12) {
-        showToast(t('toastS1Done'), "error");
+    // Guard: Onclicka SDK not yet ready
+    if (!window.show) {
+        showToast(t('toastAdNotAvail'), "error");
         return;
     }
-    if (sessionNum === 2) {
-        if (userData.session_2_locked) {
+
+    if (!userData) return;
+    currentWatchingSession = sessionNum;
+
+    // Evaluate & validate state
+    evaluateAdState();
+
+    const s1Count = userData.session_1_count || 0;
+    const s2Count = userData.session_2_count || 0;
+    const now = Date.now();
+    const isCooling = currentLevel === 1 && levelClicks >= LEVEL_LIMIT && cooldownEndTime > 0 && now < cooldownEndTime;
+
+    if (sessionNum === 1) {
+        if (s1Count >= LEVEL_LIMIT) {
+            showToast(t('toastS1Done'), "error");
+            return;
+        }
+    } else if (sessionNum === 2) {
+        if (isCooling) {
             showToast(t('toastS2Locked'), "error");
             return;
         }
-        if (userData.session_2_count >= 12) {
+        if (currentLevel < 2 && s1Count < LEVEL_LIMIT) {
+            showToast(t('toastS2Locked'), "error");
+            return;
+        }
+        if (s2Count >= LEVEL_LIMIT) {
             showToast(t('toastS2Done'), "error");
             return;
         }
     }
 
-    if (!adController) {
-        if (!initAdsgram()) {
-            showToast(t('toastAdNotAvail'), "error");
-            return;
-        }
-    }
+    const watchBtn = document.getElementById(`session-${sessionNum}-btn`);
+    const otherBtn = document.getElementById(`session-${sessionNum === 1 ? 2 : 1}-btn`);
 
     watchBtn.disabled = true;
-    const oldText = watchBtn.textContent;
     watchBtn.textContent = t('adLoading');
     if (otherBtn) otherBtn.disabled = true;
 
     try {
-        const result = await adController.show();
-
-        if (result.done) {
-            watchBtn.textContent = t('rewardCalc');
-
-            await creditReward(sessionNum);
-
-            spawnCoinBurst();
-
-            showToast(t('toastEarned').replace('{amount}', userData.mc_per_video), "success");
-        }
-
-    } catch (result) {
-        if (result.error) {
-            console.error("Adsgram xətası:", result.description);
-            showToast(t('toastAdFailed'), "error");
-        } else {
-            showToast(t('toastWatchFull'), "error");
-        }
+        await window.show();
+        // Ad completed successfully
+        watchBtn.textContent = t('rewardCalc');
+        await executeAdSuccessReward(sessionNum);
+        spawnCoinBurst();
+        showToast(t('toastEarned').replace('{amount}', userData.mc_per_video || 300), "success");
+    } catch (e) {
+        console.log('[Onclicka] Ad dismissed or error:', e);
+        showToast(t('toastWatchFull'), "error");
     } finally {
         renderDashboard();
         startButtonCooldown(sessionNum);
     }
 }
 
-// ── Düymə Cooldown ────────────────────────────────────────────────────
+// ── Button post-ad cooldown (7 seconds) ─────────────────────────────
 function startButtonCooldown(sessionNum, seconds = 7) {
-    const btn    = document.getElementById(`session-${sessionNum}-btn`);
+    const btn      = document.getElementById(`session-${sessionNum}-btn`);
     const otherBtn = document.getElementById(`session-${sessionNum === 1 ? 2 : 1}-btn`);
 
-    // ── 1. Acquire mutex ─────────────────────────────────────────────
-    isCooldownActive = true;
+    isBtnCooldownActive = true;
 
-    // ── 2. Destroy any stacked/hanging interval before creating a new one
     if (_btnCooldownTimerId !== null) {
         clearInterval(_btnCooldownTimerId);
         _btnCooldownTimerId = null;
     }
 
-    // ── 3. Hard DOM lock — browser-level click/touch rejection ───────
-    //    Also explicitly strip any orange inline styles that renderDashboard()
-    //    may have applied just before this call (inside the finally block),
-    //    so the CSS :disabled rule is never visually overridden during countdown.
     function applyDisabledStyles(el) {
         if (!el) return;
         el.disabled = true;
-        el.style.background = '#1f293d';
-        el.style.boxShadow  = 'none';
-        el.style.color      = '#6b7280';
-        el.style.opacity    = '1';
+        el.style.background    = '#1f293d';
+        el.style.boxShadow     = 'none';
+        el.style.color         = '#6b7280';
+        el.style.opacity       = '1';
         el.style.pointerEvents = 'none';
-        el.style.transform  = 'none';
-        el.style.filter     = 'none';
-        el.style.textShadow = 'none';
+        el.style.transform     = 'none';
+        el.style.filter        = 'none';
+        el.style.textShadow    = 'none';
     }
 
     function clearDisabledStyles(el) {
         if (!el) return;
-        el.disabled = false;
+        el.disabled            = false;
         el.style.background    = '';
         el.style.boxShadow     = '';
         el.style.color         = '';
@@ -1125,61 +1187,73 @@ function startButtonCooldown(sessionNum, seconds = 7) {
     applyDisabledStyles(btn);
     applyDisabledStyles(otherBtn);
 
-    // ── 4. Countdown — stored in module-level handle ─────────────────
     cooldownRemaining = seconds;
-    btn.textContent = `${t('waitSec')} (${cooldownRemaining}s)...`;
+    if (btn) btn.textContent = `${t('waitSec')} (${cooldownRemaining}s)...`;
 
     _btnCooldownTimerId = setInterval(() => {
         cooldownRemaining--;
         if (cooldownRemaining > 0) {
-            // Strictly enforce disabled appearance on every tick
             applyDisabledStyles(btn);
-            btn.textContent = `${t('waitSec')} (${cooldownRemaining}s)...`;
+            if (btn) btn.textContent = `${t('waitSec')} (${cooldownRemaining}s)...`;
         } else {
-            // ── 5. Strict zero — release everything ──────────────────
             clearInterval(_btnCooldownTimerId);
             _btnCooldownTimerId = null;
-
-            // Clear all inline overrides so CSS active state takes over cleanly
             clearDisabledStyles(btn);
-            if (otherBtn) {
-                clearDisabledStyles(otherBtn);
-            }
-
-            // Release mutex
-            isCooldownActive = false;
+            if (otherBtn) clearDisabledStyles(otherBtn);
+            isBtnCooldownActive = false;
             cooldownRemaining = 0;
-
             renderDashboard();
         }
     }, 1000);
 }
 
-// ── Mükafat Kreditləmə ───────────────────────────────────────────────
-async function creditReward(sessionNum) {
-    if (userData) {
-        userData.balance_mc += userData.mc_per_video;
-        userData.total_earned_mc += userData.mc_per_video;
-        userData.videos_today += 1;
+// ── Reward Lifecycle Engine ───────────────────────────────────────────
+/**
+ * Called immediately after a successful ad completion.
+ * Applies optimistic local state update, then fires backend sync.
+ */
+async function executeAdSuccessReward(sessionNum) {
+    if (!userData) return;
 
-        if (sessionNum === 1) {
-            userData.session_1_count += 1;
-            if (userData.session_1_count === 12) {
-                // Mark Session 2 as locked optimistically.
-                // DO NOT compute unlock_at from the local device clock —
-                // device time can be spoofed or drift from server time.
-                // The authoritative unlock_at ISO timestamp will be
-                // retrieved from the backend via scheduleServerSync below.
-                userData.session_2_locked = true;
-                userData.unlock_at = null; // cleared; server will supply real value
-            }
-        } else if (sessionNum === 2) {
-            userData.session_2_count += 1;
+    const reward = userData.mc_per_video || 300;
+
+    // ── 1. Optimistic UI update ────────────────────────────────────────
+    userData.balance_mc      += reward;
+    userData.total_earned_mc += reward;
+    userData.videos_today    = (userData.videos_today || 0) + 1;
+
+    if (sessionNum === 1) {
+        userData.session_1_count = (userData.session_1_count || 0) + 1;
+        levelClicks = userData.session_1_count;
+
+        // Level 1 just completed → start 3-hour cooldown
+        if (userData.session_1_count >= LEVEL_LIMIT && currentLevel === 1) {
+            cooldownEndTime = Date.now() + COOLDOWN_MS;
+            saveAdState();
+        } else {
+            saveAdState();
         }
-
-        renderDashboard();
+    } else if (sessionNum === 2) {
+        userData.session_2_count = (userData.session_2_count || 0) + 1;
+        levelClicks = userData.session_2_count;
+        saveAdState();
     }
 
+    // ── 2. Animate balance ────────────────────────────────────────────
+    const balEl = document.getElementById('balance-mc');
+    if (balEl) {
+        balEl.style.transition = 'transform 0.3s cubic-bezier(0.34,1.56,0.64,1), color 0.3s';
+        balEl.style.transform = 'scale(1.12)';
+        balEl.style.color = '#00ffcc';
+        setTimeout(() => {
+            balEl.style.transform = 'scale(1)';
+            balEl.style.color = '';
+        }, 400);
+    }
+
+    renderDashboard();
+
+    // ── 3. Fire backend sync (non-blocking) ───────────────────────────
     scheduleServerSync(4, 2500);
 }
 
