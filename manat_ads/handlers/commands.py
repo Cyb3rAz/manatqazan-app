@@ -854,7 +854,8 @@ async def _show_balance(tg_user: types.User, message: types.Message) -> None:
             user = db_user
 
     from main import _get_vip_params
-    session_limit, _, _ = _get_vip_params(user.vip_status, now)
+    session_limit, daily_limit, _ = _get_vip_params(user.vip_status, now)
+    session_2_limit = daily_limit - session_limit
 
     session_1_count = user.session_1_count
     session_2_count = user.session_2_count
@@ -889,7 +890,7 @@ async def _show_balance(tg_user: types.User, message: types.Message) -> None:
         f"│ {loc['balance_earn_row']} {total_earned_mc:,.0f} MC\n"
         f"├─────────────────────────\n"
         f"│ {loc['balance_s1_row']}  {session_1_count}/{session_limit} klik\n"
-        f"│ {loc['balance_s2_row']}  {session_2_count}/{session_limit} klik ({s2_status})\n"
+        f"│ {loc['balance_s2_row']}  {session_2_count}/{session_2_limit} klik ({s2_status})\n"
         f"└─────────────────────────"
         + hint,
         parse_mode="HTML",

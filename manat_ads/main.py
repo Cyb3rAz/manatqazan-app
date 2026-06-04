@@ -555,7 +555,7 @@ async def _credit_user(user_id_val: int | str, event_id: str, source: str = "unk
                     )
 
                 # Level 2 is unlocked. Check if already completed Level 2.
-                if user.session_2_count >= session_limit:
+                if user.session_2_count >= (daily_limit - session_limit):
                     print(f"[CREDIT] User {user_telegram_id} completed both levels today ({daily_limit} clicks). Daily limit hit.")
                     logger.warning("[CREDIT] User %s completed both levels today (%s clicks). Limit hit.", user_telegram_id, daily_limit)
                     return JSONResponse({"ok": False, "message": "Gündəlik limitiniz bitdi. Sabah gəl."}, status_code=429)

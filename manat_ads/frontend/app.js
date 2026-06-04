@@ -11,6 +11,7 @@
 const API_BASE = "https://definition-specific-bath-proud.trycloudflare.com";
 // ── 2-Level Ad Pool Configuration ───────────────────────────────────────
 let LEVEL_LIMIT = 25;             // Ads per level — overridden dynamically from API (25 free / 22 PRO / 20 ELITE)
+let LEVEL_2_LIMIT = 25;           // Ads for level 2 — daily_limit - LEVEL_LIMIT
 const MAX_LEVELS  = 2;            // Total levels
 const COOLDOWN_MS = 3 * 60 * 60 * 1000; // 3 hours in milliseconds
 
@@ -829,10 +830,13 @@ function syncAdStateFromUserData() {
     const s2Locked = userData.session_2_locked ?? true;
     const unlockAtStr = userData.unlock_at;
 
-    // Update LEVEL_LIMIT dynamically from API (Free=25, PRO=30, ELITE=35)
+    // Update LEVEL_LIMIT dynamically from API (Free=25, PRO=22, ELITE=20)
     if (userData.session_limit && userData.session_limit > 0) {
         LEVEL_LIMIT = userData.session_limit;
     }
+    // Update LEVEL_2_LIMIT dynamically as remainder logic: daily_limit - session_limit
+    const dailyLimit = userData.daily_limit || (LEVEL_LIMIT * MAX_LEVELS);
+    LEVEL_2_LIMIT = dailyLimit - LEVEL_LIMIT;
 
     if (s1Count < LEVEL_LIMIT) {
         currentLevel = 1;
@@ -1264,11 +1268,11 @@ function renderDashboard() {
     } else if (currentLevel === 2 || (s1Count >= LEVEL_LIMIT && cooldownEndTime === 0)) {
         // Level 2 is active (cooldown cleared)
         stopLevel2CooldownTicker();
-        document.getElementById("session-2-progress-text").textContent = `${Math.min(s2Count, LEVEL_LIMIT)} / ${LEVEL_LIMIT} Video`;
-        document.getElementById("session-2-progress-fill").style.width = `${Math.min((s2Count / LEVEL_LIMIT) * 100, 100)}%`;
+        document.getElementById("session-2-progress-text").textContent = `${Math.min(s2Count, LEVEL_2_LIMIT)} / ${LEVEL_2_LIMIT} Video`;
+        document.getElementById("session-2-progress-fill").style.width = `${Math.min((s2Count / LEVEL_2_LIMIT) * 100, 100)}%`;
         s2Hint.style.display = 'none';
 
-        if (s2Count >= LEVEL_LIMIT) {
+        if (s2Count >= LEVEL_2_LIMIT) {
             // All done for the day
             s2Btn.disabled = true;
             s2Btn.innerHTML = '<svg class="btn-inline-icon" style="stroke: #06b6d4;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> Gündəlik limit bitdi! Sabah gəl.';
@@ -1293,7 +1297,7 @@ function renderDashboard() {
     } else {
         // Level 2 locked — Level 1 not yet complete
         stopLevel2CooldownTicker();
-        document.getElementById("session-2-progress-text").textContent = `0 / ${LEVEL_LIMIT} Video`;
+        document.getElementById("session-2-progress-text").textContent = `0 / ${LEVEL_2_LIMIT} Video`;
         document.getElementById("session-2-progress-fill").style.width = '0%';
         s2Btn.disabled = true;
         s2Btn.innerHTML = t('finishFirst');
@@ -1378,7 +1382,7 @@ async function watchAd(sessionNum = 1) {
             showToast(t('toastS2Locked'), "error");
             return;
         }
-        if (s2Count >= LEVEL_LIMIT) {
+        if (s2Count >= LEVEL_2_LIMIT) {
             showToast(t('toastS2Done'), "error");
             return;
         }
