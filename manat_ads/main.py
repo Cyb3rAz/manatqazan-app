@@ -644,6 +644,27 @@ async def _credit_user(user_id_val: int | str, event_id: str, source: str = "unk
         })
 
 
+# ── Leaderboard API (for Mini App) ─────────────────────────────────────
+@app.get("/api/leaderboard", summary="Get Top 45 users for Gamification Leaderboard")
+async def get_leaderboard():
+    async with async_session() as session:
+        # Fetch top 45 users ordered by balance_mc DESC
+        stmt = select(User.first_name, User.balance_mc, User.vip_status).order_by(User.balance_mc.desc()).limit(45)
+        result = await session.execute(stmt)
+        users = result.fetchall()
+        
+        # Convert to list of dicts
+        leaderboard = []
+        for row in users:
+            leaderboard.append({
+                "first_name": row.first_name or "Anonim",
+                "balance_mc": row.balance_mc,
+                "vip_status": row.vip_status
+            })
+            
+        return JSONResponse({"ok": True, "leaderboard": leaderboard})
+
+
 # ── User Info API (for Mini App) ───────────────────────────────────────
 @app.get("/api/user/{telegram_id}", summary="Get user info for Mini App")
 async def get_user_info(telegram_id: str) -> JSONResponse:

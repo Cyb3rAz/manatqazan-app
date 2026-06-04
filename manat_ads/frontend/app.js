@@ -153,6 +153,10 @@ const LOCALES = {
         Modal_Order_Msg: "Salam! Mən {package} paketi almaq istəyirəm. Mənim İD-m: {id}",
         Withdraw_Range_Notice: "Birdəfəlik Çıxarış Limiti: 5.00 - 100.00 AZN",
         Dashboard_Range: "Çıxarış: 5 - 100 AZN",
+        menu_leaderboard: "🏆 Liderlər",
+        leaderboard_title: "Ən Çox Qazanan Top 45",
+        user_label: "İstifadəçi",
+        balance_label: "Qazanc",
     },
     tr: {
         subtitle: "İzle • Kazan • Çevir",
@@ -243,6 +247,10 @@ const LOCALES = {
         Modal_Order_Msg: "Merhaba! Ben {package} paketi almak istiyorum. Benim ID'm: {id}",
         Withdraw_Range_Notice: "Tek Seferlik Çekim Limiti: 135.00 - 2700.00 TL",
         Dashboard_Range: "Çekim: 135 - 2700 TL",
+        menu_leaderboard: "🏆 Liderler",
+        leaderboard_title: "En Çok Kazanan Top 45",
+        user_label: "Kullanıcı",
+        balance_label: "Kazanç",
     },
     en: {
         subtitle: "Watch • Earn • Convert",
@@ -333,6 +341,10 @@ const LOCALES = {
         Modal_Order_Msg: "Hello! I want to buy the {package} package. My ID: {id}",
         Withdraw_Range_Notice: "Single Withdrawal Limit: 3.00 - 60.00 USDT",
         Dashboard_Range: "Withdrawal: 3 - 60 USDT",
+        menu_leaderboard: "🏆 Leaderboard",
+        leaderboard_title: "Top 45 Earners",
+        user_label: "User",
+        balance_label: "Earnings",
     },
     ru: {
         subtitle: "Смотри • Зарабатывай • Конвертируй",
@@ -423,6 +435,10 @@ const LOCALES = {
         Modal_Order_Msg: "Здравствуйте! Я хочу купить пакет {package}. Мой ID: {id}",
         Withdraw_Range_Notice: "Лимит разового вывода: 3.00 - 60.00 USDT",
         Dashboard_Range: "Вывод: 3 - 60 USDT",
+        menu_leaderboard: "🏆 Лидеры",
+        leaderboard_title: "Топ 45 по заработку",
+        user_label: "Пользователь",
+        balance_label: "Заработок",
     }
 };
 
@@ -1667,34 +1683,119 @@ function switchTab(tabId) {
     const mainTab = document.getElementById("tab-main-content");
     const tasksTab = document.getElementById("tab-tasks-content");
     const storeTab = document.getElementById("tab-store-content");
+    const leaderboardTab = document.getElementById("tab-leaderboard-content");
+    
     const navMain = document.getElementById("nav-main");
     const navTasks = document.getElementById("nav-tasks");
     const navStore = document.getElementById("nav-store");
+    const navLeaderboard = document.getElementById("nav-leaderboard");
 
-    if (!mainTab || !tasksTab || !storeTab) return;
+    if (!mainTab || !tasksTab || !storeTab || !leaderboardTab) return;
 
     if (tabId === 'main') {
         mainTab.style.display = "block";
         tasksTab.style.display = "none";
         storeTab.style.display = "none";
+        leaderboardTab.style.display = "none";
+        
         if (navMain) navMain.classList.add("active");
         if (navTasks) navTasks.classList.remove("active");
         if (navStore) navStore.classList.remove("active");
+        if (navLeaderboard) navLeaderboard.classList.remove("active");
     } else if (tabId === 'tasks') {
         mainTab.style.display = "none";
         tasksTab.style.display = "block";
         storeTab.style.display = "none";
+        leaderboardTab.style.display = "none";
+        
         if (navTasks) navTasks.classList.add("active");
         if (navMain) navMain.classList.remove("active");
         if (navStore) navStore.classList.remove("active");
+        if (navLeaderboard) navLeaderboard.classList.remove("active");
         fetchTasks();
     } else if (tabId === 'store') {
         mainTab.style.display = "none";
         tasksTab.style.display = "none";
         storeTab.style.display = "block";
+        leaderboardTab.style.display = "none";
+        
         if (navStore) navStore.classList.add("active");
         if (navMain) navMain.classList.remove("active");
         if (navTasks) navTasks.classList.remove("active");
+        if (navLeaderboard) navLeaderboard.classList.remove("active");
+    } else if (tabId === 'leaderboard') {
+        mainTab.style.display = "none";
+        tasksTab.style.display = "none";
+        storeTab.style.display = "none";
+        leaderboardTab.style.display = "block";
+        
+        if (navLeaderboard) navLeaderboard.classList.add("active");
+        if (navMain) navMain.classList.remove("active");
+        if (navTasks) navTasks.classList.remove("active");
+        if (navStore) navStore.classList.remove("active");
+        fetchLeaderboard();
+    }
+}
+
+// ── Leaderboard Logic ────────────────────────────────────────────────
+async function fetchLeaderboard() {
+    const container = document.getElementById("leaderboard-list");
+    if (!container) return;
+    
+    container.innerHTML = `<div style="text-align:center; padding: 20px; color: var(--text-muted);">Yüklənir...</div>`;
+    
+    try {
+        const resp = await fetch(`${API_BASE}/api/leaderboard`);
+        if (!resp.ok) throw new Error("Failed to load leaderboard");
+        const data = await resp.json();
+        
+        if (!data.leaderboard || data.leaderboard.length === 0) {
+            container.innerHTML = `<div style="text-align:center; padding: 20px; color: var(--text-muted);">No users found.</div>`;
+            return;
+        }
+        
+        container.innerHTML = "";
+        data.leaderboard.forEach((user, index) => {
+            const row = document.createElement("div");
+            row.className = "leaderboard-row";
+            
+            // Gold, Silver, Bronze classes
+            let rankClass = "";
+            let rankDisplay = `#${index + 1}`;
+            if (index === 0) {
+                rankClass = "rank-gold";
+                rankDisplay = "🥇";
+            } else if (index === 1) {
+                rankClass = "rank-silver";
+                rankDisplay = "🥈";
+            } else if (index === 2) {
+                rankClass = "rank-bronze";
+                rankDisplay = "🥉";
+            }
+            
+            if (rankClass) {
+                row.classList.add(rankClass);
+            }
+            
+            // VIP SVGs
+            let vipSvg = "";
+            if (user.vip_status === "elite") {
+                vipSvg = `<svg class="vip-icon elite-glow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;margin-left:5px;vertical-align:middle;color:#00ffcc;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>`;
+            } else if (user.vip_status === "pro") {
+                vipSvg = `<svg class="vip-icon pro-glow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;margin-left:5px;vertical-align:middle;color:#ff00ff;"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2l.5-.5m10-10l-10 10-3-3 10-10c2.76-2.76 7.24-2.76 7.24-2.76s0 4.48-2.76 7.24z"></path></svg>`;
+            }
+
+            row.innerHTML = `
+                <div class="leaderboard-rank">${rankDisplay}</div>
+                <div class="leaderboard-name">${user.first_name}${vipSvg}</div>
+                <div class="leaderboard-balance">${Number(user.balance_mc).toLocaleString()} MC</div>
+            `;
+            container.appendChild(row);
+        });
+        
+    } catch (err) {
+        console.error("Leaderboard fetch error:", err);
+        container.innerHTML = `<div style="text-align:center; padding: 20px; color: var(--text-muted);">Xəta baş verdi.</div>`;
     }
 }
 
