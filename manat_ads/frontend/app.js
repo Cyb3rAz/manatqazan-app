@@ -10,7 +10,7 @@
 // ── Konfiqurasiya ─────────────────────────────────────────────────────
 const API_BASE = "";
 // ── 2-Level Ad Pool Configuration ───────────────────────────────────────
-const LEVEL_LIMIT = 25;           // Ads per level
+let LEVEL_LIMIT = 25;             // Ads per level — overridden dynamically from API (25 free / 22 PRO / 20 ELITE)
 const MAX_LEVELS  = 2;            // Total levels
 const COOLDOWN_MS = 3 * 60 * 60 * 1000; // 3 hours in milliseconds
 
@@ -132,6 +132,20 @@ const LOCALES = {
         nav_store: "Mağaza",
         store_soon: "Mağaza tezliklə...",
         store_subtitle_soon: "VIP Statuslar tezliklə aktiv olacaq!",
+        vip_free_label: "Standart Sürət",
+        vip_free_price: "Pulsuz",
+        vip_free_perk: "Hər video +50 MC",
+        vip_pro_title: "PRO Nitro",
+        vip_elite_title: "ELITE Ultra",
+        vip_pro_price: "3.99 AZN / 1 Həftə",
+        vip_elite_price: "7.99 AZN / 1 Həftə",
+        vip_pro_perk1: "Gündəlik: 45 video (Daha az yorucu)",
+        vip_pro_perk2: "Hər video +65 MC",
+        vip_pro_perk3: "1.3x Daha sürətli qazanc",
+        vip_elite_perk1: "Gündəlik: 40 video (Maksimum qənaət)",
+        vip_elite_perk2: "Hər video +85 MC",
+        vip_elite_perk3: "1.7x Ultra sürət və 0% komissiyalı çıxarış",
+        vip_buy_btn: "Satın Al",
     },
     tr: {
         subtitle: "İzle • Kazan • Çevir",
@@ -202,6 +216,20 @@ const LOCALES = {
         nav_store: "Mağaza",
         store_soon: "Mağaza yakında...",
         store_subtitle_soon: "VIP Statüler yakında aktif olacak!",
+        vip_free_label: "Standart Hız",
+        vip_free_price: "Ücretsiz",
+        vip_free_perk: "Her video +50 MC",
+        vip_pro_title: "PRO Nitro",
+        vip_elite_title: "ELITE Ultra",
+        vip_pro_price: "3.99 AZN / 1 Hafta",
+        vip_elite_price: "7.99 AZN / 1 Hafta",
+        vip_pro_perk1: "Günlük: 45 video (Daha az yorucu)",
+        vip_pro_perk2: "Her video +65 MC",
+        vip_pro_perk3: "1.3x Daha hızlı kazanç",
+        vip_elite_perk1: "Günlük: 40 video (Maksimum verim)",
+        vip_elite_perk2: "Her video +85 MC",
+        vip_elite_perk3: "1.7x Ultra hız ve 0% komisyonlu çekim",
+        vip_buy_btn: "Satın Al",
     },
     en: {
         subtitle: "Watch • Earn • Convert",
@@ -272,6 +300,20 @@ const LOCALES = {
         nav_store: "Store",
         store_soon: "Store coming soon...",
         store_subtitle_soon: "VIP Statuses will be active soon!",
+        vip_free_label: "Standard Speed",
+        vip_free_price: "Free",
+        vip_free_perk: "+50 MC per video",
+        vip_pro_title: "PRO Nitro",
+        vip_elite_title: "ELITE Ultra",
+        vip_pro_price: "3.99 AZN / 1 Week",
+        vip_elite_price: "7.99 AZN / 1 Week",
+        vip_pro_perk1: "Daily: 45 videos (Less fatigue)",
+        vip_pro_perk2: "+65 MC per video",
+        vip_pro_perk3: "1.3x Faster earnings",
+        vip_elite_perk1: "Daily: 40 videos (Peak efficiency)",
+        vip_elite_perk2: "+85 MC per video",
+        vip_elite_perk3: "1.7x Ultra speed & 0% withdrawal fee",
+        vip_buy_btn: "Buy Now",
     },
     ru: {
         subtitle: "Смотри • Зарабатывай • Конвертируй",
@@ -342,6 +384,20 @@ const LOCALES = {
         nav_store: "Магазин",
         store_soon: "Магазин скоро...",
         store_subtitle_soon: "VIP Статусы будут активны скоро!",
+        vip_free_label: "Стандартная скорость",
+        vip_free_price: "Бесплатно",
+        vip_free_perk: "+50 MC за видео",
+        vip_pro_title: "PRO Nitro",
+        vip_elite_title: "ELITE Ultra",
+        vip_pro_price: "3.99 AZN / 1 Неделя",
+        vip_elite_price: "7.99 AZN / 1 Неделя",
+        vip_pro_perk1: "В день: 45 видео (Меньше усталости)",
+        vip_pro_perk2: "+65 MC за видео",
+        vip_pro_perk3: "1.3x Быстрее зарабатываешь",
+        vip_elite_perk1: "В день: 40 видео (Максимальный КПД)",
+        vip_elite_perk2: "+85 MC за видео",
+        vip_elite_perk3: "1.7x Ультраскорость и 0% комиссии при выводе",
+        vip_buy_btn: "Купить",
     }
 };
 
@@ -737,6 +793,11 @@ function syncAdStateFromUserData() {
     const s2Locked = userData.session_2_locked ?? true;
     const unlockAtStr = userData.unlock_at;
 
+    // Update LEVEL_LIMIT dynamically from API (Free=25, PRO=30, ELITE=35)
+    if (userData.session_limit && userData.session_limit > 0) {
+        LEVEL_LIMIT = userData.session_limit;
+    }
+
     if (s1Count < LEVEL_LIMIT) {
         currentLevel = 1;
         levelClicks = s1Count;
@@ -776,7 +837,7 @@ function createDefaultUserData() {
         daily_limit: 24,
         referral_count: 0,
         referral_earnings_mc: 0,
-        mc_per_video: 300,
+        mc_per_video: 50,
     };
 }
 
@@ -1009,7 +1070,8 @@ function renderDashboard() {
 
     // Statistika
     document.getElementById("total-earned").textContent = formatNumber(userData.total_earned_mc);
-    document.getElementById("videos-count").textContent = `${(userData.session_1_count || 0) + (userData.session_2_count || 0)}/${LEVEL_LIMIT * MAX_LEVELS}`;
+    const dynDailyLimit = userData.daily_limit || (LEVEL_LIMIT * MAX_LEVELS);
+    document.getElementById("videos-count").textContent = `${(userData.session_1_count || 0) + (userData.session_2_count || 0)}/${dynDailyLimit}`;
     document.getElementById("referral-count").textContent = userData.referral_count;
     document.getElementById("referral-earnings").textContent = formatNumber(userData.referral_earnings_mc);
 
@@ -1662,3 +1724,12 @@ async function submitAdminTask() {
         showToast("Şəbəkə xətası, yenidən cəhd edin", "error");
     }
 }
+
+// ── VIP Purchase Handler ─────────────────────────────────────────────
+function handleVipPurchase(tier) {
+    const tierName = tier === 'pro' ? t('vip_pro_title') : t('vip_elite_title');
+    const price    = tier === 'pro' ? t('vip_pro_price') : t('vip_elite_price');
+    // TODO: integrate payment gateway (Telegram Stars / Stripe / PayTR)
+    showToast(`💎 ${tierName} — ${price}`, 'success');
+}
+

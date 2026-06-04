@@ -1414,6 +1414,154 @@
             color: #ffffff;
             background: rgba(255, 255, 255, 0.1);
         }
+
+        /* ── VIP Subscription Cards ─────────────────────────────────── */
+        .vip-cards-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin: 12px 0 24px;
+        }
+
+        .vip-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: var(--radius-xl);
+            padding: 22px 20px 20px;
+            position: relative;
+            overflow: hidden;
+            transition: var(--transition);
+        }
+
+        /* PRO card — Mint-Green neon accent */
+        .vip-card.pro {
+            border: 1px solid rgba(0, 255, 170, 0.30);
+            box-shadow: 0 0 28px rgba(0, 255, 170, 0.07), 0 4px 24px rgba(0, 0, 0, 0.3);
+        }
+        .vip-card.pro::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #00ffaa, transparent);
+        }
+
+        /* ELITE card — Cyan gradient accent */
+        .vip-card.elite {
+            border: 1px solid rgba(6, 182, 212, 0.40);
+            box-shadow: 0 0 36px rgba(6, 182, 212, 0.12), 0 4px 24px rgba(0, 0, 0, 0.35);
+        }
+        .vip-card.elite::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #06b6d4, #00ffcc, transparent);
+        }
+
+        .vip-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 14px;
+        }
+
+        .vip-card-title {
+            font-size: 18px;
+            font-weight: 900;
+            letter-spacing: 0.5px;
+        }
+        .vip-card.pro  .vip-card-title { color: #00ffaa; }
+        .vip-card.elite .vip-card-title {
+            background: linear-gradient(135deg, #06b6d4, #00ffcc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .vip-price-badge {
+            font-size: 13px;
+            font-weight: 700;
+            border-radius: var(--radius-full);
+            padding: 5px 12px;
+            white-space: nowrap;
+        }
+        .vip-card.pro  .vip-price-badge {
+            background: rgba(0, 255, 170, 0.10);
+            border: 1px solid rgba(0, 255, 170, 0.30);
+            color: #00ffaa;
+        }
+        .vip-card.elite .vip-price-badge {
+            background: rgba(6, 182, 212, 0.10);
+            border: 1px solid rgba(6, 182, 212, 0.35);
+            color: #06b6d4;
+        }
+
+        .vip-perks {
+            list-style: none;
+            margin: 0 0 18px;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .vip-perk {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            line-height: 1.4;
+        }
+
+        .vip-perk-icon {
+            flex-shrink: 0;
+            width: 18px;
+            height: 18px;
+            margin-top: 1px;
+        }
+        .vip-card.pro  .vip-perk-icon { color: #00ffaa; }
+        .vip-card.elite .vip-perk-icon { color: #06b6d4; }
+
+        /* Buy button — mirrors the .watch-btn styling exactly */
+        .vip-buy-btn {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: var(--radius-lg);
+            font-family: 'Inter', sans-serif;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            letter-spacing: 0.3px;
+            transition: var(--transition);
+        }
+        .vip-buy-btn::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.18) 0%, transparent 50%);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .vip-buy-btn:hover::before { opacity: 1; }
+        .vip-buy-btn:active { transform: scale(0.98); }
+
+        .vip-card.pro .vip-buy-btn {
+            background: linear-gradient(135deg, #00cc88, #00ffaa);
+            color: #061a12;
+            box-shadow: 0 4px 16px rgba(0, 255, 170, 0.20), inset 0 1px 0 rgba(255,255,255,0.15);
+        }
+        .vip-card.elite .vip-buy-btn {
+            background: linear-gradient(135deg, #06b6d4, #00ffcc);
+            color: #0a1a22;
+            box-shadow: 0 4px 16px rgba(6, 182, 212, 0.22), inset 0 1px 0 rgba(255,255,255,0.15);
+        }
     </style>
 </head>
 <body>
@@ -1501,7 +1649,7 @@
                     <div class="progress-fill" id="session-1-progress-fill" style="width: 0%"></div>
                 </div>
                 <button class="watch-btn" id="session-1-btn">
-                    <svg class="btn-inline-icon" style="fill: #0a1a22; stroke: #0a1a22;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><polygon points="6 4 20 12 6 20 6 4"></polygon></svg> Video İzlə & 300 MC Qazan
+                    <svg class="btn-inline-icon" style="fill: #0a1a22; stroke: #0a1a22;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><polygon points="6 4 20 12 6 20 6 4"></polygon></svg> Video İzlə & 50 MC Qazan
                 </button>
             </div>
 
@@ -1515,7 +1663,7 @@
                     <div class="progress-fill" id="session-2-progress-fill" style="width: 0%"></div>
                 </div>
                 <button class="watch-btn" id="session-2-btn">
-                    <svg class="btn-inline-icon" style="fill: #0a1a22; stroke: #0a1a22;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><polygon points="6 4 20 12 6 20 6 4"></polygon></svg> Video İzlə & 300 MC Qazan
+                    <svg class="btn-inline-icon" style="fill: #0a1a22; stroke: #0a1a22;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><polygon points="6 4 20 12 6 20 6 4"></polygon></svg> Video İzlə & 50 MC Qazan
                 </button>
                 <div class="watch-reward-hint" id="session-2-cooldown-hint" style="margin-top: 8px; font-weight: 600; color: #06b6d4; display: none;"></div>
             </div>
@@ -1577,10 +1725,71 @@
                         <span class="tasks-header-subtitle" data-i18n="store_subtitle_soon">VIP Statuslar tezliklə aktiv olacaq!</span>
                     </div>
                 </div>
-                <div class="progress-section animate-in delay-1" style="text-align: center; padding: 40px 20px; color: var(--text-muted);">
-                    <div style="font-size: 48px; margin-bottom: 16px;">🛍️</div>
-                    <div style="font-size: 16px; font-weight: 700; color: var(--text-primary); margin-bottom: 8px;" data-i18n="store_soon">Mağaza tezliklə...</div>
-                    <div style="font-size: 13px; color: var(--text-muted);" data-i18n="store_subtitle_soon">VIP Statuslar tezliklə aktiv olacaq!</div>
+
+                <div class="vip-cards-grid animate-in delay-1">
+
+                    <!-- PRO Card -->
+                    <div class="vip-card pro">
+                        <div class="vip-card-header">
+                            <span class="vip-card-title" data-i18n="vip_pro_title">PRO Nitro</span>
+                            <span class="vip-price-badge" data-i18n="vip_pro_price">3.99 AZN / 1 Həftə</span>
+                        </div>
+                        <ul class="vip-perks">
+                            <li class="vip-perk">
+                                <svg class="vip-perk-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                </svg>
+                                <span data-i18n="vip_pro_perk1">Gündəlik: 45 video (Daha az yorucu)</span>
+                            </li>
+                            <li class="vip-perk">
+                                <svg class="vip-perk-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                </svg>
+                                <span data-i18n="vip_pro_perk2">Hər video +65 MC</span>
+                            </li>
+                            <li class="vip-perk">
+                                <svg class="vip-perk-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                </svg>
+                                <span data-i18n="vip_pro_perk3">1.3x Daha sürətli qazanc</span>
+                            </li>
+                        </ul>
+                        <button class="vip-buy-btn" id="vip-buy-pro" onclick="handleVipPurchase('pro')">
+                            <span data-i18n="vip_buy_btn">Satın Al</span>
+                        </button>
+                    </div>
+
+                    <!-- ELITE Card -->
+                    <div class="vip-card elite">
+                        <div class="vip-card-header">
+                            <span class="vip-card-title" data-i18n="vip_elite_title">ELITE Ultra</span>
+                            <span class="vip-price-badge" data-i18n="vip_elite_price">7.99 AZN / 1 Həftə</span>
+                        </div>
+                        <ul class="vip-perks">
+                            <li class="vip-perk">
+                                <svg class="vip-perk-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                </svg>
+                                <span data-i18n="vip_elite_perk1">Gündəlik: 40 video (Maksimum qənaət)</span>
+                            </li>
+                            <li class="vip-perk">
+                                <svg class="vip-perk-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                </svg>
+                                <span data-i18n="vip_elite_perk2">Hər video +85 MC</span>
+                            </li>
+                            <li class="vip-perk">
+                                <svg class="vip-perk-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                </svg>
+                                <span data-i18n="vip_elite_perk3">1.7x Ultra sürət və 0% komissiyalı çıxarış</span>
+                            </li>
+                        </ul>
+                        <button class="vip-buy-btn" id="vip-buy-elite" onclick="handleVipPurchase('elite')">
+                            <span data-i18n="vip_buy_btn">Satın Al</span>
+                        </button>
+                    </div>
+
                 </div>
             </div> <!-- End Tab STORE -->
 
@@ -1703,7 +1912,7 @@
         </div>
     </div>
 
-      <script src="/static/app.js?v=4.9.1"></script>
+      <script src="/static/app.js?v=5.0.0"></script>
 </body>
 </html>
 <!-- trigger vercel build v8 - AZ translation -->

@@ -58,7 +58,7 @@ logger = logging.getLogger("manatads")
 BOT_TOKEN: str = os.getenv("BOT_TOKEN", "")
 WEBHOOK_URL: str = os.getenv("WEBHOOK_URL", "").rstrip("/")
 ADSGRAM_SECRET: str = os.getenv("ADSGRAM_SECRET", "")
-MC_PER_VIDEO: int = int(os.getenv("MC_PER_VIDEO", "300"))
+MC_PER_VIDEO: int = int(os.getenv("MC_PER_VIDEO", "50"))
 DAILY_VIDEO_LIMIT: int = int(os.getenv("DAILY_VIDEO_LIMIT", "50"))
 MC_TO_AZN_RATE: int = int(os.getenv("MC_TO_AZN_RATE", "125000"))
 MIN_WITHDRAWAL_TRY: float = float(os.getenv("MIN_WITHDRAWAL_TRY", "135.00"))
@@ -88,6 +88,23 @@ async def _get_user_lock(user_key: str) -> asyncio.Lock:
         if user_key not in _user_credit_locks:
             _user_credit_locks[user_key] = asyncio.Lock()
         return _user_credit_locks[user_key]
+
+
+def _get_vip_params(vip_status: str, now: datetime) -> tuple[int, int, int]:
+    """
+    Return (session_limit, daily_limit, mc_reward) for a given VIP tier.
+
+    Tiers:
+      free  -> session=25, daily=50, reward=50 MC
+      pro   -> session=22, daily=45, reward=65 MC  (less fatigue, higher pay-per-video)
+      elite -> session=20, daily=40, reward=85 MC  (peak efficiency mode)
+    """
+    tier = (vip_status or "free").lower().strip()
+    if tier == "pro":
+        return (22, 45, 65)
+    if tier == "elite":
+        return (20, 40, 85)
+    return (25, 50, 50)  # free / fallback
 
 if not commands_router.parent_router:
     dp.include_router(commands_router)
@@ -445,6 +462,22 @@ async def _credit_user(user_id_val: int | str, event_id: str, source: str = "unk
             now = datetime.now(timezone.utc)
             today = now.date()
 
+            # -- Resolve VIP tier for this user --
+            raw_vip = getattr(user, "vip_status", "free") or "free"
+            # Expire VIP if the subscription window has passed
+            vip_expires = getattr(user, "vip_expires_at", None)
+            if vip_expires is not None:
+                if vip_expires.tzinfo is None:
+                    vip_expires = vip_expires.replace(tzinfo=timezone.utc)
+                if now >= vip_expires:
+                    raw_vip = "free"
+                    user.vip_status = "free"
+                    user.vip_expires_at = None
+            session_limit, daily_limit, mc_reward = _get_vip_params(raw_vip, now)
+            final_reward = float(mc_reward)
+            print(f"[CREDIT] VIP tier={raw_vip} | session_limit={session_limit} | daily_limit={daily_limit} | mc_reward={mc_reward}")
+            logger.info("[CREDIT] VIP tier=%s session_limit=%s daily_limit=%s mc_reward=%s", raw_vip, session_limit, daily_limit, mc_reward)
+
             # -- Security: 5-second Rate Limit Check --
             if user.last_watch_date:
                 last_time = user.last_watch_date if user.last_watch_date.tzinfo else user.last_watch_date.replace(tzinfo=timezone.utc)
@@ -478,14 +511,14 @@ async def _credit_user(user_id_val: int | str, event_id: str, source: str = "unk
                         user.session_1_completion_time = None
 
             # Determine target session & enforce limits/cooldown
-            if user.session_1_count < 25:
-                # Active in Session 1 (Level 1: 0–25 ads)
+            if user.session_1_count < session_limit:
+                # Active in Session 1 (Level 1: 0 – session_limit ads)
                 user.session_1_count += 1
-                if user.session_1_count == 25:
+                if user.session_1_count == session_limit:
                     user.session_1_completion_time = now
                     user.cooldown_notified = False  # Flag: push notification pending
-                    print(f"[CREDIT] User {user_telegram_id} COMPLETED Level 1 (25 ads) at {now.isoformat()}")
-                    logger.info("[CREDIT] User %s COMPLETED Level 1 (25 ads) at %s", user_telegram_id, now.isoformat())
+                    print(f"[CREDIT] User {user_telegram_id} COMPLETED Level 1 ({session_limit} ads) at {now.isoformat()}")
+                    logger.info("[CREDIT] User %s COMPLETED Level 1 (%s ads) at %s", user_telegram_id, session_limit, now.isoformat())
             else:
                 # Session 1 is completed. Check Session 2 status.
                 if user.session_1_completion_time is None:
@@ -507,9 +540,9 @@ async def _credit_user(user_id_val: int | str, event_id: str, source: str = "unk
                     )
 
                 # Level 2 is unlocked. Check if already completed Level 2.
-                if user.session_2_count >= 25:
-                    print(f"[CREDIT] User {user_telegram_id} completed both levels today (50 clicks). Daily limit hit.")
-                    logger.warning("[CREDIT] User %s completed both levels today (50 clicks). Limit hit.", user_telegram_id)
+                if user.session_2_count >= session_limit:
+                    print(f"[CREDIT] User {user_telegram_id} completed both levels today ({daily_limit} clicks). Daily limit hit.")
+                    logger.warning("[CREDIT] User %s completed both levels today (%s clicks). Limit hit.", user_telegram_id, daily_limit)
                     return JSONResponse({"ok": False, "message": "Gündəlik limitiniz bitdi. Sabah gəl."}, status_code=429)
 
                 # Increment Level 2 count
@@ -519,7 +552,7 @@ async def _credit_user(user_id_val: int | str, event_id: str, source: str = "unk
             # Using column + scalar instead of Python-side read-add-write
             # makes each increment atomic at the DB level, eliminating any
             # residual race if the application-layer lock is ever bypassed.
-            final_reward = round(float(MC_PER_VIDEO), 2)
+            final_reward = round(float(mc_reward), 2)
             old_balance = user.balance_mc
             user.balance_mc      = round(old_balance + final_reward, 2)
             user.total_earned_mc = round(user.total_earned_mc + final_reward, 2)
@@ -592,7 +625,7 @@ async def _credit_user(user_id_val: int | str, event_id: str, source: str = "unk
             "reward": final_reward,
             "new_balance": final_new_balance,
             "videos_today": final_videos_today,
-            "daily_limit": DAILY_VIDEO_LIMIT,
+            "daily_limit": daily_limit,
         })
 
 
@@ -666,8 +699,6 @@ async def get_user_info(telegram_id: str) -> JSONResponse:
         if session_1_completion_time is not None and session_1_completion_time.tzinfo is None:
             session_1_completion_time = session_1_completion_time.replace(tzinfo=timezone.utc)
             
-        session_1_count = user.session_1_count
-        session_2_count = user.session_2_count
         videos_today = session_1_count + session_2_count
         balance_mc = user.balance_mc
         total_earned_mc = user.total_earned_mc
@@ -676,12 +707,21 @@ async def get_user_info(telegram_id: str) -> JSONResponse:
         first_name = user.first_name
         telegram_id_val = user.telegram_id
         language = getattr(user, 'language', 'az')
+        vip_status = getattr(user, 'vip_status', 'free') or 'free'
+        vip_expires_at = getattr(user, 'vip_expires_at', None)
 
-    # Compute Session 2 lock state
+    # Auto-expire VIP if window passed
+    now_check = datetime.now(timezone.utc)
+    if vip_expires_at is not None:
+        vx = vip_expires_at if vip_expires_at.tzinfo else vip_expires_at.replace(tzinfo=timezone.utc)
+        if now_check >= vx:
+            vip_status = 'free'
+
+    session_limit, dyn_daily_limit, dyn_mc = _get_vip_params(vip_status, now)
     session_2_locked = True
     unlock_at = None
 
-    if session_1_count >= 25:
+    if session_1_count >= session_limit:
         if session_1_completion_time is None:
             # Legacy or fallback: if completed but no timestamp, unlock immediately
             session_2_locked = False
@@ -711,7 +751,8 @@ async def get_user_info(telegram_id: str) -> JSONResponse:
         "balance_azn": round(balance_mc / MC_TO_AZN_RATE, 4),
         "total_earned_mc": total_earned_mc,
         "videos_today": videos_today,
-        "daily_limit": 70,
+        "daily_limit": dyn_daily_limit,
+        "session_limit": session_limit,
         "session_1_count": session_1_count,
         "session_2_count": session_2_count,
         "session_2_locked": session_2_locked,
@@ -719,9 +760,11 @@ async def get_user_info(telegram_id: str) -> JSONResponse:
         "unlock_at": unlock_at,
         "referral_count": referral_count,
         "referral_earnings_mc": referral_earnings_mc,
-        "mc_per_video": MC_PER_VIDEO,
+        "mc_per_video": dyn_mc,
         "mc_to_azn_rate": MC_TO_AZN_RATE,
         "language": language,
+        "vip_status": vip_status,
+        "vip_expires_at": vip_expires_at.isoformat() if vip_expires_at else None,
     })
 
 

@@ -12,7 +12,7 @@ services:
   db:
     image: postgres:16-alpine
     container_name: manatads-db
-    restart: unless-stopped
+    restart: always
     environment:
       POSTGRES_DB: manat_ads
       POSTGRES_USER: manatads
@@ -33,7 +33,7 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: manatads-app
-    restart: unless-stopped
+    restart: always
     depends_on:
       db:
         condition: service_healthy
@@ -46,7 +46,7 @@ services:
       - ADSGRAM_BLOCK_ID=${ADSGRAM_BLOCK_ID}
       - DATABASE_URL=postgresql+asyncpg://manatads:${DB_PASSWORD:-changeme_in_production}@db:5432/manat_ads
       - ENVIRONMENT=production
-      - MC_PER_VIDEO=300
+      - MC_PER_VIDEO=50
       - DAILY_VIDEO_LIMIT=24
       - MC_TO_AZN_RATE=125000
       - REFERRAL_BONUS_PERCENT=10
