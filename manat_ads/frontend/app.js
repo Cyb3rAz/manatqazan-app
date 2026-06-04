@@ -690,11 +690,47 @@ async function fetchUserData() {
         }
 
         userData = newData;
+        syncAdStateFromUserData();
 
     } catch (err) {
         console.error("[fetchUserData] Şəbəkə xətası:", err);
         if (!userData) userData = createDefaultUserData();
     }
+}
+
+function syncAdStateFromUserData() {
+    if (!userData) return;
+    const s1Count = userData.session_1_count || 0;
+    const s2Count = userData.session_2_count || 0;
+    const s2Locked = userData.session_2_locked ?? true;
+    const unlockAtStr = userData.unlock_at;
+
+    if (s1Count < LEVEL_LIMIT) {
+        currentLevel = 1;
+        levelClicks = s1Count;
+        cooldownEndTime = 0;
+    } else {
+        if (s2Locked) {
+            currentLevel = 1;
+            levelClicks = LEVEL_LIMIT;
+            if (unlockAtStr) {
+                let tStr = unlockAtStr;
+                if (typeof tStr === 'string' && !tStr.endsWith('Z') && !tStr.includes('+')) {
+                    tStr += 'Z';
+                }
+                cooldownEndTime = new Date(tStr).getTime();
+            } else {
+                if (cooldownEndTime <= 0) {
+                    cooldownEndTime = Date.now() + COOLDOWN_MS;
+                }
+            }
+        } else {
+            currentLevel = 2;
+            levelClicks = s2Count;
+            cooldownEndTime = 0;
+        }
+    }
+    saveAdState();
 }
 
 function createDefaultUserData() {
