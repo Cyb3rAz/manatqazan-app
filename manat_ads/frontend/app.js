@@ -683,15 +683,31 @@ async function fetchUserData() {
         console.log(`[fetchUserData] Backend data: balance_mc=${newData.balance_mc}, videos_today=${newData.videos_today}`);
 
         if (newData && typeof newData.session_1_count === 'number' && typeof newData.session_2_count === 'number') {
+            const s1Count = newData.session_1_count;
+            const s2Count = newData.session_2_count;
+            const serverClicks = currentLevel === 1 ? s1Count : s2Count;
+            const isDailyReset = (s1Count === 0 && s2Count === 0 && !isRewardSyncing);
+
+            if ((isRewardSyncing || serverClicks < levelClicks) && !isDailyReset) {
+                console.log(`[fetchUserData-GUARD] Stale server data ignored. isRewardSyncing=${isRewardSyncing}, serverClicks=${serverClicks}, levelClicks=${levelClicks}`);
+                if (userData) {
+                    userData.referral_count = newData.referral_count;
+                    userData.referral_earnings_mc = newData.referral_earnings_mc;
+                }
+                return newData;
+            }
+
             userData = newData;
             syncAdStateFromUserData();
         } else {
             userData = newData;
         }
+        return newData;
 
     } catch (err) {
         console.error("[fetchUserData] Şəbəkə xətası:", err);
         if (!userData) userData = createDefaultUserData();
+        return null;
     }
 }
 
@@ -1122,6 +1138,7 @@ let currentWatchingSession = 1;
 
 // Mutex: prevents re-entry during the 7-second post-ad cooldown
 let isBtnCooldownActive = false;
+let isRewardSyncing = false;
 let cooldownRemaining = 0;
 let _btnCooldownTimerId = null;
 
@@ -1258,6 +1275,9 @@ function startButtonCooldown(sessionNum, seconds = 7) {
 async function executeAdSuccessReward(sessionNum) {
     if (!userData) return;
 
+    // Set reward syncing flag to true
+    isRewardSyncing = true;
+
     const reward = userData.mc_per_video || 300;
 
     // ── 1. Optimistic UI update ────────────────────────────────────────
@@ -1306,6 +1326,7 @@ async function executeAdSuccessReward(sessionNum) {
  */
 function scheduleServerSync(maxRetries, delayMs) {
     let attempt = 0;
+    const targetBalance = userData ? userData.balance_mc : 0;
 
     function trySync() {
         attempt++;
@@ -1313,19 +1334,27 @@ function scheduleServerSync(maxRetries, delayMs) {
 
         setTimeout(async () => {
             try {
-                const prevBalance = userData ? userData.balance_mc : 0;
-                await fetchUserData();
+                const newData = await fetchUserData();
                 renderDashboard();
 
-                const newBalance = userData ? userData.balance_mc : 0;
-                console.log(`[SYNC] Cəhd ${attempt} tamamlandı: balans=${newBalance} (əvvəlki=${prevBalance})`);
+                const currentServerBalance = newData ? newData.balance_mc : 0;
+                console.log(`[SYNC] Cəhd ${attempt} tamamlandı: server_balans=${currentServerBalance} | hedef=${targetBalance}`);
 
-                if (newBalance < prevBalance && attempt < maxRetries) {
+                if (currentServerBalance < targetBalance && attempt < maxRetries) {
                     trySync();
+                } else {
+                    isRewardSyncing = false;
+                    // Trigger a final fetch to apply the server data and remove the sync guard
+                    await fetchUserData();
+                    renderDashboard();
                 }
             } catch (err) {
                 console.error(`[SYNC] Cəhd ${attempt} xətası:`, err);
-                if (attempt < maxRetries) trySync();
+                if (attempt < maxRetries) {
+                    trySync();
+                } else {
+                    isRewardSyncing = false;
+                }
             }
         }, delayMs * attempt);
     }
