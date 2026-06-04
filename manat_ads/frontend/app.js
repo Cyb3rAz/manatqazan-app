@@ -502,6 +502,16 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
+    // Watch button event listeners to handle clicking programmatically
+    const s1Btn = document.getElementById("session-1-btn");
+    const s2Btn = document.getElementById("session-2-btn");
+    if (s1Btn) {
+        s1Btn.addEventListener("click", () => watchAd(1));
+    }
+    if (s2Btn) {
+        s2Btn.addEventListener("click", () => watchAd(2));
+    }
+
     initApp();
 });
 
