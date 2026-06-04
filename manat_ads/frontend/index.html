@@ -1140,68 +1140,68 @@
 
         /* ── Leaderboard Styles ────────────────────────────────────── */
         .leaderboard-row {
-            display: flex;
+            display: grid;
+            grid-template-columns: 50px 1fr 110px;
             align-items: center;
             justify-content: space-between;
-            background: rgba(255, 255, 255, 0.03);
-            padding: 8px 12px;
-            margin-bottom: 5px;
-            border-radius: 6px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            background: rgba(255, 255, 255, 0.02);
+            margin-bottom: 6px;
+            padding: 10px 14px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            border-left: 3px solid transparent;
             transition: all 0.2s ease;
+            box-sizing: border-box;
         }
         
-        .leaderboard-rank {
-            font-size: 15px;
+        .rank {
+            font-size: 14px;
             font-weight: 700;
             color: #06b6d4;
-            width: 40px;
-            text-align: center;
+            text-align: left;
+            display: flex;
+            align-items: center;
         }
         
-        .leaderboard-name {
-            flex: 1;
+        .username {
             font-size: 13px;
             font-weight: 600;
             color: var(--text-primary);
             text-align: left;
-            margin-left: 10px;
             display: flex;
             align-items: center;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
         
-        .leaderboard-balance {
+        .balance {
             font-size: 13px;
             font-weight: 700;
             color: #00ffcc;
+            text-align: right;
         }
         
         .rank-gold {
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            border-left: 3px solid #FFD700;
-            background: rgba(255, 215, 0, 0.03);
+            border-left-color: #FFD700;
         }
         
-        .rank-gold .leaderboard-rank { color: #FFD700; }
-        .rank-gold .leaderboard-balance { color: #FFD700; }
+        .rank-gold .rank { color: #FFD700; }
+        .rank-gold .balance { color: #FFD700; }
         
         .rank-silver {
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            border-left: 3px solid #E2E8F0;
-            background: rgba(226, 232, 240, 0.03);
+            border-left-color: #E2E8F0;
         }
         
-        .rank-silver .leaderboard-rank { color: #E2E8F0; }
-        .rank-silver .leaderboard-balance { color: #E2E8F0; }
+        .rank-silver .rank { color: #E2E8F0; }
+        .rank-silver .balance { color: #E2E8F0; }
         
         .rank-bronze {
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            border-left: 3px solid #FF7F50;
-            background: rgba(255, 127, 80, 0.03);
+            border-left-color: #FF7F50;
         }
         
-        .rank-bronze .leaderboard-rank { color: #FF7F50; }
-        .rank-bronze .leaderboard-balance { color: #FF7F50; }
+        .rank-bronze .rank { color: #FF7F50; }
+        .rank-bronze .balance { color: #FF7F50; }
         
         .elite-glow {
             /* removed heavy filter drop-shadow */
@@ -1884,9 +1884,10 @@
                     </div>
                 </div>
                 
-                <div style="padding: 0 16px; display: flex; justify-content: space-between; margin-bottom: 10px; color: var(--text-muted); font-size: 12px; font-weight: 600;">
-                    <span style="flex:1; margin-left:55px;" data-i18n="user_label">İstifadəçi</span>
-                    <span data-i18n="balance_label">Qazanc</span>
+                <div class="leaderboard-row" style="background: transparent; border: 1px solid transparent; border-left: 3px solid transparent; margin-bottom: 8px; padding-top: 0; padding-bottom: 0; pointer-events: none; color: var(--text-muted); font-size: 12px; font-weight: 600; box-shadow: none;">
+                    <span></span>
+                    <span data-i18n="user_label" style="color: var(--text-muted); text-align: left;">İstifadəçi</span>
+                    <span data-i18n="balance_label" style="color: var(--text-muted); text-align: right;">Qazanc</span>
                 </div>
 
                 <div id="leaderboard-list" class="animate-in delay-1" style="padding: 0 16px; padding-bottom: 80px;">

@@ -1769,7 +1769,7 @@ async function fetchLeaderboard() {
             
             // Gold, Silver, Bronze classes
             let rankClass = "";
-            let rankDisplay = `#${index + 1}`;
+            let rankDisplay = `${index + 1}`;
             if (index === 0) {
                 rankClass = "rank-gold";
                 rankDisplay = "🥇";
@@ -1794,9 +1794,9 @@ async function fetchLeaderboard() {
             }
 
             row.innerHTML = `
-                <div class="leaderboard-rank">${rankDisplay}</div>
-                <div class="leaderboard-name">${user.first_name}${vipSvg}</div>
-                <div class="leaderboard-balance">${Number(user.balance_mc).toLocaleString()} MC</div>
+                <span class="rank">${rankDisplay}</span>
+                <span class="username">${user.first_name}${vipSvg}</span>
+                <span class="balance">${Number(user.balance_mc).toLocaleString()} MC</span>
             `;
             container.appendChild(row);
         });
