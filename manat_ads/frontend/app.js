@@ -150,6 +150,7 @@ const LOCALES = {
         Modal_Btn_Cancel: "İmtina", 
         Modal_Btn_Confirm: "Təsdiqlə",
         Modal_Order_Msg: "Salam! Mən {package} paketi almaq istəyirəm. Mənim İD-m: {id}",
+        Withdraw_Range_Notice: "Birdəfəlik Çıxarış Limiti: 5.00 - 100.00 AZN",
     },
     tr: {
         subtitle: "İzle • Kazan • Çevir",
@@ -238,6 +239,7 @@ const LOCALES = {
         Modal_Btn_Cancel: "İptal", 
         Modal_Btn_Confirm: "Onayla",
         Modal_Order_Msg: "Merhaba! Ben {package} paketi almak istiyorum. Benim ID'm: {id}",
+        Withdraw_Range_Notice: "Tek Seferlik Çekim Limiti: 135.00 - 2700.00 TL",
     },
     en: {
         subtitle: "Watch • Earn • Convert",
@@ -326,6 +328,7 @@ const LOCALES = {
         Modal_Btn_Cancel: "Cancel", 
         Modal_Btn_Confirm: "Confirm",
         Modal_Order_Msg: "Hello! I want to buy the {package} package. My ID: {id}",
+        Withdraw_Range_Notice: "Single Withdrawal Limit: 3.00 - 60.00 USDT",
     },
     ru: {
         subtitle: "Смотри • Зарабатывай • Конвертируй",
@@ -414,6 +417,7 @@ const LOCALES = {
         Modal_Btn_Cancel: "Отмена", 
         Modal_Btn_Confirm: "Подтвердить",
         Modal_Order_Msg: "Здравствуйте! Я хочу купить пакет {package}. Мой ID: {id}",
+        Withdraw_Range_Notice: "Лимит разового вывода: 3.00 - 60.00 USDT",
     }
 };
 
@@ -456,6 +460,9 @@ function setLanguage(lang) {
     
     const elitePriceEl = document.getElementById('elite-price-tag');
     if (elitePriceEl) elitePriceEl.innerText = LOCALES[currentLang].Elite_Price;
+
+    const withdrawNoticeEl = document.getElementById('store-withdraw-notice');
+    if (withdrawNoticeEl) withdrawNoticeEl.innerText = LOCALES[currentLang].Withdraw_Range_Notice;
 
     // Manually translate tasks-empty-msg if present in DOM
     const emptyMsgEl = document.getElementById('tasks-empty-msg');
