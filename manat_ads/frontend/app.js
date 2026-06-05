@@ -2012,7 +2012,6 @@ document.addEventListener("DOMContentLoaded", () => {
 // ── Global User Stats Counter ──────────────────────────────────────────
 let globalUserCount = 0;
 let statsFetchIntervalId = null;
-let statsFakeIncrementIntervalId = null;
 
 async function fetchGlobalStats() {
     try {
@@ -2027,7 +2026,8 @@ async function fetchGlobalStats() {
         if (resp.ok) {
             const data = await resp.json();
             if (data && typeof data.total_users === 'number') {
-                globalUserCount = data.total_users;
+                // To completely guarantee the counter never jumps backwards
+                globalUserCount = Math.max(globalUserCount, data.total_users);
                 updateGlobalUserCountUI(globalUserCount);
             }
         }
@@ -2050,18 +2050,6 @@ function startGlobalStatsPolling() {
     // Poll strictly once every 60 seconds (60000 ms)
     if (!statsFetchIntervalId) {
         statsFetchIntervalId = setInterval(fetchGlobalStats, 60000);
-    }
-
-    // Fake increment randomly every 8 seconds to make UI look active
-    if (!statsFakeIncrementIntervalId) {
-        statsFakeIncrementIntervalId = setInterval(() => {
-            if (globalUserCount > 0) {
-                if (Math.random() < 0.6) {
-                    globalUserCount += 1;
-                    updateGlobalUserCountUI(globalUserCount);
-                }
-            }
-        }, 8000);
     }
 }
 
