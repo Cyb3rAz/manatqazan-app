@@ -1434,8 +1434,27 @@ async function watchAd(sessionNum = 1) {
         spawnCoinBurst();
         showToast(t('toastEarned').replace('{amount}', userData.mc_per_video || 200), "success");
     } catch (e) {
-        console.log('[Onclicka] Ad dismissed or error:', e);
-        showToast(t('toastWatchFull'), "error");
+        console.error('[Onclicka] Ad error or dismissed:', e);
+        
+        let errStr = "";
+        if (typeof e === 'string') {
+            errStr = e.toLowerCase();
+        } else if (e && e.message) {
+            errStr = e.message.toLowerCase();
+        } else {
+            try {
+                errStr = JSON.stringify(e).toLowerCase();
+            } catch (err) {
+                errStr = "";
+            }
+        }
+
+        // Differentiate between user dismissal and technical SDK failure
+        if (errStr.includes('dismiss') || errStr.includes('close') || errStr.includes('skip') || errStr.includes('cancel')) {
+            showToast(t('toastWatchFull'), "error");
+        } else {
+            showToast(t('toastAdFailed'), "error");
+        }
     } finally {
         renderDashboard();
         startButtonCooldown(sessionNum);
