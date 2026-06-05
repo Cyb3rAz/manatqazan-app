@@ -1453,7 +1453,7 @@ async function watchAd(sessionNum = 1) {
         if (errStr.includes('dismiss') || errStr.includes('close') || errStr.includes('skip') || errStr.includes('cancel')) {
             showToast(t('toastWatchFull'), "error");
         } else {
-            showToast(t('toastAdFailed'), "error");
+            showToast(`${t('toastAdFailed')} (${errStr.substring(0, 80)})`, "error");
         }
     } finally {
         renderDashboard();
