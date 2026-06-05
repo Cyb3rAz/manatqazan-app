@@ -644,6 +644,15 @@ async def _credit_user(user_id_val: int | str, event_id: str, source: str = "unk
         })
 
 
+# ── Global Config API ───────────────────────────────────────────────────
+@app.get("/api/config", summary="Get global frontend configuration")
+async def get_config() -> JSONResponse:
+    return JSONResponse({
+        "adsgram_block_id": os.getenv("ADSGRAM_BLOCK_ID", "31923"),
+        "adsgram_platform_id": os.getenv("ADSGRAM_PLATFORM_ID", "30613"),
+        "bot_id": os.getenv("BOT_ID", "8960200640"),
+    })
+
 # ── Global User Stats API ──────────────────────────────────────────────
 @app.get("/api/global-stats", summary="Get global user count stats")
 async def get_global_stats():

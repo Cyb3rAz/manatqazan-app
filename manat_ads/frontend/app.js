@@ -16,7 +16,23 @@ const MAX_LEVELS  = 2;            // Total levels
 const COOLDOWN_MS = 3 * 60 * 60 * 1000; // 3 hours in milliseconds
 
 // ── Adsgram TMA SDK Bootstrap ──────────────────────────────────────────
-const AdController = window.Adsgram ? window.Adsgram.init({ blockId: "31923" }) : null;
+let AdController = null;
+let globalConfig = null;
+
+async function fetchConfigAndInitAdsgram() {
+    try {
+        const resp = await fetch(`${API_BASE}/api/config`);
+        if (resp.ok) {
+            globalConfig = await resp.json();
+            if (window.Adsgram && globalConfig.adsgram_block_id) {
+                AdController = window.Adsgram.init({ blockId: globalConfig.adsgram_block_id.toString() });
+            }
+        }
+    } catch(e) {
+        console.error("Failed to fetch global config:", e);
+    }
+}
+fetchConfigAndInitAdsgram();
 
 // ── 2-Level Ad Pool State ─────────────────────────────────────────────
 // These are loaded from / persisted to localStorage so state survives refreshes.
