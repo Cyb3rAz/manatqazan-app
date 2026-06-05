@@ -15,10 +15,8 @@ let LEVEL_2_LIMIT = 25;           // Ads for level 2 — daily_limit - LEVEL_LIM
 const MAX_LEVELS  = 2;            // Total levels
 const COOLDOWN_MS = 3 * 60 * 60 * 1000; // 3 hours in milliseconds
 
-// ── Onclicka TMA SDK Bootstrap ────────────────────────────────────────
-window.initCdTma?.({ id: 6120549 })
-    .then(show => window.show = show)
-    .catch(e => console.log('[Onclicka] Init error:', e));
+// ── Adsgram TMA SDK Bootstrap ──────────────────────────────────────────
+const AdController = window.Adsgram ? window.Adsgram.init({ blockId: "31923" }) : null;
 
 // ── 2-Level Ad Pool State ─────────────────────────────────────────────
 // These are loaded from / persisted to localStorage so state survives refreshes.
@@ -1382,8 +1380,8 @@ async function watchAd(sessionNum = 1) {
     // Guard: mutex cooldown
     if (isBtnCooldownActive) return;
 
-    // Guard: Onclicka SDK not yet ready
-    if (!window.show) {
+    // Guard: Adsgram SDK not yet ready
+    if (!AdController) {
         showToast(t('toastAdNotAvail'), "error");
         return;
     }
@@ -1427,37 +1425,21 @@ async function watchAd(sessionNum = 1) {
     if (otherBtn) otherBtn.disabled = true;
 
     try {
-        await window.show();
-        // Ad completed successfully
+        const result = await AdController.show();
+        console.log('[Adsgram] Ad completed successfully:', result);
+        
         watchBtn.textContent = t('rewardCalc');
         await executeAdSuccessReward(sessionNum);
         spawnCoinBurst();
         showToast(t('toastEarned').replace('{amount}', userData.mc_per_video || 200), "success");
-    } catch (e) {
-        console.error('[Onclicka] Ad error or dismissed:', e);
+    } catch (error) {
+        console.error('[Adsgram] Ad playback tracking state failed/skipped:', error);
         
-        let errStr = "";
-        if (typeof e === 'string') {
-            errStr = e.toLowerCase();
-        } else if (e && e.message) {
-            errStr = e.message.toLowerCase();
-        } else {
-            try {
-                errStr = JSON.stringify(e).toLowerCase();
-            } catch (err) {
-                errStr = "";
-            }
-        }
-
-        // Differentiate between user dismissal and technical SDK failure
-        if (errStr.includes('dismiss') || errStr.includes('close') || errStr.includes('skip') || errStr.includes('cancel')) {
+        // Handle gracefully based on whether user skipped or script failed to load
+        if (error && (error.userExit || error.done === false)) {
             showToast(t('toastWatchFull'), "error");
         } else {
-            if (!errStr || errStr === "{}" || errStr.trim() === "") {
-                showToast("⚠️ Reklam tapılmadı və ya Bloklandı. Bir az sonra yenidən cəhd edin.", "error");
-            } else {
-                showToast(`${t('toastAdFailed')} (${errStr.substring(0, 80)})`, "error");
-            }
+            showToast(t('toastAdFailed'), "error");
         }
     } finally {
         renderDashboard();
