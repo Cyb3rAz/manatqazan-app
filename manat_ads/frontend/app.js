@@ -653,10 +653,12 @@ document.addEventListener("DOMContentLoaded", () => {
     const s1Btn = document.getElementById("session-1-btn");
     const s2Btn = document.getElementById("session-2-btn");
     if (s1Btn) {
-        s1Btn.addEventListener("click", () => watchAd(1));
+        s1Btn.onclick = null; // Explicitly unbind
+        s1Btn.onclick = () => watchAd(1);
     }
     if (s2Btn) {
-        s2Btn.addEventListener("click", () => watchAd(2));
+        s2Btn.onclick = null; // Explicitly unbind
+        s2Btn.onclick = () => watchAd(2);
     }
 
     initApp();
@@ -1392,7 +1394,27 @@ let lastFetchId = 0;
 let cooldownRemaining = 0;
 let _btnCooldownTimerId = null;
 
+let isAdRunning = false;
+
 async function watchAd(sessionNum = 1) {
+    if (isAdRunning) return;
+    isAdRunning = true;
+    
+    const watchBtn = document.getElementById(`session-${sessionNum}-btn`);
+    if (watchBtn) watchBtn.disabled = true; // Immediately disable
+
+    try {
+        await _watchAdImpl(sessionNum);
+    } finally {
+        isAdRunning = false;
+        // Allow button to be active again if not in cooldown
+        if (!isBtnCooldownActive && watchBtn) {
+            watchBtn.disabled = false;
+        }
+    }
+}
+
+async function _watchAdImpl(sessionNum = 1) {
     // Guard: mutex cooldown
     if (isBtnCooldownActive) return;
 
@@ -1575,8 +1597,8 @@ async function executeAdSuccessReward(sessionNum) {
 
     // ── 3. Fire backend sync (non-blocking) ───────────────────────────
     try {
-        // Explicitly trigger the reward on the backend since Onclicka doesn't send S2S webhooks automatically
-        await fetch(`${API_BASE}/api/reward?userId=${currentUser.id}&event_id=onclicka_${Date.now()}`);
+        // Explicitly trigger the reward on the backend (Adsgram backend configuration uses event_id uniquely)
+        await fetch(`${API_BASE}/api/reward?userId=${currentUser.id}&event_id=adsgram_${Date.now()}_${Math.random()}`);
     } catch (err) {
         console.error("[Reward] Backend trigger error:", err);
     }
