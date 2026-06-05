@@ -1640,6 +1640,64 @@
             color: #0a1a22;
             box-shadow: 0 4px 16px rgba(6, 182, 212, 0.22), inset 0 1px 0 rgba(255,255,255,0.15);
         }
+
+        /* ── Global User Counter Badge ────────────────────────────── */
+        .global-counter-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 4px 10px;
+            margin: 6px auto 0;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            width: fit-content;
+            transition: all 0.3s ease;
+        }
+
+        .global-counter-icon {
+            width: 12px;
+            height: 12px;
+            color: var(--text-muted);
+            stroke: var(--text-muted);
+            flex-shrink: 0;
+        }
+
+        .global-counter-dot {
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: #00ffcc;
+            box-shadow: 0 0 8px #00ffcc;
+            animation: pulse 1.5s infinite;
+            flex-shrink: 0;
+        }
+
+        .global-counter-text {
+            color: var(--text-primary);
+            letter-spacing: 0.2px;
+            font-weight: 700;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(0.8);
+                opacity: 0.5;
+            }
+            50% {
+                transform: scale(1.2);
+                opacity: 1;
+                box-shadow: 0 0 10px #00ffcc;
+            }
+            100% {
+                transform: scale(0.8);
+                opacity: 0.5;
+            }
+        }
     </style>
 </head>
 <body>
@@ -1659,6 +1717,16 @@
                 <div class="header animate-in">
                 <div class="header-logo">ManatAds</div>
                 <div class="header-subtitle" data-i18n="subtitle">İzlə • Qazan • Çevir</div>
+                <div class="global-counter-badge">
+                    <svg class="global-counter-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="9" cy="7" r="4"></circle>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                    </svg>
+                    <span class="global-counter-dot"></span>
+                    <span class="global-counter-text"><span id="global-user-count">...</span> <span data-i18n="global_users">istifadəçi</span></span>
+                </div>
                 <div class="header-greeting">
                     <div class="greeting-text">
                         <span data-i18n="greeting">Xoş gəldiniz,</span> <strong id="user-name">İstifadəçi</strong> 👋

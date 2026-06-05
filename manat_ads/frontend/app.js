@@ -159,6 +159,7 @@ const LOCALES = {
         leaderboard_title: "Ən Çox Qazanan Top 45",
         user_label: "İstifadəçi",
         balance_label: "Qazanc",
+        global_users: "istifadəçi",
     },
     tr: {
         subtitle: "İzle • Kazan • Çevir",
@@ -255,6 +256,7 @@ const LOCALES = {
         leaderboard_title: "En Çok Kazanan Top 45",
         user_label: "Kullanıcı",
         balance_label: "Kazanç",
+        global_users: "kullanıcı",
     },
     en: {
         subtitle: "Watch • Earn • Convert",
@@ -351,6 +353,7 @@ const LOCALES = {
         leaderboard_title: "Top 45 Earners",
         user_label: "User",
         balance_label: "Earnings",
+        global_users: "users",
     },
     ru: {
         subtitle: "Смотри • Зарабатывай • Конвертируй",
@@ -447,6 +450,7 @@ const LOCALES = {
         leaderboard_title: "Топ 45 по заработку",
         user_label: "Пользователь",
         balance_label: "Заработок",
+        global_users: "пользователей",
     }
 };
 
@@ -762,6 +766,9 @@ async function initApp() {
             splashSuccess.style.visibility = 'hidden';
             setTimeout(() => splashSuccess.remove(), 400);
         }
+
+        // Start global user counter polling
+        startGlobalStatsPolling();
 
     } catch (err) {
         console.error("Başlanğıc xətası:", err);
@@ -2001,4 +2008,60 @@ document.addEventListener("DOMContentLoaded", () => {
     if (cancelBtn) cancelBtn.addEventListener('click', closeVipModal);
     if (confirmBtn) confirmBtn.addEventListener('click', confirmVipPurchase);
 });
+
+// ── Global User Stats Counter ──────────────────────────────────────────
+let globalUserCount = 0;
+let statsFetchIntervalId = null;
+let statsFakeIncrementIntervalId = null;
+
+async function fetchGlobalStats() {
+    try {
+        const resp = await fetch(`${API_BASE}/api/global-stats`, {
+            method: "GET",
+            headers: {
+                "Cache-Control": "no-cache, no-store, must-revalidate",
+                "Pragma": "no-cache",
+                "ngrok-skip-browser-warning": "true"
+            }
+        });
+        if (resp.ok) {
+            const data = await resp.json();
+            if (data && typeof data.total_users === 'number') {
+                globalUserCount = data.total_users;
+                updateGlobalUserCountUI(globalUserCount);
+            }
+        }
+    } catch (err) {
+        console.error("Error fetching global stats:", err);
+    }
+}
+
+function updateGlobalUserCountUI(count) {
+    const el = document.getElementById("global-user-count");
+    if (el) {
+        el.textContent = count.toLocaleString('en-US');
+    }
+}
+
+function startGlobalStatsPolling() {
+    // Fetch immediately
+    fetchGlobalStats();
+
+    // Poll strictly once every 60 seconds (60000 ms)
+    if (!statsFetchIntervalId) {
+        statsFetchIntervalId = setInterval(fetchGlobalStats, 60000);
+    }
+
+    // Fake increment randomly every 8 seconds to make UI look active
+    if (!statsFakeIncrementIntervalId) {
+        statsFakeIncrementIntervalId = setInterval(() => {
+            if (globalUserCount > 0) {
+                if (Math.random() < 0.6) {
+                    globalUserCount += 1;
+                    updateGlobalUserCountUI(globalUserCount);
+                }
+            }
+        }, 8000);
+    }
+}
 

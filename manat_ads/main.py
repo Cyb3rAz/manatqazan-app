@@ -38,7 +38,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
-from sqlalchemy import select, update
+from sqlalchemy import select, update, func
 
 from bot_instance import bot, dp
 from database import async_session, close_db, init_db
@@ -642,6 +642,21 @@ async def _credit_user(user_id_val: int | str, event_id: str, source: str = "unk
             "videos_today": final_videos_today,
             "daily_limit": daily_limit,
         })
+
+
+# ── Global User Stats API ──────────────────────────────────────────────
+@app.get("/api/global-stats", summary="Get global user count stats")
+async def get_global_stats():
+    """Return total number of registered users."""
+    try:
+        async with async_session() as session:
+            stmt = select(func.count(User.id))
+            result = await session.execute(stmt)
+            total_users = result.scalar() or 0
+            return JSONResponse({"total_users": total_users})
+    except Exception as e:
+        logger.error("Error in /api/global-stats: %s", e, exc_info=True)
+        return JSONResponse({"total_users": 0}, status_code=500)
 
 
 # ── Leaderboard API (for Mini App) ─────────────────────────────────────
