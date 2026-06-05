@@ -493,24 +493,18 @@ async def _credit_user(user_id_val: int | str, event_id: str, source: str = "unk
             print(f"[CREDIT] VIP tier={raw_vip} | session_limit={session_limit} | daily_limit={daily_limit} | mc_reward={mc_reward}")
             logger.info("[CREDIT] VIP tier=%s session_limit=%s daily_limit=%s mc_reward=%s", raw_vip, session_limit, daily_limit, mc_reward)
 
-            # -- Security: 5-second Rate Limit Check --
-            if user.last_watch_date:
-                last_time = user.last_watch_date if user.last_watch_date.tzinfo else user.last_watch_date.replace(tzinfo=timezone.utc)
-                delta_sec = (now - last_time).total_seconds()
-                if delta_sec < 5:
-                    logger.warning("[CREDIT] User %s hit 5-second rate limit! Delta: %.2fs", user_telegram_id, delta_sec)
-                    return JSONResponse({"error": "Too many requests. Please wait."}, status_code=429)
-
-            # -- event_id ile dublikat yoxla --
+            # -- Idempotency Check (Uniqueness Filter) based on event_id --
             if event_id:
                 dup_stmt = select(WatchRecord).where(WatchRecord.adsgram_event_id == event_id)
                 dup_result = await session.execute(dup_stmt)
                 dup_record = dup_result.scalar_one_or_none()
                 if dup_record:
                     existing_balance = user.balance_mc
-                    print(f"[CREDIT] Duplicate event_id={event_id} - skipping.")
-                    logger.info("[CREDIT] Duplicate event_id=%s - skipping.", event_id)
-                    return JSONResponse({"ok": True, "message": "Artiq kreditlenib.", "balance": existing_balance})
+                    print(f"[CREDIT] REJECTED: Replay Attack protection. Duplicate event_id={event_id}")
+                    logger.warning("[CREDIT] REJECTED: Duplicate event_id=%s detected. Blocking replay attack.", event_id)
+                    # Reject it immediately as per Replay Attack protection
+                    return JSONResponse({"error": "Duplicate event_id. Replay attack blocked."}, status_code=403)
+
 
             # -- Gundelik limit ve ardicil seans yoxla --
             # Dynamic daily reset
