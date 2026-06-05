@@ -1453,7 +1453,11 @@ async function watchAd(sessionNum = 1) {
         if (errStr.includes('dismiss') || errStr.includes('close') || errStr.includes('skip') || errStr.includes('cancel')) {
             showToast(t('toastWatchFull'), "error");
         } else {
-            showToast(`${t('toastAdFailed')} (${errStr.substring(0, 80)})`, "error");
+            if (!errStr || errStr === "{}" || errStr.trim() === "") {
+                showToast("⚠️ Reklam tapılmadı və ya Bloklandı. Bir az sonra yenidən cəhd edin.", "error");
+            } else {
+                showToast(`${t('toastAdFailed')} (${errStr.substring(0, 80)})`, "error");
+            }
         }
     } finally {
         renderDashboard();
