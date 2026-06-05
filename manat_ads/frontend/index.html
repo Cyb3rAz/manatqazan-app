@@ -144,6 +144,14 @@
             z-index: 10000;
         }
 
+        .header-stack {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            text-align: center;
+        }
+
         .header-logo {
             font-size: 32px;
             font-weight: 900;
@@ -157,7 +165,6 @@
         .header-subtitle {
             font-size: 11px !important;
             opacity: 0.6 !important;
-            margin-top: 2px !important;
             font-weight: 500;
             color: var(--text-muted);
             letter-spacing: 0.5px;
@@ -1645,16 +1652,11 @@
         .global-counter-badge {
             display: inline-flex;
             align-items: center;
-            justify-content: center;
             gap: 6px;
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 20px;
+            background: rgba(0, 255, 204, 0.06);
+            border: 1px solid rgba(0, 255, 204, 0.15);
+            border-radius: 12px;
             padding: 4px 10px;
-            margin: 6px auto 0;
-            font-size: 11px;
-            font-weight: 600;
-            color: var(--text-secondary);
             width: fit-content;
             transition: all 0.3s ease;
         }
@@ -1668,8 +1670,8 @@
         }
 
         .global-counter-dot {
-            width: 5px;
-            height: 5px;
+            width: 8px;
+            height: 8px;
             border-radius: 50%;
             background: #00ffcc;
             box-shadow: 0 0 8px #00ffcc;
@@ -1678,8 +1680,14 @@
         }
 
         .global-counter-text {
-            color: var(--text-primary);
-            letter-spacing: 0.2px;
+            font-size: 11px;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.6);
+            letter-spacing: 0.03em;
+        }
+
+        .global-counter-text #global-user-count {
+            color: #00ffcc;
             font-weight: 700;
         }
 
@@ -1715,17 +1723,19 @@
             <div id="tab-main-content">
                 <!-- Header -->
                 <div class="header animate-in">
-                <div class="header-logo">ManatAds</div>
-                <div class="header-subtitle" data-i18n="subtitle">İzlə • Qazan • Çevir</div>
-                <div class="global-counter-badge">
-                    <svg class="global-counter-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                        <circle cx="9" cy="7" r="4"></circle>
-                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-                    </svg>
-                    <span class="global-counter-dot"></span>
-                    <span class="global-counter-text"><span id="global-user-count">...</span> <span data-i18n="global_users">istifadəçi</span></span>
+                <div class="header-stack">
+                    <div class="header-logo">ManatAds</div>
+                    <div class="header-subtitle" data-i18n="subtitle">İzlə • Qazan • Çevir</div>
+                    <div class="global-counter-badge">
+                        <svg class="global-counter-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="9" cy="7" r="4"></circle>
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                        </svg>
+                        <span class="global-counter-dot"></span>
+                        <span class="global-counter-text"><span id="global-user-count">...</span> <span data-i18n="global_users">istifadəçi</span></span>
+                    </div>
                 </div>
                 <div class="header-greeting">
                     <div class="greeting-text">
