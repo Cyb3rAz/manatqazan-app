@@ -161,7 +161,7 @@ BOT_LOCALES = {
         'referral_invited': "👤 <b>Dəvət Edilənlər:</b>",
         'referral_earned':  "🪙 <b>Referal Qazancı:</b>",
         'referral_azn':     "💵 <b>Referal AZN:</b>     {amount:,.4f} AZN",
-        'referral_tip':     "💡 <i>Dəvət etdiyiniz hər şəxsin izlədiyi video üçün ({mc} VC), siz avtomatik {bonus} VC qazanırsınız!</i>",
+        'referral_tip':     "💡 <i>Dəvət etdiyiniz hər şəxsin qazandığı VC-dən avtomatik 10% bonus qazanırsınız!</i>",
         # ── How it works ──
         'how_title':        "ℹ️ <b>VibeCash Layihəsi Haqqında Məlumat</b>",
         'how_body':         (
@@ -229,7 +229,7 @@ BOT_LOCALES = {
         'referral_invited': "👤 <b>Davet Edilenler:</b>",
         'referral_earned':  "🪙 <b>Referans Kazancı:</b>",
         'referral_azn':     "💵 <b>Referans TRY:</b>     {amount:,.4f} TRY",
-        'referral_tip':     "💡 <i>Davet ettiğiniz her kişinin izlediği video için ({mc} VC), siz otomatik olarak {bonus} VC kazanırsınız!</i>",
+        'referral_tip':     "💡 <i>Davet ettiğiniz her kişinin kazandığı VC'den otomatik %10 bonus kazanırsınız!</i>",
         # ── How it works ──
         'how_title':        "ℹ️ <b>VibeCash Projesi Hakkında Bilgi</b>",
         'how_body':         (
@@ -297,7 +297,7 @@ BOT_LOCALES = {
         'referral_invited': "👤 <b>People Invited:</b>",
         'referral_earned':  "🪙 <b>Referral Earnings:</b>",
         'referral_azn':     "💵 <b>Referral USDT:</b>     {amount:,.4f} USDT",
-        'referral_tip':     "💡 <i>For every video watched by someone you invite ({mc} VC each), you automatically earn {bonus} VC!</i>",
+        'referral_tip':     "💡 <i>You automatically earn a 10% bonus from the VC earned by everyone you invite!</i>",
         # ── How it works ──
         'how_title':        "ℹ️ <b>About VibeCash</b>",
         'how_body':         (
@@ -365,7 +365,7 @@ BOT_LOCALES = {
         'referral_invited': "👤 <b>Приглашено:</b>",
         'referral_earned':  "🪙 <b>Реферальный заработок:</b>",
         'referral_azn':     "💵 <b>Реферальные USDT:</b> {amount:,.4f} USDT",
-        'referral_tip':     "💡 <i>За каждое видео, просмотренное приглашённым вами пользователем ({mc} VC), вы автоматически получаете {bonus} VC!</i>",
+        'referral_tip':     "💡 <i>Вы автоматически получаете 10% бонус от VC, заработанных каждым приглашенным вами пользователем!</i>",
         # ── How it works ──
         'how_title':        "ℹ️ <b>О проекте VibeCash</b>",
         'how_body':         (
@@ -1526,10 +1526,10 @@ async def cmd_setvip(message: types.Message) -> None:
                 "ru": "Есть бомбическая новость! Твой аккаунт прокачан до PRO Nitro! 🚀\n\nСкорость заработка взлетает на **130% Турбо**! ⚡ Видосы готовы, залетай и начинай рубить кэш!"
             },
             "elite": {
-                "az": "Vəssalam, sən artıq ən zirvədəsən! Hesabın ELITE Ultra-ya uçuruldu! 🔥\n\nSürətiniz maksimumda: **170% Ultra Sürət** və **0% komissiya**! Sənin üçün bütün qapılar açıldı, daxil ol və rekordları darmadağın elə!",
-                "tr": "Ve bitti! Artık zirvedesin! Hesabın ELITE Ultra statüsüne yükseltildi! 🔥\n\nKazanç hızın maksimumda: **170% Ultra Hız** ve **%0 komisyon**! Tüm kapılar açıldı, gir ve rekorları darmadağın et!",
-                "en": "Boom! You are at the absolute top now! Account upgraded to ELITE Ultra! 🔥\n\nMax velocity engaged: **170% Ultra Speed** & **0% commission**! All gateways unlocked, go smash some records!",
-                "ru": "Изи! Ты теперь на самом пике! Твой аккаунт взлетел до ELITE Ultra! 🔥\n\nСкорость на максимуме: **170% Ультра** и **0% комиссия**! Все шлюзы открыты, залетай и разноси рекорды в щепки!"
+                "az": "Vəssalam, sən artıq ən zirvədəsən! Hesabın ELITE Ultra-ya uçuruldu! 🔥\n\nSürətiniz maksimumda: **175% Ultra Sürət** və **0% komissiya**! Sənin üçün bütün qapılar açıldı, daxil ol və rekordları darmadağın elə!",
+                "tr": "Ve bitti! Artık zirvedesin! Hesabın ELITE Ultra statüsüne yükseltildi! 🔥\n\nKazanç hızın maksimumda: **175% Ultra Hız** ve **%0 komisyon**! Tüm kapılar açıldı, gir ve rekorları darmadağın et!",
+                "en": "Boom! You are at the absolute top now! Account upgraded to ELITE Ultra! 🔥\n\nMax velocity engaged: **175% Ultra Speed** & **0% commission**! All gateways unlocked, go smash some records!",
+                "ru": "Изи! Ты теперь на самом пике! Твой аккаунт взлетел до ELITE Ultra! 🔥\n\nСкорость на максимуме: **175% Ультра** и **0% комиссия**! Все шлюзы открыты, залетай и разноси рекорды в щепки!"
             }
         }
         
