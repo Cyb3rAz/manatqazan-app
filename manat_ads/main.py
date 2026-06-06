@@ -351,7 +351,12 @@ async def adsgram_reward_get(
         logger.error("[ADSGRAM-GET] Missing userId or user_id in request query parameters! All params: %s", params)
         raise HTTPException(status_code=400, detail=f"userId parametri tapilmadi. Alinan parametrler: {list(params.keys())}")
 
-    event_id = params.get("event_id") or params.get("eventId") or str(uuid.uuid4())
+    event_id = params.get("event_id") or params.get("eventId")
+    if not event_id:
+        print(f"[ADSGRAM-GET] ERROR: event_id not found! All params: {params}")
+        logger.error("[ADSGRAM-GET] Missing event_id in request query parameters! All params: %s", params)
+        raise HTTPException(status_code=400, detail="event_id parametri tapilmadi.")
+
     return await _credit_user(user_id_val, event_id=event_id, source="adsgram_get")
 
 
@@ -389,7 +394,7 @@ async def adsgram_callback(request: Request) -> JSONResponse:
         or payload.get("telegramId")
         or payload.get("uid")
     )
-    event_id = payload.get("event_id") or payload.get("eventId") or str(uuid.uuid4())
+    event_id = payload.get("event_id") or payload.get("eventId")
     signature = payload.get("signature") or payload.get("hash") or payload.get("sign") or ""
 
     print(f"[ADSGRAM-POST] userId={user_id_val!r} | signature={signature!r}")
@@ -403,6 +408,11 @@ async def adsgram_callback(request: Request) -> JSONResponse:
         print(f"[ADSGRAM-POST] ERROR: userId not found! Keys: {list(payload.keys())}")
         logger.error("[ADSGRAM-POST] Missing user_id in payload! Keys: %s", list(payload.keys()))
         raise HTTPException(status_code=400, detail=f"user_id parametri tapilmadi. Alinan acarlar: {list(payload.keys())}")
+
+    if not event_id:
+        print(f"[ADSGRAM-POST] ERROR: event_id not found! Keys: {list(payload.keys())}")
+        logger.error("[ADSGRAM-POST] Missing event_id in payload! Keys: %s", list(payload.keys()))
+        raise HTTPException(status_code=400, detail="event_id parametri tapilmadi.")
 
     return await _credit_user(user_id_val, event_id=event_id, source="adsgram_post")
 
