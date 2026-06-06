@@ -184,7 +184,7 @@ BOT_LOCALES = {
             "Daha çox video izləməklə yanaşı, <b>dostlarınızı dəvət edərək</b> daha böyük məbləğlər qazana bilərsiniz! "
             "Dəvət etdiyiniz hər dostunuzun izlədiyi reklamlardan sizə avtomatik <b>ömürlük 10% bonus</b> gələcək. "
             "Linkinizi paylaşın və hədəfə sürətlə çatın! 👥💸\n\n"
-            "Həmçinin Mağaza bölməsindən qazancınızı kosmik sürətlə qatlamaq və minimum limiti göz qırpımında darmadağın etmək üçün PRO Nitro və ya limitsiz imkanlar təqdim edən ELITE Ultra paketlərinə keçid edə bilərsiniz! Liderlər lövhəsində hamıdan öndə olun, rütbənizi parıldadın və pulunuzu gözləmədən nağdlaşdırın! 🚀"
+            "Gözləmək sənlik deyil? ⚡ Mağaza (Store) bölməsindən PRO və ya ELITE paketlərinə keç, VC qazancını uçur! Gündəlik limiti saniyələr daxilində vur, Liderlər siyahısında zirvəyə yüksəl və qazancını gözləmədən anında nağdlaşdır! 🚀"
         ),
         'withdraw_ok': (
             "✅ Təbriklər! Çıxarış limitini keçmisiniz. Zəhmət olmasa pulu köçürmək "
@@ -252,7 +252,7 @@ BOT_LOCALES = {
             "Daha fazla video izlemenin yanı sıra, <b>arkadaşlarınızı davet ederek</b> daha büyük miktarlar kazanabilirsiniz! "
             "Davet ettiğiniz her arkadaşınızın izlediği reklamlardan size otomatik <b>ömür boyu %10 bonus</b> gelecek. "
             "Bağlantınızı paylaşın ve hedefe hızla ulaşın! 👥💸\n\n"
-            "Ayrıca Mağaza bölümünden kazancınızı kozmik hızla katlamak ve minimum limiti göz kırpmasında darmadağın etmek için PRO Nitro veya sınırsız imkanlar sunan ELITE Ultra paketlerine geçiş yapabilirsiniz! Liderler listesinde herkesten önde olun, rütbenizi parlatın ve paranızı beklemeden nakde çevirin! 🚀"
+            "Beklemek sana göre değil mi? ⚡ Mağaza (Store) bölümünden PRO veya ELITE paketlerine geç, VC kazancını uçur! Günlük limiti saniyeler içinde erit, Liderler listesinde zirveye tırman ve kazancını beklemeden anında nakde çevir! 🚀"
         ),
         'withdraw_ok': (
             "✅ Tebrikler! Çekim limitini aştınız. Lütfen parayı transfer etmek "
@@ -320,7 +320,7 @@ BOT_LOCALES = {
             "Watch more videos and <b>invite your friends</b> to earn larger amounts! "
             "You'll automatically earn a <b>lifetime 10% bonus</b> from every ad your referrals watch. "
             "Share your link and reach your goal faster! 👥💸\n\n"
-            "You can also upgrade to PRO Nitro or the ultimate ELITE Ultra package in the Store to multiply your earnings at cosmic speed and smash the withdrawal limit in the blink of an eye! Dominate the Leaderboard, flaunt your VIP status, and cash out without waiting! 🚀"
+            "Hate waiting? ⚡ Head over to the Store and upgrade to PRO or ELITE to skyrocket your VC earnings! Smash through the daily limits in seconds, climb the leaderboard to the very top, and cash out instantly without waiting! 🚀"
         ),
         'withdraw_ok': (
             "✅ Congratulations! You've reached the withdrawal limit. Please provide your "
@@ -388,7 +388,7 @@ BOT_LOCALES = {
             "Смотрите больше видео и <b>приглашайте друзей</b>, чтобы зарабатывать больше! "
             "Вы автоматически получите <b>пожизненный бонус 10%</b> с каждой рекламы, просмотренной вашими рефералами. "
             "Поделитесь ссылкой и быстрее достигните цели! 👥💸\n\n"
-            "Вы также можете перейти на пакеты PRO Nitro или ультимативный ELITE Ultra в Магазине, чтобы умножить свой заработок на космической скорости и преодолеть лимит в мгновение ока! Доминируйте в Топе лидеров, хвастайтесь своим VIP-статусом и выводите деньги без всякого ожидания! 🚀"
+            "Не любишь ждать? ⚡ Залетай в Магазин (Store), хватай PRO или ELITE и разгоняй свой заработок VC до небес! Закрывай дневные лимиты за секунды, взлетай на вершину Топа лидеров и выводи кэш моментально без ожидания! 🚀"
         ),
         'withdraw_ok': (
             "✅ Поздравляем! Вы достигли лимита вывода. Пожалуйста, укажите адрес своего "
