@@ -111,6 +111,7 @@ const LOCALES = {
         copyBtn: "📋 Linki Kopyala",
         copied: "✅ Kopyalandı!",
         toastEarned: "🎉 +{amount} VC qazandınız!",
+        rewardSuccess: "🎉 +{amount} VC qazandınız!",
         toastCopied: "📋 Referal linki kopyalandı!",
         toastCopyFail: "⚠️ Kopyalana bilmədi. Linki əl ilə kopyalayın.",
         toastAdNotAvail: "⚠️ Reklam xidməti mövcud deyil. Sonra cəhd edin.",
@@ -209,6 +210,7 @@ const LOCALES = {
         copyBtn: "📋 Linki Kopyala",
         copied: "✅ Kopyalandı!",
         toastEarned: "🎉 +{amount} VC kazandınız!",
+        rewardSuccess: "🎉 +{amount} VC kazandınız!",
         toastCopied: "📋 Referans linki kopyalandı!",
         toastCopyFail: "⚠️ Kopyalanamadı. Linki elle kopyalayın.",
         toastAdNotAvail: "⚠️ Reklam servisi mevcut değil. Daha sonra deneyin.",
@@ -307,6 +309,7 @@ const LOCALES = {
         copyBtn: "📋 Copy Link",
         copied: "✅ Copied!",
         toastEarned: "🎉 +{amount} VC earned!",
+        rewardSuccess: "🎉 You earned +{amount} VC!",
         toastCopied: "📋 Referral link copied!",
         toastCopyFail: "⚠️ Could not copy. Copy the link manually.",
         toastAdNotAvail: "⚠️ Ad service unavailable. Try later.",
@@ -405,6 +408,7 @@ const LOCALES = {
         copyBtn: "📋 Копировать ссылку",
         copied: "✅ Скопировано!",
         toastEarned: "🎉 +{amount} VC заработано!",
+        rewardSuccess: "🎉 Вы заработали +{amount} VC!",
         toastCopied: "📋 Реферальная ссылка скопирована!",
         toastCopyFail: "⚠️ Не удалось скопировать. Скопируйте ссылку вручную.",
         toastAdNotAvail: "⚠️ Рекламный сервис недоступен. Попробуйте позже.",
@@ -1473,7 +1477,7 @@ async function _watchAdImpl(sessionNum = 1) {
         watchBtn.textContent = t('rewardCalc');
         await executeAdSuccessReward(sessionNum);
         spawnCoinBurst();
-        showToast(t('toastEarned').replace('{amount}', userData.mc_per_video || 200), "success");
+        showToast(t('rewardSuccess').replace('{amount}', userData.mc_per_video || 200), "success");
     } catch (error) {
         console.error('[Adsgram] Ad playback tracking state failed/skipped:', error);
         
@@ -1768,7 +1772,7 @@ function showToast(message, toastType = "success") {
     if (toastTimer) clearTimeout(toastTimer);
     toastTimer = setTimeout(() => {
         toast.classList.remove("visible");
-    }, 3000);
+    }, 2500);
 }
 
 // ── Yardımçı (Format) ────────────────────────────────────────────────
@@ -1963,7 +1967,7 @@ async function verifyTask(taskId) {
         const data = await resp.json();
         
         if (resp.ok && data.ok) {
-            showToast(`🎉 Təbriklər! +${data.reward} VC qazandınız!`, "success");
+            showToast(t('rewardSuccess').replace('{amount}', data.reward), "success");
             spawnCoinBurst();
             
             // Update local balance
