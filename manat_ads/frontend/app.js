@@ -1,10 +1,10 @@
 /**
- * ManatAds – Mini App Frontend Logic (i18n: AZ, TR, EN, RU)
+ * VibeCash – Mini App Frontend Logic (i18n: AZ, TR, EN, RU)
  * ===========================================================
  * Integrates with:
  *   • Telegram Web App SDK (istifadəçi kimliyi + tema)
  *   • Onclicka TMA SDK (video reklamlar – Zone ID: 443591)
- *   • ManatAds Backend API (istifadəçi məlumatı + mükafat callback)
+ *   • VibeCash Backend API (istifadəçi məlumatı + mükafat callback)
  */
 
 // ── Konfiqurasiya ─────────────────────────────────────────────────────
@@ -93,7 +93,7 @@ const LOCALES = {
         session2Title: "🌙 Mərhələ 2",
         videoUnit: "video",
         watchBtn: "<svg class=\"btn-inline-icon\" style=\"fill: #0a1a22; stroke: #0a1a22;\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\"><polygon points=\"6 4 20 12 6 20 6 4\"></polygon></svg> Video İzlə &",
-        watchBtnSuffix: "MC Qazan",
+        watchBtnSuffix: "VC Qazan",
         completedS1: "<svg class=\"btn-inline-icon\" style=\"stroke: #06b6d4;\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M22 11.08V12a10 10 0 1 1-5.93-9.14\"></path><polyline points=\"22 4 12 14.01 9 11.01\"></polyline></svg> Tamamlandı",
         completedS2: "<svg class=\"btn-inline-icon\" style=\"stroke: #06b6d4;\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M22 11.08V12a10 10 0 1 1-5.93-9.14\"></path><polyline points=\"22 4 12 14.01 9 11.01\"></polyline></svg> Tamamlandı",
         locked: "🔒 Mərhələ 2 Kilidlidir",
@@ -105,12 +105,12 @@ const LOCALES = {
         waitSec: "⏳ Gözləyin",
         referralTitle: "👥 Referal Proqramı",
         refFriends: "Dostlar",
-        refEarnedLabel: "MC Qazanc",
+        refEarnedLabel: "VC Qazanc",
         refBonusPct: "Bonus Faizi",
         refLinkLoading: "Referal linki yüklənir...",
         copyBtn: "📋 Linki Kopyala",
         copied: "✅ Kopyalandı!",
-        toastEarned: "🎉 +{amount} MC qazandınız!",
+        toastEarned: "🎉 +{amount} VC qazandınız!",
         toastCopied: "📋 Referal linki kopyalandı!",
         toastCopyFail: "⚠️ Kopyalana bilmədi. Linki əl ilə kopyalayın.",
         toastAdNotAvail: "⚠️ Reklam xidməti mövcud deyil. Sonra cəhd edin.",
@@ -151,16 +151,16 @@ const LOCALES = {
         store_subtitle_soon: "VIP Statuslar tezliklə aktiv olacaq!",
         vip_free_label: "Standart Sürət",
         vip_free_price: "Pulsuz",
-        vip_free_perk: "Hər video +200 MC",
+        vip_free_perk: "Hər video +200 VC",
         vip_pro_title: "PRO Nitro",
         vip_elite_title: "ELITE Ultra",
         Pro_Price: "2.50 AZN / 1 Həftə",
         Elite_Price: "3.50 AZN / 1 Həftə",
         Pro_Line_1: "Gündəlik: 45 video (Daha az yorucu)",
-        Pro_Line_2: "Hər gün +11,700 MC-yə qədər böyük qazanc",
+        Pro_Line_2: "Hər gün +11,700 VC-yə qədər böyük qazanc",
         Pro_Line_3: "🚀 130% Turbo Sürətli qazanc gücü",
         Elite_Line_1: "Gündəlik: 40 video (Maksimum qənaət)",
-        Elite_Line_2: "Hər gün +14,000 MC-yə qədər rekord qazanc",
+        Elite_Line_2: "Hər gün +14,000 VC-yə qədər rekord qazanc",
         Elite_Line_3: "🔥 175% Ultra Sürət və 0% komissiyalı çıxarış",
         vip_buy_btn: "Satın Al",
         Modal_Confirm_Text: "Siz bu paketi almaq istədiyinizi təsdiqləyirsiniz?", 
@@ -190,7 +190,7 @@ const LOCALES = {
         session2Title: "🌙 Aşama 2",
         videoUnit: "video",
         watchBtn: "<svg class=\"btn-inline-icon\" style=\"fill: #0a1a22; stroke: #0a1a22;\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\"><polygon points=\"6 4 20 12 6 20 6 4\"></polygon></svg> Video İzle &",
-        watchBtnSuffix: "MC Kazan",
+        watchBtnSuffix: "VC Kazan",
         completedS1: "<svg class=\"btn-inline-icon\" style=\"stroke: #06b6d4;\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M22 11.08V12a10 10 0 1 1-5.93-9.14\"></path><polyline points=\"22 4 12 14.01 9 11.01\"></polyline></svg> Tamamlandı",
         completedS2: "<svg class=\"btn-inline-icon\" style=\"stroke: #06b6d4;\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M22 11.08V12a10 10 0 1 1-5.93-9.14\"></path><polyline points=\"22 4 12 14.01 9 11.01\"></polyline></svg> Tamamlandı",
         locked: "🔒 Aşama 2 Kilitli",
@@ -202,12 +202,12 @@ const LOCALES = {
         waitSec: "⏳ Bekleyin",
         referralTitle: "👥 Referans Programı",
         refFriends: "Arkadaşlar",
-        refEarnedLabel: "MC Kazanç",
+        refEarnedLabel: "VC Kazanç",
         refBonusPct: "Bonus Yüzdesi",
         refLinkLoading: "Referans linki yükleniyor...",
         copyBtn: "📋 Linki Kopyala",
         copied: "✅ Kopyalandı!",
-        toastEarned: "🎉 +{amount} MC kazandınız!",
+        toastEarned: "🎉 +{amount} VC kazandınız!",
         toastCopied: "📋 Referans linki kopyalandı!",
         toastCopyFail: "⚠️ Kopyalanamadı. Linki elle kopyalayın.",
         toastAdNotAvail: "⚠️ Reklam servisi mevcut değil. Daha sonra deneyin.",
@@ -248,16 +248,16 @@ const LOCALES = {
         store_subtitle_soon: "VIP Statüler yakında aktif olacak!",
         vip_free_label: "Standart Hız",
         vip_free_price: "Ücretsiz",
-        vip_free_perk: "Her video +200 MC",
+        vip_free_perk: "Her video +200 VC",
         vip_pro_title: "PRO Nitro",
         vip_elite_title: "ELITE Ultra",
         Pro_Price: "70 TRY / 1 Hafta",
         Elite_Price: "95 TRY / 1 Hafta",
         Pro_Line_1: "Günlük: 45 video (Daha az yorucu)",
-        Pro_Line_2: "Her gün +11.700 MC'ye varan büyük kazanç",
+        Pro_Line_2: "Her gün +11.700 VC'ye varan büyük kazanç",
         Pro_Line_3: "🚀 130% Turbo Hızlı kazanç gücü",
         Elite_Line_1: "Günlük: 40 video (Maksimum tasarruf)",
-        Elite_Line_2: "Her gün +14.000 MC'ye varan rekor kazanç",
+        Elite_Line_2: "Her gün +14.000 VC'ye varan rekor kazanç",
         Elite_Line_3: "🔥 175% Ultra Hız ve 0% komisyonlu çekim",
         vip_buy_btn: "Satın Al",
         Modal_Confirm_Text: "Bu paketi almak istediğinizi onaylıyor musunuz?", 
@@ -287,7 +287,7 @@ const LOCALES = {
         session2Title: "🌙 Level 2",
         videoUnit: "videos",
         watchBtn: "<svg class=\"btn-inline-icon\" style=\"fill: #0a1a22; stroke: #0a1a22;\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\"><polygon points=\"6 4 20 12 6 20 6 4\"></polygon></svg> Watch Video &",
-        watchBtnSuffix: "MC Earn",
+        watchBtnSuffix: "VC Earn",
         completedS1: "<svg class=\"btn-inline-icon\" style=\"stroke: #06b6d4;\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M22 11.08V12a10 10 0 1 1-5.93-9.14\"></path><polyline points=\"22 4 12 14.01 9 11.01\"></polyline></svg> Completed",
         completedS2: "<svg class=\"btn-inline-icon\" style=\"stroke: #06b6d4;\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M22 11.08V12a10 10 0 1 1-5.93-9.14\"></path><polyline points=\"22 4 12 14.01 9 11.01\"></polyline></svg> Completed",
         locked: "🔒 Level 2 Locked",
@@ -299,12 +299,12 @@ const LOCALES = {
         waitSec: "⏳ Wait",
         referralTitle: "👥 Referral Program",
         refFriends: "Friends",
-        refEarnedLabel: "MC Earned",
+        refEarnedLabel: "VC Earned",
         refBonusPct: "Bonus Rate",
         refLinkLoading: "Loading referral link...",
         copyBtn: "📋 Copy Link",
         copied: "✅ Copied!",
-        toastEarned: "🎉 +{amount} MC earned!",
+        toastEarned: "🎉 +{amount} VC earned!",
         toastCopied: "📋 Referral link copied!",
         toastCopyFail: "⚠️ Could not copy. Copy the link manually.",
         toastAdNotAvail: "⚠️ Ad service unavailable. Try later.",
@@ -345,16 +345,16 @@ const LOCALES = {
         store_subtitle_soon: "VIP Statuses will be active soon!",
         vip_free_label: "Standard Speed",
         vip_free_price: "Free",
-        vip_free_perk: "+200 MC per video",
+        vip_free_perk: "+200 VC per video",
         vip_pro_title: "PRO Nitro",
         vip_elite_title: "ELITE Ultra",
         Pro_Price: "1.60 USDT / 1 Week",
         Elite_Price: "2.10 USDT / 1 Week",
         Pro_Line_1: "Daily: 45 videos (Less exhausting)",
-        Pro_Line_2: "Earn up to +11,700 MC massive daily drop",
+        Pro_Line_2: "Earn up to +11,700 VC massive daily drop",
         Pro_Line_3: "🚀 130% Turbo Earnings velocity multiplier",
         Elite_Line_1: "Daily: 40 videos (Maximum savings)",
-        Elite_Line_2: "Earn up to +14,000 MC record daily drop",
+        Elite_Line_2: "Earn up to +14,000 VC record daily drop",
         Elite_Line_3: "🔥 175% Ultra Speed & 0% withdrawal commission",
         vip_buy_btn: "Buy Now",
         Modal_Confirm_Text: "Do you confirm buying this package?", 
@@ -384,7 +384,7 @@ const LOCALES = {
         session2Title: "🌙 Уровень 2",
         videoUnit: "видео",
         watchBtn: "<svg class=\"btn-inline-icon\" style=\"fill: #0a1a22; stroke: #0a1a22;\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\"><polygon points=\"6 4 20 12 6 20 6 4\"></polygon></svg> Смотреть видео &",
-        watchBtnSuffix: "MC Заработать",
+        watchBtnSuffix: "VC Заработать",
         completedS1: "<svg class=\"btn-inline-icon\" style=\"stroke: #06b6d4;\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M22 11.08V12a10 10 0 1 1-5.93-9.14\"></path><polyline points=\"22 4 12 14.01 9 11.01\"></polyline></svg> Завершено",
         completedS2: "<svg class=\"btn-inline-icon\" style=\"stroke: #06b6d4;\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M22 11.08V12a10 10 0 1 1-5.93-9.14\"></path><polyline points=\"22 4 12 14.01 9 11.01\"></polyline></svg> Завершено",
         locked: "🔒 Уровень 2 заблокирован",
@@ -396,12 +396,12 @@ const LOCALES = {
         waitSec: "⏳ Подождите",
         referralTitle: "👥 Реферальная программа",
         refFriends: "Друзья",
-        refEarnedLabel: "MC Заработок",
+        refEarnedLabel: "VC Заработок",
         refBonusPct: "Бонус %",
         refLinkLoading: "Загрузка реферальной ссылки...",
         copyBtn: "📋 Копировать ссылку",
         copied: "✅ Скопировано!",
-        toastEarned: "🎉 +{amount} MC заработано!",
+        toastEarned: "🎉 +{amount} VC заработано!",
         toastCopied: "📋 Реферальная ссылка скопирована!",
         toastCopyFail: "⚠️ Не удалось скопировать. Скопируйте ссылку вручную.",
         toastAdNotAvail: "⚠️ Рекламный сервис недоступен. Попробуйте позже.",
@@ -442,16 +442,16 @@ const LOCALES = {
         store_subtitle_soon: "VIP Статусы будут активны скоро!",
         vip_free_label: "Стандартная скорость",
         vip_free_price: "Бесплатно",
-        vip_free_perk: "+200 MC за видео",
+        vip_free_perk: "+200 VC за видео",
         vip_pro_title: "PRO Nitro",
         vip_elite_title: "ELITE Ultra",
         Pro_Price: "1.60 USDT / 1 Неделя",
         Elite_Price: "2.10 USDT / 1 Неделя",
         Pro_Line_1: "Ежедневно: 45 видео (Меньше усталости)",
-        Pro_Line_2: "До +11 700 MC крупного заработка каждый день",
+        Pro_Line_2: "До +11 700 VC крупного заработка каждый день",
         Pro_Line_3: "🚀 130% Турбо Скорость генерации прибыли",
         Elite_Line_1: "Ежедневно: 40 видео (Максимальная экономия)",
-        Elite_Line_2: "До +14 000 MC рекордного заработка каждый день",
+        Elite_Line_2: "До +14 000 VC рекордного заработка каждый день",
         Elite_Line_3: "🔥 175% Ультра Скорость и 0% комиссия на вывод",
         vip_buy_btn: "Купить",
         Modal_Confirm_Text: "Вы подтверждаете покупку этого пакета?", 
@@ -1087,12 +1087,12 @@ function renderDashboard() {
     let progressPct = 0;
     let newLeagueIndex = 0;
 
-    // ── League Thresholds (350 MC/video × 50 videos/day = 17,500 MC/day max; Free=200×50=10,000 MC/day) ──
-    //   Bronze   :      0 –  49,999 MC
-    //   Silver   : 50,000 – 149,999 MC
-    //   Gold     :150,000 – 399,999 MC
-    //   Platinum :400,000 – 799,999 MC
-    //   Diamond  :800,000+ MC
+    // ── League Thresholds (350 VC/video × 50 videos/day = 17,500 VC/day max; Free=200×50=10,000 VC/day) ──
+    //   Bronze   :      0 –  49,999 VC
+    //   Silver   : 50,000 – 149,999 VC
+    //   Gold     :150,000 – 399,999 VC
+    //   Platinum :400,000 – 799,999 VC
+    //   Diamond  :800,000+ VC
     const LEAGUE_THRESHOLDS = [
         { limit: 50000,   base: 0,      span: 50000  }, // 0 → Bronze
         { limit: 150000,  base: 50000,  span: 100000 }, // 1 → Silver
@@ -1883,7 +1883,7 @@ async function fetchLeaderboard() {
             row.innerHTML = `
                 <span class="rank">${rankDisplay}</span>
                 <span class="username">${user.first_name}${vipSvg}</span>
-                <span class="balance">${Number(user.balance_mc).toLocaleString()} MC</span>
+                <span class="balance">${Number(user.balance_mc).toLocaleString()} VC</span>
             `;
             container.appendChild(row);
         });
@@ -1925,7 +1925,7 @@ async function fetchTasks() {
             card.innerHTML = `
                 <div class="task-info">
                     <div class="task-title">${task.title}</div>
-                    <div class="task-reward">+${task.reward_amount} MC</div>
+                    <div class="task-reward">+${task.reward_amount} VC</div>
                 </div>
                 <div class="task-actions">
                     <a href="${task.channel_url}" target="_blank" class="task-btn task-btn-join">${t('btn_join')}</a>
@@ -1959,7 +1959,7 @@ async function verifyTask(taskId) {
         const data = await resp.json();
         
         if (resp.ok && data.ok) {
-            showToast(`🎉 Təbriklər! +${data.reward} MC qazandınız!`, "success");
+            showToast(`🎉 Təbriklər! +${data.reward} VC qazandınız!`, "success");
             spawnCoinBurst();
             
             // Update local balance
