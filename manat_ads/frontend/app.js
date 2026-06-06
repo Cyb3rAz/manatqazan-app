@@ -1485,34 +1485,40 @@ async function _watchAdImpl(sessionNum = 1) {
     }
 }
 
-// ── Button post-ad cooldown (7-12 seconds jitter) ─────────────────────────────
+// ── Button post-ad cooldown (7-10 seconds jitter, Premium Progress Bar) ─────────
 function startButtonCooldown(sessionNum, seconds = null) {
     const btn      = document.getElementById(`session-${sessionNum}-btn`);
     const otherBtn = document.getElementById(`session-${sessionNum === 1 ? 2 : 1}-btn`);
 
     isBtnCooldownActive = true;
 
-    // Generate jitter cooldown if not explicitly provided
+    // Generate jitter cooldown between 7 and 10 seconds inclusive
     if (seconds === null) {
-        seconds = Math.floor(Math.random() * (12 - 7 + 1)) + 7;
+        seconds = Math.floor(Math.random() * (10 - 7 + 1)) + 7;
     }
 
     if (_btnCooldownTimerId !== null) {
-        clearInterval(_btnCooldownTimerId);
+        clearTimeout(_btnCooldownTimerId);
         _btnCooldownTimerId = null;
     }
 
-    function applyDisabledStyles(el) {
+    function applyDisabledStyles(el, isMainBtn) {
         if (!el) return;
         el.disabled = true;
         el.style.background    = '#1f293d';
         el.style.boxShadow     = 'none';
-        el.style.color         = '#6b7280';
+        el.style.color         = isMainBtn ? '#ffffff' : '#6b7280';
         el.style.opacity       = '1';
         el.style.pointerEvents = 'none';
         el.style.transform     = 'none';
         el.style.filter        = 'none';
         el.style.textShadow    = 'none';
+        
+        if (isMainBtn) {
+            el.style.position = 'relative';
+            el.style.overflow = 'hidden';
+            el.style.border = '1px solid rgba(6, 182, 212, 0.3)';
+        }
     }
 
     function clearDisabledStyles(el) {
@@ -1526,29 +1532,55 @@ function startButtonCooldown(sessionNum, seconds = null) {
         el.style.transform     = '';
         el.style.filter        = '';
         el.style.textShadow    = '';
+        el.style.position      = '';
+        el.style.overflow      = '';
+        el.style.border        = '';
     }
 
-    applyDisabledStyles(btn);
-    applyDisabledStyles(otherBtn);
+    applyDisabledStyles(btn, true);
+    applyDisabledStyles(otherBtn, false);
 
     cooldownRemaining = seconds;
-    if (btn) btn.textContent = `${t('waitSec')} (${cooldownRemaining}s)...`;
 
-    _btnCooldownTimerId = setInterval(() => {
-        cooldownRemaining--;
-        if (cooldownRemaining > 0) {
-            applyDisabledStyles(btn);
-            if (btn) btn.textContent = `${t('waitSec')} (${cooldownRemaining}s)...`;
-        } else {
-            clearInterval(_btnCooldownTimerId);
-            _btnCooldownTimerId = null;
-            clearDisabledStyles(btn);
-            if (otherBtn) clearDisabledStyles(otherBtn);
-            isBtnCooldownActive = false;
-            cooldownRemaining = 0;
-            renderDashboard();
-        }
-    }, 1000);
+    if (btn) {
+        btn.innerHTML = `
+            <div id="cooldown-progress-bar" style="
+                position: absolute;
+                top: 0;
+                left: 0;
+                height: 100%;
+                width: 0%;
+                background: linear-gradient(135deg, #06b6d4, #00ffcc);
+                transition: width ${seconds}s linear;
+                z-index: 1;
+                opacity: 0.85;
+            "></div>
+            <span style="position: relative; z-index: 2; font-weight: 700; color: #ffffff; text-shadow: 0 1px 3px rgba(0,0,0,0.6); letter-spacing: 0.5px;">Yeni video hazırlanır...</span>
+        `;
+        
+        // Trigger reflow to apply the CSS transition smoothly
+        void btn.offsetHeight;
+        
+        // Start animation
+        setTimeout(() => {
+            const bar = document.getElementById('cooldown-progress-bar');
+            if (bar) bar.style.width = '100%';
+        }, 50);
+    }
+    
+    if (otherBtn) {
+        otherBtn.textContent = `${t('waitSec')}...`;
+    }
+
+    // Set a timeout to clear the state once the exact random duration has finished animating
+    _btnCooldownTimerId = setTimeout(() => {
+        _btnCooldownTimerId = null;
+        clearDisabledStyles(btn);
+        if (otherBtn) clearDisabledStyles(otherBtn);
+        isBtnCooldownActive = false;
+        cooldownRemaining = 0;
+        renderDashboard(); // Restore original UI structure via the render loop
+    }, seconds * 1000);
 }
 
 // ── Reward Lifecycle Engine ───────────────────────────────────────────
