@@ -174,6 +174,7 @@ const LOCALES = {
         user_label: "İstifadəçi",
         balance_label: "Qazanc",
         global_users: "istifadəçi",
+        videoPreparing: "Yeni video hazırlanır...",
     },
     tr: {
         subtitle: "İzle • Kazan • Çevir",
@@ -271,6 +272,7 @@ const LOCALES = {
         user_label: "Kullanıcı",
         balance_label: "Kazanç",
         global_users: "kullanıcı",
+        videoPreparing: "Yeni video hazırlanıyor...",
     },
     en: {
         subtitle: "Watch • Earn • Convert",
@@ -368,6 +370,7 @@ const LOCALES = {
         user_label: "User",
         balance_label: "Earnings",
         global_users: "users",
+        videoPreparing: "Preparing new video...",
     },
     ru: {
         subtitle: "Смотри • Зарабатывай • Конвертируй",
@@ -465,6 +468,7 @@ const LOCALES = {
         user_label: "Пользователь",
         balance_label: "Заработок",
         global_users: "пользователей",
+        videoPreparing: "Подготовка нового видео...",
     }
 };
 
@@ -1555,7 +1559,7 @@ function startButtonCooldown(sessionNum, seconds = null) {
                 z-index: 1;
                 opacity: 0.85;
             "></div>
-            <span style="position: relative; z-index: 2; font-weight: 700; color: #ffffff; text-shadow: 0 1px 3px rgba(0,0,0,0.6); letter-spacing: 0.5px;">Yeni video hazırlanır...</span>
+            <span style="position: relative; z-index: 2; font-weight: 700; color: #ffffff; text-shadow: 0 1px 3px rgba(0,0,0,0.6); letter-spacing: 0.5px;">${t('videoPreparing')}</span>
         `;
         
         // Trigger reflow to apply the CSS transition smoothly
