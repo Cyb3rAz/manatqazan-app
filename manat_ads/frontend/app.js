@@ -1387,7 +1387,7 @@ function stopLevel2CooldownTicker() {
  */
 let currentWatchingSession = 1;
 
-// Mutex: prevents re-entry during the 7-second post-ad cooldown
+// Mutex: prevents re-entry during the post-ad cooldown
 let isBtnCooldownActive = false;
 let isRewardSyncing = false;
 let lastFetchId = 0;
@@ -1485,12 +1485,17 @@ async function _watchAdImpl(sessionNum = 1) {
     }
 }
 
-// ── Button post-ad cooldown (7 seconds) ─────────────────────────────
-function startButtonCooldown(sessionNum, seconds = 7) {
+// ── Button post-ad cooldown (7-12 seconds jitter) ─────────────────────────────
+function startButtonCooldown(sessionNum, seconds = null) {
     const btn      = document.getElementById(`session-${sessionNum}-btn`);
     const otherBtn = document.getElementById(`session-${sessionNum === 1 ? 2 : 1}-btn`);
 
     isBtnCooldownActive = true;
+
+    // Generate jitter cooldown if not explicitly provided
+    if (seconds === null) {
+        seconds = Math.floor(Math.random() * (12 - 7 + 1)) + 7;
+    }
 
     if (_btnCooldownTimerId !== null) {
         clearInterval(_btnCooldownTimerId);
