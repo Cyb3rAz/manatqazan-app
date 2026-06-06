@@ -1175,11 +1175,11 @@ async def _get_admin_stats_text() -> str:
         total_users_res = await session.execute(select(func.count(User.id)))
         total_users = total_users_res.scalar() or 0
 
-        # ── Dövriyyədəki ümumi VC ──
-        total_mc_res = await session.execute(select(func.sum(User.balance_mc)))
+        # ── Dövriyyədəki ümumi VC (Yalnız aktiv istifadəçilər) ──
+        total_mc_res = await session.execute(select(func.sum(User.balance_mc)).where(User.is_active == True))
         total_mc = total_mc_res.scalar() or 0.0
 
-        # ── Ümumi qazanılan VC ──
+        # ── Ümumi qazanılan VC (Bütün tarixi qazanc) ──
         total_earned_res = await session.execute(select(func.sum(User.total_earned_mc)))
         total_earned = total_earned_res.scalar() or 0.0
 
@@ -1204,7 +1204,7 @@ async def _get_admin_stats_text() -> str:
         last5_block = "  — Hələ istifadəçi yoxdur."
 
     return (
-        f"📊 <b>MANAT QAZAN — ADMİN PANELİ</b>\n"
+        f"📊 <b>VIBECASH — ADMİN PANELİ</b>\n"
         f"{'─' * 30}\n\n"
         f"👤 <b>Ümumi İstifadəçi Sayı:</b> {total_users} nəfər\n"
         f"🪙 <b>Dövriyyədəki Cəmi VC:</b> {total_mc:,.0f} VC\n"
