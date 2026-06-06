@@ -1313,9 +1313,9 @@ function renderDashboard() {
         const mm = Math.floor((remaining % 3600000) / 60000);
         const ss = Math.floor((remaining % 60000) / 1000);
         const pad = n => String(n).padStart(2, '0');
-        document.getElementById("session-2-progress-text").textContent = `Növbəti mərhələ: ${pad(hh)}:${pad(mm)}:${pad(ss)}`;
+        document.getElementById("session-2-progress-text").textContent = `0 / ${LEVEL_2_LIMIT} Video`;
         document.getElementById("session-2-progress-fill").style.width = '0%';
-        s2Btn.textContent = `⏳ Növbəti mərhələ: ${pad(hh)}:${pad(mm)}:${pad(ss)}`;
+        s2Btn.textContent = `⏳ ${t('lock_countdown') || 'Növbəti mərhələ:'} ${pad(hh)}:${pad(mm)}:${pad(ss)}`;
         s2Hint.style.display = 'none';
 
         // Start the live countdown ticker
