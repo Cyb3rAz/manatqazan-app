@@ -3,7 +3,7 @@ ManatAds – Telegram Bot Command Handlers
 ==========================================
 Commands:
   /start [referral_code]  – Register + deep-link referral binding.
-  /balance                – Show current MC balance & AZN equivalent.
+  /balance                – Show current VC balance & AZN equivalent.
   /referral               – Show referral link, stats & earnings.
 """
 
@@ -77,19 +77,19 @@ MC_TO_AZN_RATE = int(os.getenv("MC_TO_AZN_RATE", "140000"))
 MIN_WITHDRAWAL_TRY = float(os.getenv("MIN_WITHDRAWAL_TRY", "135.00"))
 MC_PER_VIDEO = int(os.getenv("MC_PER_VIDEO", "300"))
 DAILY_LIMIT = int(os.getenv("DAILY_VIDEO_LIMIT", "24"))
-# Withdrawal threshold = 5 AZN = 700,000 MC (at 140,000 MC/AZN)
+# Withdrawal threshold = 5 AZN = 700,000 VC (at 140,000 VC/AZN)
 _WITHDRAWAL_THRESHOLD_MC: float = 700_000.0
 
 
 def _get_mc_for_tier(vip_status: str | None) -> int:
-    """Return the MC-per-video reward for a given VIP tier string.
+    """Return the VC-per-video reward for a given VIP tier string.
 
     Mirrors _get_vip_params() in main.py but is self-contained so
     command handlers need no cross-module import.
-    MC_TO_AZN_RATE=140,000 | Withdrawal threshold=700,000 MC = 5 AZN:
-      free  -> 200 MC  (50 clicks/day → 70 days to withdraw)
-      pro   -> 260 MC  (45 clicks/day → ~60 days to withdraw)
-      elite -> 350 MC  (40 clicks/day → 50 days to withdraw)
+    MC_TO_AZN_RATE=140,000 | Withdrawal threshold=700,000 VC = 5 AZN:
+      free  -> 200 VC  (50 clicks/day → 70 days to withdraw)
+      pro   -> 260 VC  (45 clicks/day → ~60 days to withdraw)
+      elite -> 350 VC  (40 clicks/day → 50 days to withdraw)
     """
     tier = (vip_status or "free").lower().strip()
     if tier == "pro":
@@ -131,14 +131,14 @@ BOT_LOCALES = {
         'welcome_new':    (
             "🎉 <b>ManatAds-a xoş gəlmisiniz!</b>\n\n"
             "Salam, <b>{name}</b>! 👋\n\n"
-            "📺 Qısa videolar izləyin və hər video üçün <b>{mc} MC</b> qazanın.\n"
+            "📺 Qısa videolar izləyin və hər video üçün <b>{mc} VC</b> qazanın.\n"
             "📊 Gündəlik limit: <b>50 video klik</b> (hər mərhələ 25 video klik)\n"
             "👥 Dostlarınızı dəvət edin və <b>ömürlük 10% bonus</b> qazanın!"
             "\n\n💡 İpucu: Sistemi yeniləmək üçün /start yaza bilərsiniz!"
         ),
-        'welcome_back':   "👋 <b>Yenidən xoş gəldiniz, {name}!</b>\n\n🪙 Balans: <b>{balance} MC</b>\n📈 Ümumi qazanc: <b>{total} MC</b>\n\nDaha çox qazanmağa hazırsınız? Aşağıdakı düyməyə toxunun! 👇\n\n💡 İpucu: Sistemi yeniləmək üçün /start yaza bilərsiniz!",
+        'welcome_back':   "👋 <b>Yenidən xoş gəldiniz, {name}!</b>\n\n🪙 Balans: <b>{balance} VC</b>\n📈 Ümumi qazanc: <b>{total} VC</b>\n\nDaha çox qazanmağa hazırsınız? Aşağıdakı düyməyə toxunun! 👇\n\n💡 İpucu: Sistemi yeniləmək üçün /start yaza bilərsiniz!",
         'referral_msg':   "\n\n🤝 <b>Sizi dostunuz dəvət edib!</b> Onlar sizin qazancınızdan ömürlük 10% bonus qazanacaqlar.",
-        'btn_video':      "🎬 Video İzlə & {mc} MC Qazan",
+        'btn_video':      "🎬 Video İzlə & {mc} VC Qazan",
         'btn_balance':    "💰 Balansım",
         'btn_referral':   "👥 Referal Proqramı",
         'btn_how':        "ℹ️ Necə İşləyir?",
@@ -147,7 +147,7 @@ BOT_LOCALES = {
         'btn_lang_settings': "🌐 Dil Seçimi / Language ⚙️",
         # ── Balance screen ──
         'balance_title':    "💰 <b>Balansınız</b>",
-        'balance_mc_row':   "🪙 <b>Manat Coins:</b>",
+        'balance_mc_row':   "🪙 <b>Vibe Coins:</b>",
         'balance_earn_row': "📈 <b>Ümumi Qazanc:</b>",
         'balance_s1_row':   "1️⃣ <b>Mərhələ 1:</b>",
         'balance_s2_row':   "2️⃣ <b>Mərhələ 2:</b>",
@@ -161,16 +161,16 @@ BOT_LOCALES = {
         'referral_invited': "👤 <b>Dəvət Edilənlər:</b>",
         'referral_earned':  "🪙 <b>Referal Qazancı:</b>",
         'referral_azn':     "💵 <b>Referal AZN:</b>     {amount:,.4f} AZN",
-        'referral_tip':     "💡 <i>Dəvət etdiyiniz hər şəxsin izlədiyi video üçün ({mc} MC), siz avtomatik {bonus} MC qazanırsınız!</i>",
+        'referral_tip':     "💡 <i>Dəvət etdiyiniz hər şəxsin izlədiyi video üçün ({mc} VC), siz avtomatik {bonus} VC qazanırsınız!</i>",
         # ── How it works ──
         'how_title':        "ℹ️ <b>ManatAds Layihəsi Haqqında Məlumat</b>",
         'how_body':         (
             "Platformamızın işləmə məntiqi çox bəsitdir:\n"
-            "1️⃣ '<b>🎬 Video İzlə & {mc} MC Qazan</b>' düyməsinə toxunaraq qısa video reklamlar izliyirsiniz.\n"
-            "2️⃣ Hər uğurlu izləmə üçün balansınıza anında <b>{mc} MC</b> (Manat Coin) əlavə olunur.\n"
+            "1️⃣ '<b>🎬 Video İzlə & {mc} VC Qazan</b>' düyməsinə toxunaraq qısa video reklamlar izliyirsiniz.\n"
+            "2️⃣ Hər uğurlu izləmə üçün balansınıza anında <b>{mc} VC</b> (Vibe Coin) əlavə olunur.\n"
             "3️⃣ Dostlarınızı dəvət edərək onların qazancından da əlavə bonuslar əldə edirsiniz.\n\n"
             "💰 <b>Çıxarış və Balans Mexanizmi:</b>\n"
-            "Yığılan MC xalları sistem daxilində real Azərbaycan Manatına (AZN) konvertasiya olunur. "
+            "Yığılan VC xalları sistem daxilində real Azərbaycan Manatına (AZN) konvertasiya olunur. "
             "Minimum çıxarış limiti 5 AZN-dir. Bu limitə çatdıqdan sonra qazancınızı rahatlıqla "
             "şəxsi elektron pul kisələrinə (məsələn, m10) və ya bank kartınıza nağdlaşdıra bilərsiniz!\n\n"
             "Hər hansı bir sualınız yaranarsa, dəstək komandası ilə əlaqə saxlaya bilərsiniz. "
@@ -199,14 +199,14 @@ BOT_LOCALES = {
         'welcome_new':    (
             "🎉 <b>ManatAds'a hoş geldiniz!</b>\n\n"
             "Merhaba, <b>{name}</b>! 👋\n\n"
-            "📺 Kısa videolar izleyin ve her video için <b>{mc} MC</b> kazanın.\n"
+            "📺 Kısa videolar izleyin ve her video için <b>{mc} VC</b> kazanın.\n"
             "📊 Günlük limit: <b>50 video klik</b> (her aşama 25 video klik)\n"
             "👥 Arkadaşlarınızı davet edin ve <b>ömür boyu %10 bonus</b> kazanın!"
             "\n\n💡 İpucu: Sistemi yenilemek için /start yazabilirsiniz!"
         ),
-        'welcome_back':   "👋 <b>Tekrar hoş geldiniz, {name}!</b>\n\n🪙 Bakiye: <b>{balance} MC</b>\n📈 Toplam kazanç: <b>{total} MC</b>\n\nDaha fazla kazanmaya hazır mısınız? Aşağıdaki butona dokunun! 👇\n\n💡 İpucu: Sistemi yenilemek için /start yazabilirsiniz!",
+        'welcome_back':   "👋 <b>Tekrar hoş geldiniz, {name}!</b>\n\n🪙 Bakiye: <b>{balance} VC</b>\n📈 Toplam kazanç: <b>{total} VC</b>\n\nDaha fazla kazanmaya hazır mısınız? Aşağıdaki butona dokunun! 👇\n\n💡 İpucu: Sistemi yenilemek için /start yazabilirsiniz!",
         'referral_msg':   "\n\n🤝 <b>Sizi bir arkadaşınız davet etti!</b> Kazancınızdan ömür boyu %10 bonus alacaklar.",
-        'btn_video':      "🎬 Video İzle & {mc} MC Kazan",
+        'btn_video':      "🎬 Video İzle & {mc} VC Kazan",
         'btn_balance':    "💰 Bakiyem",
         'btn_referral':   "👥 Referans Programı",
         'btn_how':        "ℹ️ Nasıl Çalışır?",
@@ -215,7 +215,7 @@ BOT_LOCALES = {
         'btn_lang_settings': "🌐 Dil Seçimi / Language ⚙️",
         # ── Balance screen ──
         'balance_title':    "💰 <b>Bakiyeniz</b>",
-        'balance_mc_row':   "🪙 <b>Manat Coins:</b>",
+        'balance_mc_row':   "🪙 <b>Vibe Coins:</b>",
         'balance_earn_row': "📈 <b>Toplam Kazanç:</b>",
         'balance_s1_row':   "1️⃣ <b>Aşama 1:</b>",
         'balance_s2_row':   "2️⃣ <b>Aşama 2:</b>",
@@ -229,16 +229,16 @@ BOT_LOCALES = {
         'referral_invited': "👤 <b>Davet Edilenler:</b>",
         'referral_earned':  "🪙 <b>Referans Kazancı:</b>",
         'referral_azn':     "💵 <b>Referans TRY:</b>     {amount:,.4f} TRY",
-        'referral_tip':     "💡 <i>Davet ettiğiniz her kişinin izlediği video için ({mc} MC), siz otomatik olarak {bonus} MC kazanırsınız!</i>",
+        'referral_tip':     "💡 <i>Davet ettiğiniz her kişinin izlediği video için ({mc} VC), siz otomatik olarak {bonus} VC kazanırsınız!</i>",
         # ── How it works ──
         'how_title':        "ℹ️ <b>ManatAds Projesi Hakkında Bilgi</b>",
         'how_body':         (
             "Platformamızın çalışma mantığı çok basittir:\n"
-            "1️⃣ '<b>🎬 Video İzle & {mc} MC Kazan</b>' butonuna dokunarak kısa video reklamlar izliyorsunuz.\n"
-            "2️⃣ Her başarılı izleme için bakiyenize anında <b>{mc} MC</b> (Manat Coin) ekleniyor.\n"
+            "1️⃣ '<b>🎬 Video İzle & {mc} VC Kazan</b>' butonuna dokunarak kısa video reklamlar izliyorsunuz.\n"
+            "2️⃣ Her başarılı izleme için bakiyenize anında <b>{mc} VC</b> (Vibe Coin) ekleniyor.\n"
             "3️⃣ Arkadaşlarınızı davet ederek onun kazançlarından da ek bonuslar elde ediyorsunuz.\n\n"
             "💰 <b>Çekim ve Bakiye Mekanizması:</b>\n"
-            "Biriktirilen MC puanları sistem içinde gerçek Türk Lirası (TRY) para birimine dönüştürülür. "
+            "Biriktirilen VC puanları sistem içinde gerçek Türk Lirası (TRY) para birimine dönüştürülür. "
             "Minimum çekim limiti 135.00 TRY'dir. Bu limite ulaştıktan sonra kazancınızı kolayca "
             "Papara, İninal numaranıza veya Yerel Banka kartınıza çekebilirsiniz!\n\n"
             "Herhangi bir sorunuz olursa destek ekibiyle iletişime geçebilirsiniz. "
@@ -267,14 +267,14 @@ BOT_LOCALES = {
         'welcome_new':    (
             "🎉 <b>Welcome to ManatAds!</b>\n\n"
             "Hello, <b>{name}</b>! 👋\n\n"
-            "📺 Watch short videos and earn <b>{mc} MC</b> per video.\n"
+            "📺 Watch short videos and earn <b>{mc} VC</b> per video.\n"
             "📊 Daily limit: <b>50 video clicks</b> (25 video clicks per level)\n"
             "👥 Invite your friends and earn a <b>lifetime 10% bonus</b>!"
             "\n\n💡 Tip: You can type /start at any time to refresh the system!"
         ),
-        'welcome_back':   "👋 <b>Welcome back, {name}!</b>\n\n🪙 Balance: <b>{balance} MC</b>\n📈 Total earned: <b>{total} MC</b>\n\nReady to earn more? Tap the button below! 👇\n\n💡 Tip: You can type /start at any time to refresh the system!",
+        'welcome_back':   "👋 <b>Welcome back, {name}!</b>\n\n🪙 Balance: <b>{balance} VC</b>\n📈 Total earned: <b>{total} VC</b>\n\nReady to earn more? Tap the button below! 👇\n\n💡 Tip: You can type /start at any time to refresh the system!",
         'referral_msg':   "\n\n🤝 <b>You were invited by a friend!</b> They will earn a lifetime 10% bonus from your earnings.",
-        'btn_video':      "🎬 Watch Videos & Earn {mc} MC",
+        'btn_video':      "🎬 Watch Videos & Earn {mc} VC",
         'btn_balance':    "💰 My Balance",
         'btn_referral':   "👥 Referral Program",
         'btn_how':        "ℹ️ How It Works?",
@@ -283,7 +283,7 @@ BOT_LOCALES = {
         'btn_lang_settings': "🌐 Change Language / Dil Seçimi ⚙️",
         # ── Balance screen ──
         'balance_title':    "💰 <b>Your Balance</b>",
-        'balance_mc_row':   "🪙 <b>Manat Coins:</b>",
+        'balance_mc_row':   "🪙 <b>Vibe Coins:</b>",
         'balance_earn_row': "📈 <b>Total Earned:</b>",
         'balance_s1_row':   "1️⃣ <b>Level 1:</b>",
         'balance_s2_row':   "2️⃣ <b>Level 2:</b>",
@@ -297,16 +297,16 @@ BOT_LOCALES = {
         'referral_invited': "👤 <b>People Invited:</b>",
         'referral_earned':  "🪙 <b>Referral Earnings:</b>",
         'referral_azn':     "💵 <b>Referral USDT:</b>     {amount:,.4f} USDT",
-        'referral_tip':     "💡 <i>For every video watched by someone you invite ({mc} MC each), you automatically earn {bonus} MC!</i>",
+        'referral_tip':     "💡 <i>For every video watched by someone you invite ({mc} VC each), you automatically earn {bonus} VC!</i>",
         # ── How it works ──
         'how_title':        "ℹ️ <b>About ManatAds</b>",
         'how_body':         (
             "Our platform's logic is very simple:\n"
-            "1️⃣ Tap the '<b>🎬 Watch Videos & Earn {mc} MC</b>' button to watch short video ads.\n"
-            "2️⃣ For each successful watch, <b>{mc} MC</b> (Manat Coin) is instantly added to your balance.\n"
+            "1️⃣ Tap the '<b>🎬 Watch Videos & Earn {mc} VC</b>' button to watch short video ads.\n"
+            "2️⃣ For each successful watch, <b>{mc} VC</b> (Vibe Coin) is instantly added to your balance.\n"
             "3️⃣ Invite your friends and earn extra bonuses from their activity too.\n\n"
             "💰 <b>Withdrawal & Balance Mechanism:</b>\n"
-            "Accumulated MC points are converted to USDT (Crypto) within the system. "
+            "Accumulated VC points are converted to USDT (Crypto) within the system. "
             "The minimum withdrawal amount is 3 USDT. Once you reach this limit, you can easily "
             "cash out to your crypto wallets (e.g., TRC-20, BEP-20) or global payment systems!\n\n"
             "If you have any questions, feel free to contact the support team. "
@@ -335,14 +335,14 @@ BOT_LOCALES = {
         'welcome_new':    (
             "🎉 <b>Добро пожаловать в ManatAds!</b>\n\n"
             "Привет, <b>{name}</b>! 👋\n\n"
-            "📺 Смотрите короткие видео и зарабатывайте <b>{mc} MC</b> за каждое видео.\n"
+            "📺 Смотрите короткие видео и зарабатывайте <b>{mc} VC</b> за каждое видео.\n"
             "📊 Ежедневный лимит: <b>50 video klik</b> (25 video klik за уровень)\n"
             "👥 Приглашайте друзей и зарабатывайте <b>пожизненный бонус 10%</b>!"
             "\n\n💡 Подсказка: Вы можете написать /start в любое время, чтобы обновить систему!"
         ),
-        'welcome_back':   "👋 <b>С возвращением, {name}!</b>\n\n🪙 Баланс: <b>{balance} MC</b>\n📈 Всего заработано: <b>{total} MC</b>\n\nГотовы зарабатывать больше? Нажмите на кнопку ниже! 👇\n\n💡 Подсказка: Вы можете написать /start в любое время, чтобы обновить систему!",
+        'welcome_back':   "👋 <b>С возвращением, {name}!</b>\n\n🪙 Баланс: <b>{balance} VC</b>\n📈 Всего заработано: <b>{total} VC</b>\n\nГотовы зарабатывать больше? Нажмите на кнопку ниже! 👇\n\n💡 Подсказка: Вы можете написать /start в любое время, чтобы обновить систему!",
         'referral_msg':   "\n\n🤝 <b>Вас пригласил друг!</b> Они будут получать пожизненный бонус 10% с ваших заработков.",
-        'btn_video':      "🎬 Смотреть видео & Заработать {mc} MC",
+        'btn_video':      "🎬 Смотреть видео & Заработать {mc} VC",
         'btn_balance':    "💰 Мой баланс",
         'btn_referral':   "👥 Реферальная программа",
         'btn_how':        "ℹ️ Как это работает?",
@@ -351,7 +351,7 @@ BOT_LOCALES = {
         'btn_lang_settings': "🌐 Смена языка / Language ⚙️",
         # ── Balance screen ──
         'balance_title':    "💰 <b>Ваш баланс</b>",
-        'balance_mc_row':   "🪙 <b>Manat Coins:</b>",
+        'balance_mc_row':   "🪙 <b>Vibe Coins:</b>",
         'balance_earn_row': "📈 <b>Всего заработано:</b>",
         'balance_s1_row':   "1️⃣ <b>Уровень 1:</b>",
         'balance_s2_row':   "2️⃣ <b>Уровень 2:</b>",
@@ -365,16 +365,16 @@ BOT_LOCALES = {
         'referral_invited': "👤 <b>Приглашено:</b>",
         'referral_earned':  "🪙 <b>Реферальный заработок:</b>",
         'referral_azn':     "💵 <b>Реферальные USDT:</b> {amount:,.4f} USDT",
-        'referral_tip':     "💡 <i>За каждое видео, просмотренное приглашённым вами пользователем ({mc} MC), вы автоматически получаете {bonus} MC!</i>",
+        'referral_tip':     "💡 <i>За каждое видео, просмотренное приглашённым вами пользователем ({mc} VC), вы автоматически получаете {bonus} VC!</i>",
         # ── How it works ──
         'how_title':        "ℹ️ <b>О проекте ManatAds</b>",
         'how_body':         (
             "Логика работы нашей платформы очень проста:\n"
-            "1️⃣ Нажмите на кнопку '<b>🎬 Смотреть видео & Заработать {mc} MC</b>', чтобы смотреть короткую видеорекламу.\n"
-            "2️⃣ За каждый успешный просмотр на ваш баланс мгновенно зачисляется <b>{mc} MC</b> (Manat Coin).\n"
+            "1️⃣ Нажмите на кнопку '<b>🎬 Смотреть видео & Заработать {mc} VC</b>', чтобы смотреть короткую видеорекламу.\n"
+            "2️⃣ За каждый успешный просмотр на ваш баланс мгновенно зачисляется <b>{mc} VC</b> (Vibe Coin).\n"
             "3️⃣ Приглашайте друзей и получайте дополнительные бонусы с их активности.\n\n"
             "💰 <b>Механизм вывода и баланса:</b>\n"
-            "Накопленные MC-баллы конвертируются в USDT (Крипто) внутри системы. "
+            "Накопленные VC-баллы конвертируются в USDT (Крипто) внутри системы. "
             "Минимальная сумма вывода составляет 3 USDT. Достигнув этого лимита, вы легко можете "
             "вывести средства на свои криптокошельки (например, TRC-20, BEP-20) или глобальные платежные системы!\n\n"
             "Если у вас возникнут вопросы, вы можете обратиться в службу поддержки. "
@@ -796,7 +796,7 @@ async def cb_set_bot_lang(callback: types.CallbackQuery) -> None:
     except Exception:
         pass
 
-    # Build welcome message — use tier-aware MC for new users (always free at first pick)
+    # Build welcome message — use tier-aware VC for new users (always free at first pick)
     name = tg_user.first_name or "friend"
     tier_mc = _get_mc_for_tier(getattr(db_user, 'vip_status', 'free') if db_user else 'free')
     welcome_text = loc['welcome_new'].format(
@@ -815,7 +815,7 @@ async def cb_set_bot_lang(callback: types.CallbackQuery) -> None:
 # ── /balance ────────────────────────────────────────────────────────────
 @router.message(Command("balance"))
 async def cmd_balance(message: types.Message) -> None:
-    """Show the user's current MC balance and AZN equivalent."""
+    """Show the user's current VC balance and AZN equivalent."""
     tg_user = message.from_user
     if not tg_user:
         return
@@ -890,8 +890,8 @@ async def _show_balance(tg_user: types.User, message: types.Message) -> None:
     await message.answer(
         f"{loc['balance_title']}\n\n"
         f"┌─────────────────────────\n"
-        f"│ {loc['balance_mc_row']}  {balance_mc:,.0f} MC\n"
-        f"│ {loc['balance_earn_row']} {total_earned_mc:,.0f} MC\n"
+        f"│ {loc['balance_mc_row']}  {balance_mc:,.0f} VC\n"
+        f"│ {loc['balance_earn_row']} {total_earned_mc:,.0f} VC\n"
         f"├─────────────────────────\n"
         f"│ {loc['balance_s1_row']}  {session_1_count}/{session_limit} klik\n"
         f"│ {loc['balance_s2_row']}  {session_2_count}/{session_2_limit} klik ({s2_status})\n"
@@ -929,9 +929,9 @@ async def _show_referral(tg_user: types.User, message: types.Message) -> None:
     referral_link = f"https://t.me/{bot_username}?start={tg_user.id}"
     
     # Dynamic fiat calculation according to selected language
-    # MC_TO_AZN_RATE=140,000 | Threshold=700,000 MC = 5 AZN
-    # TRY divisor: 700,000 MC / 135 TRY = ~5,185.19 MC/TRY
-    # USDT divisor: 700,000 MC / 3 USDT = ~233,333.33 MC/USDT
+    # MC_TO_AZN_RATE=140,000 | Threshold=700,000 VC = 5 AZN
+    # TRY divisor: 700,000 VC / 135 TRY = ~5,185.19 VC/TRY
+    # USDT divisor: 700,000 VC / 3 USDT = ~233,333.33 VC/USDT
     if lang == 'az':
         ref_fiat = user.referral_earnings_mc / MC_TO_AZN_RATE
     elif lang == 'tr':
@@ -949,7 +949,7 @@ async def _show_referral(tg_user: types.User, message: types.Message) -> None:
         f"<code>{referral_link}</code>\n\n"
         f"┌─────────────────────────\n"
         f"│ {loc['referral_invited']}   {user.referral_count}\n"
-        f"│ {loc['referral_earned']}   {user.referral_earnings_mc:,.0f} MC\n"
+        f"│ {loc['referral_earned']}   {user.referral_earnings_mc:,.0f} VC\n"
         f"│ {loc['referral_azn'].format(amount=ref_fiat)}\n"
         f"└─────────────────────────\n\n"
         + loc['referral_tip'].format(mc=MC_PER_VIDEO, bonus=bonus_per_video)
@@ -1057,7 +1057,7 @@ async def handle_user_text_message(message: types.Message) -> None:
                 "📥 <b>Yeni Çıxarış Sorğusu!</b>\n\n"
                 f"👤 <b>İstifadəçi:</b> {name_display} ({uname_display})\n"
                 f"🆔 <b>Telegram ID:</b> <code>{user.telegram_id}</code>\n"
-                f"🪙 <b>Balans:</b> {user.balance_mc:,.0f} MC\n"
+                f"🪙 <b>Balans:</b> {user.balance_mc:,.0f} VC\n"
                 f"💬 <b>Kart/Məhsul Məlumatları:</b>\n"
                 f"<code>{message.text}</code>"
             )
@@ -1150,7 +1150,7 @@ async def _handle_withdraw(tg_user: types.User, message: types.Message) -> None:
 
     hint = SYSTEM_REFRESH_HINT.get(lang, SYSTEM_REFRESH_HINT['en'])
 
-    # Global hardcoded minimum threshold (700,000 MC = 5 AZN at 140,000 MC/AZN)
+    # Global hardcoded minimum threshold (700,000 VC = 5 AZN at 140,000 VC/AZN)
     if user.balance_mc < _WITHDRAWAL_THRESHOLD_MC:
         if lang == 'az':
             fiat_value = user.balance_mc / MC_TO_AZN_RATE
@@ -1175,11 +1175,11 @@ async def _get_admin_stats_text() -> str:
         total_users_res = await session.execute(select(func.count(User.id)))
         total_users = total_users_res.scalar() or 0
 
-        # ── Dövriyyədəki ümumi MC ──
+        # ── Dövriyyədəki ümumi VC ──
         total_mc_res = await session.execute(select(func.sum(User.balance_mc)))
         total_mc = total_mc_res.scalar() or 0.0
 
-        # ── Ümumi qazanılan MC ──
+        # ── Ümumi qazanılan VC ──
         total_earned_res = await session.execute(select(func.sum(User.total_earned_mc)))
         total_earned = total_earned_res.scalar() or 0.0
 
@@ -1207,8 +1207,8 @@ async def _get_admin_stats_text() -> str:
         f"📊 <b>MANAT QAZAN — ADMİN PANELİ</b>\n"
         f"{'─' * 30}\n\n"
         f"👤 <b>Ümumi İstifadəçi Sayı:</b> {total_users} nəfər\n"
-        f"🪙 <b>Dövriyyədəki Cəmi MC:</b> {total_mc:,.0f} MC\n"
-        f"📈 <b>Ümumi Qazanılan MC:</b> {total_earned:,.0f} MC\n\n"
+        f"🪙 <b>Dövriyyədəki Cəmi VC:</b> {total_mc:,.0f} VC\n"
+        f"📈 <b>Ümumi Qazanılan VC:</b> {total_earned:,.0f} VC\n\n"
         f"🕒 <b>Son Qoşulan 5 İstifadəçi:</b>\n"
         f"{last5_block}"
     )
@@ -1219,7 +1219,7 @@ ADMIN_HELP_TEXT = (
     "• /admin — Ümumi sistem statistikası və idarəetmə paneli.\n"
     "• /users — Bota son qoşulan 20 istifadəçi və balansları.\n"
     "• /info [ID/Username] — İstifadəçinin bütün detallı profili (Məs: /info CVb3rAz).\n"
-    "• /give [ID/Username] [Miqdar] — Balansa manual MC əlavə edir/silir (Məs: /give CVb3rAz 500).\n"
+    "• /give [ID/Username] [Miqdar] — Balansa manual VC əlavə edir/silir (Məs: /give CVb3rAz 500).\n"
     "• /ban [ID] — Şübhəli şəxsi dondurur, botu və Mini App-i onun üçün bağlayır.\n"
     "• /unban [ID] — Ban olunmuş şəxsin blokunu qaldırır.\n"
     "• /broadcast [Mesaj] — Bazardakı BÜTÜN istifadəçilərə kütləvi bildiriş göndərir.\n"
@@ -1276,7 +1276,7 @@ async def cmd_users(message: types.Message) -> None:
     lines = ["👥 Son Aktiv İstifadəçilər:"]
     for i, u in enumerate(users, 1):
         username_str = f"@{u.username}" if u.username else "Yoxdur"
-        lines.append(f"{i}. ID: {u.telegram_id} | {username_str} | Balans: {u.balance_mc:,.0f} MC")
+        lines.append(f"{i}. ID: {u.telegram_id} | {username_str} | Balans: {u.balance_mc:,.0f} VC")
         
     await message.answer("\n".join(lines))
 
@@ -1322,8 +1322,8 @@ async def cmd_info(message: types.Message) -> None:
         f"ℹ️ <b>İstifadəçi Məlumatı:</b>\n"
         f"• <b>Telegram ID:</b> <code>{user.telegram_id}</code>\n"
         f"• <b>Username:</b> {username_display}\n"
-        f"• <b>Hazırkı Balans:</b> {user.balance_mc:,.0f} MC\n"
-        f"• <b>Ümumi Qazanc:</b> {user.total_earned_mc:,.0f} MC\n"
+        f"• <b>Hazırkı Balans:</b> {user.balance_mc:,.0f} VC\n"
+        f"• <b>Ümumi Qazanc:</b> {user.total_earned_mc:,.0f} VC\n"
         f"• <b>Bugünkü Videolar:</b> {total_videos}/{daily_limit} (S1: {session_1}/{session_limit} | S2: {session_2}/{session_limit})\n"
         f"• <b>Dəvət Etdiyi Şəxslər:</b> {user.referral_count} nəfər\n"
         f"• <b>Status:</b> {status_str}"
@@ -1370,9 +1370,9 @@ async def cmd_give(message: types.Message) -> None:
         await message.answer(
             f"✅ <b>Balans yeniləndi!</b>\n\n"
             f"👤 İstifadəçi: <code>{user.telegram_id}</code>\n"
-            f"🪙 Əvvəlki balans: {old_bal:,.0f} MC\n"
-            f"➕ Dəyişiklik: {amount:+,.0f} MC\n"
-            f"💰 Yeni balans: {user.balance_mc:,.0f} MC"
+            f"🪙 Əvvəlki balans: {old_bal:,.0f} VC\n"
+            f"➕ Dəyişiklik: {amount:+,.0f} VC\n"
+            f"💰 Yeni balans: {user.balance_mc:,.0f} VC"
         )
 
 
