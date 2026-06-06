@@ -1,5 +1,5 @@
 """
-ManatAds – Telegram Bot Command Handlers
+VibeCash – Telegram Bot Command Handlers
 ==========================================
 Commands:
   /start [referral_code]  – Register + deep-link referral binding.
@@ -129,7 +129,7 @@ BOT_LOCALES = {
         'choose_lang':    "🌐 <b>Xoş gəldiniz!</b>\n\nZəhmət olmasa bot dilini seçin:",
         'lang_set':       "✅ Dil Azərbaycan dilinə təyin edildi!",
         'welcome_new':    (
-            "🎉 <b>ManatAds-a xoş gəlmisiniz!</b>\n\n"
+            "🎉 <b>VibeCash-a xoş gəlmisiniz!</b>\n\n"
             "Salam, <b>{name}</b>! 👋\n\n"
             "📺 Qısa videolar izləyin və hər video üçün <b>{mc} VC</b> qazanın.\n"
             "📊 Gündəlik limit: <b>50 video klik</b> (hər mərhələ 25 video klik)\n"
@@ -163,7 +163,7 @@ BOT_LOCALES = {
         'referral_azn':     "💵 <b>Referal AZN:</b>     {amount:,.4f} AZN",
         'referral_tip':     "💡 <i>Dəvət etdiyiniz hər şəxsin izlədiyi video üçün ({mc} VC), siz avtomatik {bonus} VC qazanırsınız!</i>",
         # ── How it works ──
-        'how_title':        "ℹ️ <b>ManatAds Layihəsi Haqqında Məlumat</b>",
+        'how_title':        "ℹ️ <b>VibeCash Layihəsi Haqqında Məlumat</b>",
         'how_body':         (
             "Platformamızın işləmə məntiqi çox bəsitdir:\n"
             "1️⃣ '<b>🎬 Video İzlə & {mc} VC Qazan</b>' düyməsinə toxunaraq qısa video reklamlar izliyirsiniz.\n"
@@ -197,7 +197,7 @@ BOT_LOCALES = {
         'choose_lang':    "🌐 <b>Hoş geldiniz!</b>\n\nLütfen bot dilini seçin:",
         'lang_set':       "✅ Dil Türkçe olarak ayarlandı!",
         'welcome_new':    (
-            "🎉 <b>ManatAds'a hoş geldiniz!</b>\n\n"
+            "🎉 <b>VibeCash'a hoş geldiniz!</b>\n\n"
             "Merhaba, <b>{name}</b>! 👋\n\n"
             "📺 Kısa videolar izleyin ve her video için <b>{mc} VC</b> kazanın.\n"
             "📊 Günlük limit: <b>50 video klik</b> (her aşama 25 video klik)\n"
@@ -231,7 +231,7 @@ BOT_LOCALES = {
         'referral_azn':     "💵 <b>Referans TRY:</b>     {amount:,.4f} TRY",
         'referral_tip':     "💡 <i>Davet ettiğiniz her kişinin izlediği video için ({mc} VC), siz otomatik olarak {bonus} VC kazanırsınız!</i>",
         # ── How it works ──
-        'how_title':        "ℹ️ <b>ManatAds Projesi Hakkında Bilgi</b>",
+        'how_title':        "ℹ️ <b>VibeCash Projesi Hakkında Bilgi</b>",
         'how_body':         (
             "Platformamızın çalışma mantığı çok basittir:\n"
             "1️⃣ '<b>🎬 Video İzle & {mc} VC Kazan</b>' butonuna dokunarak kısa video reklamlar izliyorsunuz.\n"
@@ -265,7 +265,7 @@ BOT_LOCALES = {
         'choose_lang':    "🌐 <b>Welcome!</b>\n\nPlease choose the bot language:",
         'lang_set':       "✅ Language set to English!",
         'welcome_new':    (
-            "🎉 <b>Welcome to ManatAds!</b>\n\n"
+            "🎉 <b>Welcome to VibeCash!</b>\n\n"
             "Hello, <b>{name}</b>! 👋\n\n"
             "📺 Watch short videos and earn <b>{mc} VC</b> per video.\n"
             "📊 Daily limit: <b>50 video clicks</b> (25 video clicks per level)\n"
@@ -299,7 +299,7 @@ BOT_LOCALES = {
         'referral_azn':     "💵 <b>Referral USDT:</b>     {amount:,.4f} USDT",
         'referral_tip':     "💡 <i>For every video watched by someone you invite ({mc} VC each), you automatically earn {bonus} VC!</i>",
         # ── How it works ──
-        'how_title':        "ℹ️ <b>About ManatAds</b>",
+        'how_title':        "ℹ️ <b>About VibeCash</b>",
         'how_body':         (
             "Our platform's logic is very simple:\n"
             "1️⃣ Tap the '<b>🎬 Watch Videos & Earn {mc} VC</b>' button to watch short video ads.\n"
@@ -333,7 +333,7 @@ BOT_LOCALES = {
         'choose_lang':    "🌐 <b>Добро пожаловать!</b>\n\nПожалуйста, выберите язык бота:",
         'lang_set':       "✅ Язык установлен на Русский!",
         'welcome_new':    (
-            "🎉 <b>Добро пожаловать в ManatAds!</b>\n\n"
+            "🎉 <b>Добро пожаловать в VibeCash!</b>\n\n"
             "Привет, <b>{name}</b>! 👋\n\n"
             "📺 Смотрите короткие видео и зарабатывайте <b>{mc} VC</b> за каждое видео.\n"
             "📊 Ежедневный лимит: <b>50 video klik</b> (25 video klik за уровень)\n"
@@ -367,7 +367,7 @@ BOT_LOCALES = {
         'referral_azn':     "💵 <b>Реферальные USDT:</b> {amount:,.4f} USDT",
         'referral_tip':     "💡 <i>За каждое видео, просмотренное приглашённым вами пользователем ({mc} VC), вы автоматически получаете {bonus} VC!</i>",
         # ── How it works ──
-        'how_title':        "ℹ️ <b>О проекте ManatAds</b>",
+        'how_title':        "ℹ️ <b>О проекте VibeCash</b>",
         'how_body':         (
             "Логика работы нашей платформы очень проста:\n"
             "1️⃣ Нажмите на кнопку '<b>🎬 Смотреть видео & Заработать {mc} VC</b>', чтобы смотреть короткую видеорекламу.\n"
@@ -1215,7 +1215,7 @@ async def _get_admin_stats_text() -> str:
 
 
 ADMIN_HELP_TEXT = (
-    "🛠️ <b>ManatAds — Aktiv Admin Əmrləri:</b>\n\n"
+    "🛠️ <b>VibeCash — Aktiv Admin Əmrləri:</b>\n\n"
     "• /admin — Ümumi sistem statistikası və idarəetmə paneli.\n"
     "• /users — Bota son qoşulan 20 istifadəçi və balansları.\n"
     "• /info [ID/Username] — İstifadəçinin bütün detallı profili (Məs: /info CVb3rAz).\n"
