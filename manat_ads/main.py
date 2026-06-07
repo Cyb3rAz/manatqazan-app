@@ -1320,8 +1320,70 @@ async def _midnight_broadcast_scheduler() -> None:
 
 # ── Mini App Frontend Serving ──────────────────────────────────────────
 @app.get("/miniapp", response_class=HTMLResponse)
-async def serve_miniapp() -> FileResponse:
-    """Serve the Mini App index.html."""
+async def serve_miniapp() -> HTMLResponse | FileResponse:
+    """Serve the Mini App index.html or Maintenance page."""
+    if os.getenv("MAINTENANCE_MODE", "false").lower() == "true":
+        return HTMLResponse(content="""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Texniki İşlər</title>
+            <style>
+                body {
+                    background-color: #0f172a;
+                    color: #f8fafc;
+                    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    height: 100vh;
+                    margin: 0;
+                    text-align: center;
+                    padding: 20px;
+                }
+                .container {
+                    max-width: 400px;
+                    padding: 30px;
+                    background: rgba(30, 41, 59, 0.7);
+                    border-radius: 16px;
+                    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+                    border: 1px solid rgba(255,255,255,0.1);
+                    backdrop-filter: blur(10px);
+                }
+                h1 {
+                    color: #38bdf8;
+                    margin-top: 0;
+                    font-size: 24px;
+                }
+                p {
+                    color: #94a3b8;
+                    line-height: 1.6;
+                    font-size: 16px;
+                }
+                .icon {
+                    font-size: 48px;
+                    margin-bottom: 20px;
+                    animation: spin 3s linear infinite;
+                    display: inline-block;
+                }
+                @keyframes spin {
+                    0% { transform: rotate(0deg); }
+                    100% { transform: rotate(360deg); }
+                }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="icon">⚙️</div>
+                <h1>Texniki İşlər Gedir</h1>
+                <p>Sistemdə optimallaşdırma və təmir işləri aparılır. Tezliklə yenidən xidmətinizdə olacağıq. Anlayışınız üçün təşəkkür edirik!</p>
+            </div>
+        </body>
+        </html>
+        """)
     return FileResponse(FRONTEND_DIR / "index.html", media_type="text/html")
 
 

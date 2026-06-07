@@ -48,8 +48,9 @@ services:
       - ENVIRONMENT=production
       - MC_PER_VIDEO=100
       - DAILY_VIDEO_LIMIT=24
-      - MC_TO_AZN_RATE=250000
+      - MC_TO_AZN_RATE=140000
       - REFERRAL_BONUS_PERCENT=10
+      - MAINTENANCE_MODE=${MAINTENANCE_MODE:-false}
     env_file:
       - .env
 
