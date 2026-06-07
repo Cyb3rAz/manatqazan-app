@@ -877,6 +877,35 @@ async def claim_welcome_bonus(telegram_id: str) -> JSONResponse:
         return JSONResponse({"ok": True, "message": "Welcome bonus marked as claimed."})
 
 
+@app.post("/api/admin/fix_vc_collision", summary="HOTFIX: Fix legacy VC unit collision")
+async def fix_vc_collision():
+    from sqlalchemy import text
+    try:
+        async with engine.begin() as conn:
+            # 1. Fix balance_mc
+            await conn.execute(text("""
+                UPDATE users 
+                SET balance_mc = (FLOOR(balance_mc) / 140000.0) + (balance_mc - FLOOR(balance_mc))
+                WHERE balance_mc > 50;
+            """))
+            # 2. Fix total_earned_mc
+            await conn.execute(text("""
+                UPDATE users 
+                SET total_earned_mc = (FLOOR(total_earned_mc) / 140000.0) + (total_earned_mc - FLOOR(total_earned_mc))
+                WHERE total_earned_mc > 50;
+            """))
+            # 3. Fix referral_earnings_mc
+            await conn.execute(text("""
+                UPDATE users 
+                SET referral_earnings_mc = (FLOOR(referral_earnings_mc) / 140000.0) + (referral_earnings_mc - FLOOR(referral_earnings_mc))
+                WHERE referral_earnings_mc > 50;
+            """))
+        return JSONResponse({"ok": True, "message": "Production database unit collision fixed successfully."})
+    except Exception as e:
+        import traceback
+        return JSONResponse({"ok": False, "error": str(e), "trace": traceback.format_exc()}, status_code=500)
+
+
 # ── Update User Language ───────────────────────────────────────────────
 class LanguageUpdate(BaseModel):
     language: str
