@@ -1137,7 +1137,7 @@ function renderDashboard() {
 
     // Balans
     const balanceMcEl = document.getElementById("balance-mc");
-    balanceMcEl.textContent = formatNumber(userData.balance_mc);
+    balanceMcEl.textContent = formatNumber(userData.balance_vc !== undefined ? userData.balance_vc : 0);
 
     // Çıxarış Progress Bar -> Natively calculated against 10 AZN target
     const currentMc = userData.balance_mc || 0;
@@ -1278,7 +1278,7 @@ function renderDashboard() {
     if (dashboardTargetEl) dashboardTargetEl.innerText = LOCALES[currentLang].withdrawalTarget;
 
     // Statistika
-    document.getElementById("total-earned").textContent = formatNumber(userData.total_earned_mc);
+    document.getElementById("total-earned").textContent = formatNumber(userData.total_earned_vc !== undefined ? userData.total_earned_vc : 0);
     const dynDailyLimit = userData.daily_limit || (LEVEL_LIMIT * MAX_LEVELS);
     document.getElementById("videos-count").textContent = `${(userData.session_1_count || 0) + (userData.session_2_count || 0)}/${dynDailyLimit}`;
     document.getElementById("referral-count").textContent = userData.referral_count;
@@ -1635,8 +1635,10 @@ async function executeAdSuccessReward(sessionNum) {
     const reward = userData.mc_per_video || 200;
 
     // ── 1. Optimistic UI update ────────────────────────────────────────
-    userData.balance_mc      += reward;
+    userData.balance_mc      += reward; // Keep internal AZN float updated if needed
+    userData.balance_vc      = (userData.balance_vc || 0) + (userData.mc_per_video || 200);
     userData.total_earned_mc += reward;
+    userData.total_earned_vc = (userData.total_earned_vc || 0) + (userData.mc_per_video || 200);
     userData.videos_today    = (userData.videos_today || 0) + 1;
 
     if (sessionNum === 1) {
@@ -2022,6 +2024,9 @@ async function verifyTask(taskId) {
             // Update local balance
             if (userData) {
                 userData.balance_mc = data.new_balance;
+                if (data.new_balance_vc !== undefined) {
+                    userData.balance_vc = data.new_balance_vc;
+                }
                 renderDashboard();
             }
             
