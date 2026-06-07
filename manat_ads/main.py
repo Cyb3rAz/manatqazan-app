@@ -778,6 +778,13 @@ async def get_user_info(telegram_id: str) -> JSONResponse:
         language = getattr(user, 'language', 'az')
         vip_status = getattr(user, 'vip_status', 'free') or 'free'
         vip_expires_at = getattr(user, 'vip_expires_at', None)
+        welcome_bonus_claimed = getattr(user, 'welcome_bonus_claimed', False)
+        
+        # Check eligibility: created within last 12 hours AND not claimed
+        created_at_utc = user.created_at if user.created_at.tzinfo else user.created_at.replace(tzinfo=timezone.utc)
+        is_eligible_for_welcome_bonus = False
+        if not welcome_bonus_claimed and (now - created_at_utc).total_seconds() <= 12 * 3600:
+            is_eligible_for_welcome_bonus = True
 
     # Auto-expire VIP if window passed
     now_check = datetime.now(timezone.utc)
@@ -828,13 +835,44 @@ async def get_user_info(telegram_id: str) -> JSONResponse:
         "session_1_completion_time": session_1_completion_time.isoformat() if session_1_completion_time else None,
         "unlock_at": unlock_at,
         "referral_count": referral_count,
-        "referral_earnings_mc": referral_earnings_mc,
+            "referral_earnings_mc": referral_earnings_mc,
         "mc_per_video": dyn_mc,
         "mc_to_azn_rate": MC_TO_AZN_RATE,
         "language": language,
         "vip_status": vip_status,
         "vip_expires_at": vip_expires_at.isoformat() if vip_expires_at else None,
+        "is_eligible_for_welcome_bonus": is_eligible_for_welcome_bonus,
     })
+
+
+@app.post("/api/user/{telegram_id}/claim_welcome_bonus", summary="Mark welcome bonus as claimed")
+async def claim_welcome_bonus(telegram_id: str) -> JSONResponse:
+    user_str = telegram_id.strip()
+    is_numeric = user_str.isdigit()
+
+    async with async_session() as session:
+        if is_numeric:
+            tg_id = int(user_str)
+            stmt = select(User).where(User.telegram_id == tg_id)
+        else:
+            username_val = user_str.lstrip('@')
+            stmt = select(User).where(User.username == username_val)
+
+        result = await session.execute(stmt)
+        user = result.scalar_one_or_none()
+
+        if not user and is_numeric:
+            stmt = select(User).where(User.username == user_str)
+            result = await session.execute(stmt)
+            user = result.scalar_one_or_none()
+
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found.")
+
+        user.welcome_bonus_claimed = True
+        session.add(user)
+        await session.commit()
+        return JSONResponse({"ok": True, "message": "Welcome bonus marked as claimed."})
 
 
 # ── Update User Language ───────────────────────────────────────────────

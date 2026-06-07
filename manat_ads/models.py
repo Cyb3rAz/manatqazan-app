@@ -48,6 +48,7 @@ class User(Base):
     total_earned_mc: Mapped[float] = mapped_column(Float, default=0.0, server_default="0")
     videos_today: Mapped[int] = mapped_column(Integer, default=0, server_default="0")
     last_watch_date: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    welcome_bonus_claimed: Mapped[bool] = mapped_column(Boolean, default=False, server_default="0")
 
     # ── Sequential Cooldown Session Columns ──
     session_1_count: Mapped[int] = mapped_column(Integer, default=0, server_default="0")

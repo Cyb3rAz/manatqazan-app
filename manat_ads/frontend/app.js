@@ -651,8 +651,7 @@ function completeOnboarding() {
 }
 
 function checkWelcomeBonus() {
-    const welcomeBonusShown = localStorage.getItem('welcome_bonus_shown');
-    if (welcomeBonusShown !== 'true') {
+    if (userData && userData.is_eligible_for_welcome_bonus) {
         const wbModal = document.getElementById("welcome-bonus-modal");
         if (wbModal) {
             wbModal.style.display = "flex";
@@ -661,14 +660,21 @@ function checkWelcomeBonus() {
     }
 }
 
-function closeWelcomeBonusModal() {
-    localStorage.setItem('welcome_bonus_shown', 'true');
+async function closeWelcomeBonusModal() {
     const wbModal = document.getElementById("welcome-bonus-modal");
     if (wbModal) {
         wbModal.classList.remove("active");
         setTimeout(() => {
             wbModal.style.display = "none";
         }, 400);
+    }
+    if (currentUser && currentUser.id) {
+        try {
+            await fetch(`/api/user/${currentUser.id}/claim_welcome_bonus`, { method: "POST" });
+            if (userData) userData.is_eligible_for_welcome_bonus = false;
+        } catch (e) {
+            console.error("Failed to mark welcome bonus as claimed", e);
+        }
     }
 }
 
