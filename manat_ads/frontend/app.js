@@ -160,9 +160,11 @@ const LOCALES = {
         Pro_Line_1: "Gündəlik: 45 video (Daha az yorucu)",
         Pro_Line_2: "Hər gün +11,700 VC-yə qədər böyük qazanc",
         Pro_Line_3: "🚀 130% Turbo Sürətli qazanc gücü",
+        Pro_Line_4: "+310 VC hər tapşırıq üçün",
         Elite_Line_1: "Gündəlik: 40 video (Maksimum qənaət)",
         Elite_Line_2: "Hər gün +14,000 VC-yə qədər rekord qazanc",
         Elite_Line_3: "🔥 175% Ultra Sürət və 0% komissiyalı çıxarış",
+        Elite_Line_4: "+400 VC hər tapşırıq üçün",
         vip_buy_btn: "Satın Al",
         Modal_Confirm_Text: "Siz bu paketi almaq istədiyinizi təsdiqləyirsiniz?", 
         Modal_Btn_Cancel: "İmtina", 
@@ -259,9 +261,11 @@ const LOCALES = {
         Pro_Line_1: "Günlük: 45 video (Daha az yorucu)",
         Pro_Line_2: "Her gün +11.700 VC'ye varan büyük kazanç",
         Pro_Line_3: "🚀 130% Turbo Hızlı kazanç gücü",
+        Pro_Line_4: "+310 VC her görev için",
         Elite_Line_1: "Günlük: 40 video (Maksimum tasarruf)",
         Elite_Line_2: "Her gün +14.000 VC'ye varan rekor kazanç",
         Elite_Line_3: "🔥 175% Ultra Hız ve 0% komisyonlu çekim",
+        Elite_Line_4: "+400 VC her görev için",
         vip_buy_btn: "Satın Al",
         Modal_Confirm_Text: "Bu paketi almak istediğinizi onaylıyor musunuz?", 
         Modal_Btn_Cancel: "İptal", 
@@ -358,9 +362,11 @@ const LOCALES = {
         Pro_Line_1: "Daily: 45 videos (Less exhausting)",
         Pro_Line_2: "Earn up to +11,700 VC massive daily drop",
         Pro_Line_3: "🚀 130% Turbo Earnings velocity multiplier",
+        Pro_Line_4: "+310 VC per task",
         Elite_Line_1: "Daily: 40 videos (Maximum savings)",
         Elite_Line_2: "Earn up to +14,000 VC record daily drop",
         Elite_Line_3: "🔥 175% Ultra Speed & 0% withdrawal commission",
+        Elite_Line_4: "+400 VC per task",
         vip_buy_btn: "Buy Now",
         Modal_Confirm_Text: "Do you confirm buying this package?", 
         Modal_Btn_Cancel: "Cancel", 
@@ -457,9 +463,11 @@ const LOCALES = {
         Pro_Line_1: "Ежедневно: 45 видео (Меньше усталости)",
         Pro_Line_2: "До +11 700 VC крупного заработка каждый день",
         Pro_Line_3: "🚀 130% Турбо Скорость генерации прибыли",
+        Pro_Line_4: "+310 VC за задание",
         Elite_Line_1: "Ежедневно: 40 видео (Максимальная экономия)",
         Elite_Line_2: "До +14 000 VC рекордного заработка каждый день",
         Elite_Line_3: "🔥 175% Ультра Скорость и 0% комиссия на вывод",
+        Elite_Line_4: "+400 VC за задание",
         vip_buy_btn: "Купить",
         Modal_Confirm_Text: "Вы подтверждаете покупку этого пакета?", 
         Modal_Btn_Cancel: "Отмена", 
@@ -1822,7 +1830,12 @@ function switchTab(tabId) {
             try {
                 const taskBlock = window.Adsgram.initTask({ blockId: "task-34381" });
                 taskBlock.show().then((result) => {
-                    showToast(t('rewardSuccess').replace('{amount}', '500'), "success");
+                    let calcAmount = 250;
+                    if (userData && userData.vip_status) {
+                        if (userData.vip_status === "pro") calcAmount = 310;
+                        else if (userData.vip_status === "elite") calcAmount = 400;
+                    }
+                    showToast(t('rewardSuccess').replace('{amount}', calcAmount), "success");
                 }).catch((result) => {
                     console.log("AdsGram task failed or closed", result);
                 });
