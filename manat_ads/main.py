@@ -571,10 +571,10 @@ async def _credit_user(user_id_val: int | str, event_id: str, source: str = "unk
             # Using column + scalar instead of Python-side read-add-write
             # makes each increment atomic at the DB level, eliminating any
             # residual race if the application-layer lock is ever bypassed.
-            final_reward = round(float(mc_reward), 2)
+            final_reward = round(float(mc_reward) / MC_TO_AZN_RATE, 6)
             old_balance = user.balance_mc
-            user.balance_mc      = round(old_balance + final_reward, 2)
-            user.total_earned_mc = round(user.total_earned_mc + final_reward, 2)
+            user.balance_mc      = round(old_balance + final_reward, 6)
+            user.total_earned_mc = round(user.total_earned_mc + final_reward, 6)
             user.videos_today    = user.session_1_count + user.session_2_count
             user.last_watch_date = now
 
@@ -595,7 +595,7 @@ async def _credit_user(user_id_val: int | str, event_id: str, source: str = "unk
             referrer_tg_id: int | None = user.referrer_id
 
             if referrer_tg_id:
-                referrer_bonus = round(final_reward * REFERRAL_BONUS_PERCENT / 100.0, 2)
+                referrer_bonus = round(final_reward * REFERRAL_BONUS_PERCENT / 100.0, 6)
                 # Guard: bonus must be a positive, finite number
                 if referrer_bonus > 0:
                     ref_stmt = (
@@ -606,11 +606,11 @@ async def _credit_user(user_id_val: int | str, event_id: str, source: str = "unk
                     ref_result = await session.execute(ref_stmt)
                     referrer = ref_result.scalar_one_or_none()
                     if referrer:
-                        referrer.balance_mc           = round(referrer.balance_mc + referrer_bonus, 2)
-                        referrer.total_earned_mc      = round(referrer.total_earned_mc + referrer_bonus, 2)
-                        referrer.referral_earnings_mc = round(referrer.referral_earnings_mc + referrer_bonus, 2)
+                        referrer.balance_mc           = round(referrer.balance_mc + referrer_bonus, 6)
+                        referrer.total_earned_mc      = round(referrer.total_earned_mc + referrer_bonus, 6)
+                        referrer.referral_earnings_mc = round(referrer.referral_earnings_mc + referrer_bonus, 6)
                         session.add(referrer)
-                        print(f"[CREDIT] Referral bonus {referrer_bonus:.2f} MC -> user {referrer_tg_id}")
+                        print(f"[CREDIT] Referral bonus {referrer_bonus:.6f} AZN -> user {referrer_tg_id}")
                         logger.info("[CREDIT] Referral bonus %.2f MC -> user %s", referrer_bonus, referrer_tg_id)
 
             # -- Audit record --
@@ -817,7 +817,7 @@ async def get_user_info(telegram_id: str) -> JSONResponse:
         "telegram_id": telegram_id_val,
         "first_name": first_name,
         "balance_mc": balance_mc,
-        "balance_azn": round(balance_mc / MC_TO_AZN_RATE, 4),
+        "balance_azn": round(balance_mc, 4),
         "total_earned_mc": total_earned_mc,
         "videos_today": videos_today,
         "daily_limit": dyn_daily_limit,
@@ -1036,8 +1036,9 @@ async def verify_task(req: VerifyTaskRequest) -> JSONResponse:
             return JSONResponse({"ok": False, "message": "Tapşırıq mükafatı etibarsızdır."}, status_code=400)
 
         # Reward user — both writes staged in the same transaction
-        user.balance_mc      = round(user.balance_mc + task.reward_amount, 2)
-        user.total_earned_mc = round(user.total_earned_mc + task.reward_amount, 2)
+        task_azn_reward = round(float(task.reward_amount) / MC_TO_AZN_RATE, 6)
+        user.balance_mc      = round(user.balance_mc + task_azn_reward, 6)
+        user.total_earned_mc = round(user.total_earned_mc + task_azn_reward, 6)
         new_balance = user.balance_mc
 
         user_task = UserTask(user_id=user.id, task_id=task.id)
