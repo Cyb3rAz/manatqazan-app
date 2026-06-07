@@ -74,11 +74,11 @@ router.callback_query.outer_middleware(BanCheckMiddleware())
 
 # ── Config ──────────────────────────────────────────────────────────────
 MC_TO_AZN_RATE = int(os.getenv("MC_TO_AZN_RATE", "140000"))
-MIN_WITHDRAWAL_TRY = float(os.getenv("MIN_WITHDRAWAL_TRY", "135.00"))
+MIN_WITHDRAWAL_TRY = float(os.getenv("MIN_WITHDRAWAL_TRY", "275.00"))
 MC_PER_VIDEO = int(os.getenv("MC_PER_VIDEO", "300"))
 DAILY_LIMIT = int(os.getenv("DAILY_VIDEO_LIMIT", "24"))
-# Withdrawal threshold = 5 AZN = 700,000 VC (at 140,000 VC/AZN)
-_WITHDRAWAL_THRESHOLD_MC: float = 700_000.0
+# Withdrawal threshold = 10 AZN
+_WITHDRAWAL_THRESHOLD_MC: float = 10.0
 
 
 def _get_mc_for_tier(vip_status: str | None) -> int:
@@ -929,15 +929,12 @@ async def _show_referral(tg_user: types.User, message: types.Message) -> None:
     referral_link = f"https://t.me/{bot_username}?start={tg_user.id}"
     
     # Dynamic fiat calculation according to selected language
-    # MC_TO_AZN_RATE=140,000 | Threshold=700,000 VC = 5 AZN
-    # TRY divisor: 700,000 VC / 135 TRY = ~5,185.19 VC/TRY
-    # USDT divisor: 700,000 VC / 3 USDT = ~233,333.33 VC/USDT
     if lang == 'az':
-        ref_fiat = user.referral_earnings_mc / MC_TO_AZN_RATE
+        ref_fiat = user.referral_earnings_mc
     elif lang == 'tr':
         ref_fiat = user.referral_earnings_mc / (_WITHDRAWAL_THRESHOLD_MC / MIN_WITHDRAWAL_TRY)
     else:  # en, ru — USDT
-        ref_fiat = user.referral_earnings_mc / (_WITHDRAWAL_THRESHOLD_MC / 3.0)
+        ref_fiat = user.referral_earnings_mc / (_WITHDRAWAL_THRESHOLD_MC / 6.0)
 
     bonus_per_video = MC_PER_VIDEO * 10 // 100
 
@@ -1150,14 +1147,14 @@ async def _handle_withdraw(tg_user: types.User, message: types.Message) -> None:
 
     hint = SYSTEM_REFRESH_HINT.get(lang, SYSTEM_REFRESH_HINT['en'])
 
-    # Global hardcoded minimum threshold (700,000 VC = 5 AZN at 140,000 VC/AZN)
+    # Global hardcoded minimum threshold
     if user.balance_mc < _WITHDRAWAL_THRESHOLD_MC:
         if lang == 'az':
-            fiat_value = user.balance_mc / MC_TO_AZN_RATE
+            fiat_value = user.balance_mc
         elif lang == 'tr':
             fiat_value = user.balance_mc / (_WITHDRAWAL_THRESHOLD_MC / MIN_WITHDRAWAL_TRY)
         else:  # en, ru — USDT
-            fiat_value = user.balance_mc / (_WITHDRAWAL_THRESHOLD_MC / 3.0)
+            fiat_value = user.balance_mc / (_WITHDRAWAL_THRESHOLD_MC / 6.0)
         await message.answer(
             loc['withdraw_below_limit'].format(amount=fiat_value) + hint,
             parse_mode="HTML",

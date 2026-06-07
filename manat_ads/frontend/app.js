@@ -1097,46 +1097,26 @@ function renderDashboard() {
     const balanceMcEl = document.getElementById("balance-mc");
     balanceMcEl.textContent = formatNumber(userData.balance_mc);
 
-    // Çıxarış Progress Bar -> Liqa Sistemi
+    // Çıxarış Progress Bar -> Natively calculated against 10 AZN target
     const currentMc = userData.balance_mc || 0;
-    let leagueName = "";
-    let progressPct = 0;
+    
+    // Natively compute progress percentage against the 10 AZN target
+    let progressPct = Math.min(100, Math.max(0, (currentMc / 10) * 100));
+    
+    // Assign a league based on the progress (5 tiers, 20% each)
     let newLeagueIndex = 0;
-
-    // ── League Thresholds (350 VC/video × 50 videos/day = 17,500 VC/day max; Free=200×50=10,000 VC/day) ──
-    //   Bronze   :      0 –  49,999 VC
-    //   Silver   : 50,000 – 149,999 VC
-    //   Gold     :150,000 – 399,999 VC
-    //   Platinum :400,000 – 799,999 VC
-    //   Diamond  :800,000+ VC
-    const LEAGUE_THRESHOLDS = [
-        { limit: 50000,   base: 0,      span: 50000  }, // 0 → Bronze
-        { limit: 150000,  base: 50000,  span: 100000 }, // 1 → Silver
-        { limit: 400000,  base: 150000, span: 250000 }, // 2 → Gold
-        { limit: 800000,  base: 400000, span: 400000 }, // 3 → Platinum
-        { limit: 1600000, base: 800000, span: 800000 }, // 4 → Diamond
-    ];
+    if (progressPct < 20) newLeagueIndex = 0;
+    else if (progressPct < 40) newLeagueIndex = 1;
+    else if (progressPct < 60) newLeagueIndex = 2;
+    else if (progressPct < 80) newLeagueIndex = 3;
+    else newLeagueIndex = 4;
 
     const LEAGUE_NAMES = [
         t('leagueBronze'), t('leagueSilver'), t('leagueGold'),
         t('leaguePlatinum'), t('leagueDiamond')
     ];
 
-    // Determine current tier index (clamp to max tier at cap)
-    newLeagueIndex = LEAGUE_THRESHOLDS.length - 1;
-    for (let i = 0; i < LEAGUE_THRESHOLDS.length; i++) {
-        if (currentMc < LEAGUE_THRESHOLDS[i].limit) {
-            newLeagueIndex = i;
-            break;
-        }
-    }
-
-    leagueName = LEAGUE_NAMES[newLeagueIndex];
-
-    // Progress percentage — guarded against division-by-zero and clamped [0, 100]
-    const _tier = LEAGUE_THRESHOLDS[newLeagueIndex];
-    const _span = _tier.span > 0 ? _tier.span : 1;
-    progressPct = Math.min(100, Math.max(0, ((currentMc - _tier.base) / _span) * 100));
+    let leagueName = LEAGUE_NAMES[newLeagueIndex];
 
     // Check for league upgrade
     if (currentLeagueIndex !== -1 && newLeagueIndex > currentLeagueIndex) {
