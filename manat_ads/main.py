@@ -1319,8 +1319,8 @@ async def _midnight_broadcast_scheduler() -> None:
 
 
 # ── Mini App Frontend Serving ──────────────────────────────────────────
-@app.get("/miniapp", response_class=HTMLResponse)
-async def serve_miniapp() -> HTMLResponse | FileResponse:
+@app.get("/miniapp", response_class=HTMLResponse, response_model=None)
+async def serve_miniapp() -> Any:
     """Serve the Mini App index.html or Maintenance page."""
     if os.getenv("MAINTENANCE_MODE", "false").lower() == "true":
         return HTMLResponse(content="""
