@@ -171,14 +171,14 @@ BOT_LOCALES = {
             "3️⃣ Dostlarınızı dəvət edərək onların qazancından da əlavə bonuslar əldə edirsiniz.\n\n"
             "💰 <b>Çıxarış və Balans Mexanizmi:</b>\n"
             "Yığılan VC xalları sistem daxilində real Azərbaycan Manatına (AZN) konvertasiya olunur. "
-            "Minimum çıxarış limiti 5 AZN-dir. Bu limitə çatdıqdan sonra qazancınızı rahatlıqla "
+            "Minimum çıxarış limiti 10 AZN - 100 AZN təşkil edir. Bu limitə çatdıqdan sonra qazancınızı rahatlıqla "
             "şəxsi elektron pul kisələrinə (məsələn, m10) və ya bank kartınıza nağdlaşdıra bilərsiniz!\n\n"
             "Hər hansı bir sualınız yaranarsa, dəstək komandası ilə əlaqə saxlaya bilərsiniz. "
             "İndi ilk videonuzu izləyin və qazanmağa başlayın! 🚀"
         ),
         # ── Withdraw ──
         'withdraw_below_limit': (
-            "❌ Çıxarış uğursuz oldu. Minimum çıxarış limiti 5 AZN-dir.\n\n"
+            "❌ Çıxarış uğursuz oldu. Minimum çıxarış limiti 10 AZN - 100 AZN təşkil edir.\n\n"
             "💰 Sizin hazırkı balansınız: <b>{amount:.4f} AZN</b>\n\n"
             "🚀 <b>Limiti necə daha sürətli tamamlamaq olar?</b>\n"
             "Daha çox video izləməklə yanaşı, <b>dostlarınızı dəvət edərək</b> daha böyük məbləğlər qazana bilərsiniz! "
@@ -239,14 +239,14 @@ BOT_LOCALES = {
             "3️⃣ Arkadaşlarınızı davet ederek onun kazançlarından da ek bonuslar elde ediyorsunuz.\n\n"
             "💰 <b>Çekim ve Bakiye Mekanizması:</b>\n"
             "Biriktirilen VC puanları sistem içinde gerçek Türk Lirası (TRY) para birimine dönüştürülür. "
-            "Minimum çekim limiti 135.00 TRY'dir. Bu limite ulaştıktan sonra kazancınızı kolayca "
+            "Minimum çekim limiti 275 TRY - 2750 TRY olarak belirlenmiştir. Bu limite ulaştıktan sonra kazancınızı kolayca "
             "Papara, İninal numaranıza veya Yerel Banka kartınıza çekebilirsiniz!\n\n"
             "Herhangi bir sorunuz olursa destek ekibiyle iletişime geçebilirsiniz. "
             "Şimdi ilk videonuzu izleyin ve kazanmaya başlayın! 🚀"
         ),
         # ── Withdraw ──
         'withdraw_below_limit': (
-            "❌ Çekim başarısız oldu. Minimum çekim limiti 135.00 TRY'dir.\n\n"
+            "❌ Çekim başarısız oldu. Minimum çekim limiti 275 TRY - 2750 TRY olarak belirlenmiştir.\n\n"
             "💰 Mevcut bakiyeniz: <b>{amount:.4f} TRY</b>\n\n"
             "🚀 <b>Limiti nasıl daha hızlı tamamlarsınız?</b>\n"
             "Daha fazla video izlemenin yanı sıra, <b>arkadaşlarınızı davet ederek</b> daha büyük miktarlar kazanabilirsiniz! "
@@ -307,14 +307,14 @@ BOT_LOCALES = {
             "3️⃣ Invite your friends and earn extra bonuses from their activity too.\n\n"
             "💰 <b>Withdrawal & Balance Mechanism:</b>\n"
             "Accumulated VC points are converted to USDT (Crypto) within the system. "
-            "The minimum withdrawal amount is 3 USDT. Once you reach this limit, you can easily "
+            "The withdrawal limit is 6 USDT - 60 USDT. Once you reach this limit, you can easily "
             "cash out to your crypto wallets (e.g., TRC-20, BEP-20) or global payment systems!\n\n"
             "If you have any questions, feel free to contact the support team. "
             "Watch your first video now and start earning! 🚀"
         ),
         # ── Withdraw ──
         'withdraw_below_limit': (
-            "❌ Withdrawal failed. Minimum withdrawal amount is 3 USDT.\n\n"
+            "❌ Withdrawal failed. The withdrawal limit is 6 USDT - 60 USDT.\n\n"
             "💰 Your current balance: <b>{amount:.4f} USDT</b>\n\n"
             "🚀 <b>How to reach the limit faster?</b>\n"
             "Watch more videos and <b>invite your friends</b> to earn larger amounts! "
@@ -375,14 +375,14 @@ BOT_LOCALES = {
             "3️⃣ Приглашайте друзей и получайте дополнительные бонусы с их активности.\n\n"
             "💰 <b>Механизм вывода и баланса:</b>\n"
             "Накопленные VC-баллы конвертируются в USDT (Крипто) внутри системы. "
-            "Минимальная сумма вывода составляет 3 USDT. Достигнув этого лимита, вы легко можете "
+            "Лимит на вывод составляет 6 USDT - 60 USDT. Достигнув этого лимита, вы легко можете "
             "вывести средства на свои криптокошельки (например, TRC-20, BEP-20) или глобальные платежные системы!\n\n"
             "Если у вас возникнут вопросы, вы можете обратиться в службу поддержки. "
             "Смотрите первое видео прямо сейчас и начинайте зарабатывать! 🚀"
         ),
         # ── Withdraw ──
         'withdraw_below_limit': (
-            "❌ Вывод не удался. Минимальная сумма вывода — 3 USDT.\n\n"
+            "❌ Вывод не удался. Лимит на вывод составляет 6 USDT - 60 USDT.\n\n"
             "💰 Ваш текущий баланс: <b>{amount:.4f} USDT</b>\n\n"
             "🚀 <b>Как быстрее достичь лимита?</b>\n"
             "Смотрите больше видео и <b>приглашайте друзей</b>, чтобы зарабатывать больше! "
