@@ -84,7 +84,7 @@ const LOCALES = {
         onboardingBtn: "Davam et 🚀",
         greeting: "Xoş gəldiniz,",
         balanceLabel: "BALANSINIZ",
-        withdrawalTarget: "Çıxarış Hədəfi: 5.00 AZN",
+        withdrawalTarget: "Minimum çıxarış: 10 AZN (~5.90 USDT)",
         totalEarned: "ÜMUMİ QAZANC",
         dailyVideos: "BUGÜNKÜ VİDEOLAR",
         invitedLabel: "DƏVƏT OLUNANLAR",
@@ -170,8 +170,8 @@ const LOCALES = {
         Modal_Btn_Cancel: "İmtina", 
         Modal_Btn_Confirm: "Təsdiqlə",
         Modal_Order_Msg: "Salam! Mən {package} paketi almaq istəyirəm. Mənim İD-m: {id}",
-        Withdraw_Range_Notice: "Birdəfəlik Çıxarış Limiti: 5.00 - 100.00 AZN",
-        Dashboard_Range: "Çıxarış: 5 - 100 AZN",
+        Withdraw_Range_Notice: "Birdəfəlik Çıxarış Limiti: 10.00 - 100.00 AZN",
+        Dashboard_Range: "Çıxarış: 10 - 100 AZN",
         menu_leaderboard: "🏆 Liderlər",
         leaderboard_title: "Ən Çox Qazanan Top 25",
         user_label: "İstifadəçi",
@@ -185,7 +185,7 @@ const LOCALES = {
         onboardingBtn: "Devam et 🚀",
         greeting: "Hoş geldiniz,",
         balanceLabel: "BAKİYENİZ",
-        withdrawalTarget: "Çekim Hedefi: 135.00 TRY",
+        withdrawalTarget: "Minimum çekim: 275 TRY (~10 AZN)",
         totalEarned: "TOPLAM KAZANÇ",
         dailyVideos: "BUGÜNKÜ VİDEOLAR",
         invitedLabel: "DAVET EDİLENLER",
@@ -271,8 +271,8 @@ const LOCALES = {
         Modal_Btn_Cancel: "İptal", 
         Modal_Btn_Confirm: "Onayla",
         Modal_Order_Msg: "Merhaba! Ben {package} paketi almak istiyorum. Benim ID'm: {id}",
-        Withdraw_Range_Notice: "Tek Seferlik Çekim Limiti: 135.00 - 2700.00 TL",
-        Dashboard_Range: "Çekim: 135 - 2700 TL",
+        Withdraw_Range_Notice: "Tek Seferlik Çekim Limiti: 275.00 - 2700.00 TL",
+        Dashboard_Range: "Çekim: 275 - 2700 TL",
         menu_leaderboard: "🏆 Liderler",
         leaderboard_title: "En Çok Kazanan Top 25",
         user_label: "Kullanıcı",
@@ -286,7 +286,7 @@ const LOCALES = {
         onboardingBtn: "Continue 🚀",
         greeting: "Welcome,",
         balanceLabel: "YOUR BALANCE",
-        withdrawalTarget: "Withdrawal Target: 5.00 USDT",
+        withdrawalTarget: "Minimum withdrawal: 5.90 USDT (~10 AZN)",
         totalEarned: "TOTAL EARNED",
         dailyVideos: "TODAY'S VIDEOS",
         invitedLabel: "INVITED",
@@ -372,8 +372,8 @@ const LOCALES = {
         Modal_Btn_Cancel: "Cancel", 
         Modal_Btn_Confirm: "Confirm",
         Modal_Order_Msg: "Hello! I want to buy the {package} package. My ID: {id}",
-        Withdraw_Range_Notice: "Single Withdrawal Limit: 3.00 - 60.00 USDT",
-        Dashboard_Range: "Withdrawal: 3 - 60 USDT",
+        Withdraw_Range_Notice: "Single Withdrawal Limit: 5.90 - 60.00 USDT",
+        Dashboard_Range: "Withdrawal: 5.90 - 60 USDT",
         menu_leaderboard: "🏆 Leaderboard",
         leaderboard_title: "Top 25 Earners",
         user_label: "User",
@@ -387,7 +387,7 @@ const LOCALES = {
         onboardingBtn: "Продолжить 🚀",
         greeting: "Добро пожаловать,",
         balanceLabel: "ВАШ БАЛАНС",
-        withdrawalTarget: "Цель вывода: 5.00 USDT",
+        withdrawalTarget: "Минимальная сумма вывода: 5.90 USDT (~10 AZN)",
         totalEarned: "ОБЩИЙ ЗАРАБОТОК",
         dailyVideos: "ВИДЕО СЕГОДНЯ",
         invitedLabel: "ПРИГЛАШЁННЫЕ",
@@ -473,8 +473,8 @@ const LOCALES = {
         Modal_Btn_Cancel: "Отмена", 
         Modal_Btn_Confirm: "Подтвердить",
         Modal_Order_Msg: "Здравствуйте! Я хочу купить пакет {package}. Мой ID: {id}",
-        Withdraw_Range_Notice: "Лимит разового вывода: 3.00 - 60.00 USDT",
-        Dashboard_Range: "Вывод: 3 - 60 USDT",
+        Withdraw_Range_Notice: "Лимит разового вывода: 5.90 - 60.00 USDT",
+        Dashboard_Range: "Вывод: 5.90 - 60 USDT",
         menu_leaderboard: "🏆 Лидеры",
         leaderboard_title: "Топ 25 по заработку",
         user_label: "Пользователь",
@@ -528,7 +528,7 @@ function setLanguage(lang) {
     if (withdrawNoticeEl) withdrawNoticeEl.innerText = LOCALES[currentLang].Withdraw_Range_Notice;
 
     // Minimalist Withdrawal Range on dashboard card
-    document.getElementById('dashboard-target-text').innerText = LOCALES[currentLang].Dashboard_Range;
+    document.getElementById('dashboard-target-text').innerText = LOCALES[currentLang].withdrawalTarget;
 
     // Manually translate tasks-empty-msg if present in DOM
     const emptyMsgEl = document.getElementById('tasks-empty-msg');
@@ -1253,7 +1253,7 @@ function renderDashboard() {
 
     // Withdrawal target label
     const dashboardTargetEl = document.getElementById("dashboard-target-text");
-    if (dashboardTargetEl) dashboardTargetEl.innerText = LOCALES[currentLang].Dashboard_Range;
+    if (dashboardTargetEl) dashboardTargetEl.innerText = LOCALES[currentLang].withdrawalTarget;
 
     // Statistika
     document.getElementById("total-earned").textContent = formatNumber(userData.total_earned_mc);
