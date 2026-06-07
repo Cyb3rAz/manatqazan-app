@@ -144,6 +144,7 @@ const LOCALES = {
         nav_tasks: "Tapşırıqlar",
         nav_leaderboard: "Liderlər",
         task_sub: "Kanallara abunə ol və qazan",
+        sponsorTasksHero: "⚡ Sponsor Tapşırıqlar (Yüksək Qazanc)",
         btn_verify: "Yoxla 🔄",
         btn_join: "Abunə Ol 🚀",
         tasks_empty_msg: "Hazırda aktiv tapşırıq yoxdur.",
@@ -243,6 +244,7 @@ const LOCALES = {
         nav_tasks: "Görevler",
         nav_leaderboard: "Liderler",
         task_sub: "Kanallara abone ol ve kazan",
+        sponsorTasksHero: "⚡ Sponsor Görevler (Yüksek Kazanç)",
         btn_verify: "Kontrol Et 🔄",
         btn_join: "Abone Ol 🚀",
         tasks_empty_msg: "Şu anda aktif görev bulunmamaktadır.",
@@ -342,6 +344,7 @@ const LOCALES = {
         nav_tasks: "Tasks",
         nav_leaderboard: "Leaderboard",
         task_sub: "Subscribe to channels and earn",
+        sponsorTasksHero: "⚡ Sponsored Tasks (High Reward)",
         btn_verify: "Verify 🔄",
         btn_join: "Join 🚀",
         tasks_empty_msg: "There are currently no active tasks.",
@@ -441,6 +444,7 @@ const LOCALES = {
         nav_tasks: "Задания",
         nav_leaderboard: "Лидеры",
         task_sub: "Подписывайся на каналы и зарабатывай",
+        sponsorTasksHero: "⚡ Спонсорские Задания (Высокий Доход)",
         btn_verify: "Проверить 🔄",
         btn_join: "Подписаться 🚀",
         tasks_empty_msg: "На данный момент активных заданий нет.",
@@ -2138,6 +2142,52 @@ function startGlobalStatsPolling() {
     // Poll strictly once every 60 seconds (60000 ms)
     if (!statsFetchIntervalId) {
         statsFetchIntervalId = setInterval(fetchGlobalStats, 60000);
+    }
+}
+
+// ── AdsGram Hero Task Integration ──────────────────────────────────────
+function handleAdsGramHeroTask() {
+    if (!window.Adsgram) {
+        showToast(t('toastAdNotAvail'), "error");
+        return;
+    }
+    
+    // Disable button temporarily to prevent spam clicks
+    const btn = document.getElementById('adsgram-hero-btn');
+    if (btn) {
+        btn.disabled = true;
+        btn.style.opacity = '0.7';
+    }
+
+    try {
+        const taskBlock = window.Adsgram.init({ blockId: "task-34381" });
+        taskBlock.show().then((result) => {
+            // On successful promise resolution
+            // Show reward success toast
+            showToast(t('rewardSuccess').replace('{amount}', '500'), "success");
+            
+            // Re-enable button
+            if (btn) {
+                btn.disabled = false;
+                btn.style.opacity = '1';
+            }
+        }).catch((result) => {
+            // Task failed or closed
+            console.log("AdsGram task failed or closed", result);
+            
+            // Re-enable button
+            if (btn) {
+                btn.disabled = false;
+                btn.style.opacity = '1';
+            }
+        });
+    } catch (e) {
+        console.error("AdsGram init error:", e);
+        showToast(t('toastAdFailed'), "error");
+        if (btn) {
+            btn.disabled = false;
+            btn.style.opacity = '1';
+        }
     }
 }
 
