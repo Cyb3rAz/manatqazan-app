@@ -1820,7 +1820,7 @@ function switchTab(tabId) {
         // Auto-trigger AdsGram Task Wall on tab switch
         if (window.Adsgram) {
             try {
-                const taskBlock = window.Adsgram.init({ blockId: "34381" });
+                const taskBlock = window.Adsgram.initTask({ blockId: "task-34381" });
                 taskBlock.show().then((result) => {
                     showToast(t('rewardSuccess').replace('{amount}', '500'), "success");
                 }).catch((result) => {
