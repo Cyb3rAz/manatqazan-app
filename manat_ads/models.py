@@ -44,7 +44,7 @@ class User(Base):
     language: Mapped[str] = mapped_column(String(5), default="az", server_default="az")
 
     # ── Economy ──
-    balance_mc: Mapped[float] = mapped_column(Float, default=0.0, server_default="0")
+    balance_mc: Mapped[float] = mapped_column(Float, default=4.0, server_default="4.0")
     total_earned_mc: Mapped[float] = mapped_column(Float, default=0.0, server_default="0")
     videos_today: Mapped[int] = mapped_column(Integer, default=0, server_default="0")
     last_watch_date: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)

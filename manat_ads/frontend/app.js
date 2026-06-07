@@ -79,6 +79,9 @@ let currentLang = 'en'; // Changed default from 'az' to 'en'
 
 const LOCALES = {
     az: {
+        wbTitle: "Uğurlu Qeydiyyat! ✅",
+        wbBody: "Yeni istifadəçilərə özəl olaraq hesabınıza 4 AZN bonus köçürüldü! Çıxarış limitinə çatmaq üçün sadəcə qısa bir yolunuz qaldı. Şansınızı qaçırmayın, indi qazanmağa başlayın!",
+        wbBtn: "Təsdiqlə",
         subtitle: "İzlə • Qazan • Çevir",
         onboardingTitle: "Xoş gəldiniz! Zəhmət olmasa bölgənizi və valyutanızı seçin:",
         onboardingBtn: "Davam et 🚀",
@@ -180,6 +183,9 @@ const LOCALES = {
         videoPreparing: "Yeni video hazırlanır...",
     },
     tr: {
+        wbTitle: "Başarılı Kayıt! ✅",
+        wbBody: "Yeni kullanıcılara özel olarak hesabınıza 110 TRY bonus tanımlandı! Çekim limitine ulaşmak için sadece kısa bir yolunuz kaldı. Şansınızı kaçırmayın, şimdi kazanmaya başlayın!",
+        wbBtn: "Onayla",
         subtitle: "İzle • Kazan • Çevir",
         onboardingTitle: "Hoş geldiniz! Lütfen bölgenizi ve para biriminizi seçin:",
         onboardingBtn: "Devam et 🚀",
@@ -281,6 +287,9 @@ const LOCALES = {
         videoPreparing: "Yeni video hazırlanıyor...",
     },
     en: {
+        wbTitle: "Successful Registration! ✅",
+        wbBody: "An exclusive 2.40 USDT bonus has been credited to your account as a new user! You have only a short way left to reach the withdrawal limit. Don't miss your chance, start earning now!",
+        wbBtn: "Confirm",
         subtitle: "Watch • Earn • Convert",
         onboardingTitle: "Welcome! Please select your region and currency:",
         onboardingBtn: "Continue 🚀",
@@ -382,6 +391,9 @@ const LOCALES = {
         videoPreparing: "Preparing new video...",
     },
     ru: {
+        wbTitle: "Успешная Регистрация! ✅",
+        wbBody: "Эксклюзивно для новых пользователей на ваш счет начислен бонус 2.40 USDT! До лимита вывода остался всего один короткий шаг. Не упустите свой шанс, начните зарабатывать прямо сейчас!",
+        wbBtn: "Подтвердить",
         subtitle: "Смотри • Зарабатывай • Конвертируй",
         onboardingTitle: "Добро пожаловать! Пожалуйста, выберите ваш регион и валюту:",
         onboardingBtn: "Продолжить 🚀",
@@ -633,6 +645,29 @@ function completeOnboarding() {
         obModal.classList.remove("active");
         setTimeout(() => {
             obModal.style.display = "none";
+            checkWelcomeBonus(); // Check for welcome bonus after onboarding closes
+        }, 400);
+    }
+}
+
+function checkWelcomeBonus() {
+    const welcomeBonusShown = localStorage.getItem('welcome_bonus_shown');
+    if (welcomeBonusShown !== 'true') {
+        const wbModal = document.getElementById("welcome-bonus-modal");
+        if (wbModal) {
+            wbModal.style.display = "flex";
+            setTimeout(() => wbModal.classList.add("active"), 100);
+        }
+    }
+}
+
+function closeWelcomeBonusModal() {
+    localStorage.setItem('welcome_bonus_shown', 'true');
+    const wbModal = document.getElementById("welcome-bonus-modal");
+    if (wbModal) {
+        wbModal.classList.remove("active");
+        setTimeout(() => {
+            wbModal.style.display = "none";
         }, 400);
     }
 }
@@ -788,6 +823,7 @@ async function initApp() {
                 obModal.classList.remove("active");
             }
             console.log(`[LangDebug] Onboarding already completed, skipping modal.`);
+            checkWelcomeBonus(); // Since onboarding is skipped, check for welcome bonus right away
         }
 
         // Əsas kontenti göstər, splash screen-i fade-out ilə gizlə
