@@ -19,6 +19,7 @@ from sqlalchemy.ext.asyncio import (
     create_async_engine,
 )
 from sqlalchemy.orm import DeclarativeBase
+from sqlalchemy import text
 
 load_dotenv()
 
@@ -64,6 +65,12 @@ async def init_db() -> None:
     """Create all tables that don't yet exist."""
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+        
+        # HOTFIX: Ensure welcome_bonus_claimed exists in production PostgreSQL
+        try:
+            await conn.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS welcome_bonus_claimed BOOLEAN DEFAULT FALSE;"))
+        except Exception as e:
+            print(f"Migration fallback: column may already exist or syntax unsupported: {e}")
 
 
 async def close_db() -> None:
