@@ -192,7 +192,7 @@ async def lifespan(application: FastAPI):
         await bot.set_chat_menu_button(
             menu_button=aio_types.MenuButtonWebApp(
                 text="🚀 Aç",
-                web_app=aio_types.WebAppInfo(url="https://manatqazan.vercel.app/?v=4.8.0")
+                web_app=aio_types.WebAppInfo(url=f"{WEBHOOK_URL}/miniapp?v=4.8.0")
             )
         )
         logger.info("Chat menu button (WebApp) restored.")
@@ -936,7 +936,7 @@ async def update_user_language(telegram_id: int, body: LanguageUpdate) -> JSONRe
         'ru': "🚀 Запустить"
     }
     btn_text = btn_start_texts.get(lang, "🚀 Start")
-    webapp_url = f"https://manatqazan.vercel.app/?lang={lang}&v={int(datetime.now().timestamp())}"
+    webapp_url = f"{WEBHOOK_URL}/miniapp?lang={lang}&v={int(datetime.now().timestamp())}"
     try:
         from aiogram.types import MenuButtonWebApp, WebAppInfo
         await bot.set_chat_menu_button(
@@ -1231,7 +1231,7 @@ _MIDNIGHT_BROADCAST = {
         "button": "Watch Videos 🎬",
     },
 }
-_WEBAPP_URL = f"https://manatqazan.vercel.app/?v={int(datetime.now().timestamp())}"
+_WEBAPP_URL = f"{WEBHOOK_URL}/miniapp?v={int(datetime.now().timestamp())}"
 
 
 async def _midnight_broadcast_scheduler() -> None:
@@ -1281,7 +1281,7 @@ async def _midnight_broadcast_scheduler() -> None:
                         [
                             aio_types.InlineKeyboardButton(
                                 text=btn_label,
-                                web_app=aio_types.WebAppInfo(url=f"https://manatqazan.vercel.app/?v={int(datetime.now().timestamp())}"),
+                                web_app=aio_types.WebAppInfo(url=f"{WEBHOOK_URL}/miniapp?v={int(datetime.now().timestamp())}"),
                             )
                         ]
                     ]

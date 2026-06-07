@@ -8,7 +8,7 @@
  */
 
 // ── Konfiqurasiya ─────────────────────────────────────────────────────
-const API_BASE = "https://definition-specific-bath-proud.trycloudflare.com";
+const API_BASE = window.location.origin;
 // ── 2-Level Ad Pool Configuration ───────────────────────────────────────
 let LEVEL_LIMIT = 25;             // Ads per level — overridden dynamically from API (25 free / 22 PRO / 20 ELITE)
 let LEVEL_2_LIMIT = 25;           // Ads for level 2 — daily_limit - LEVEL_LIMIT
