@@ -655,6 +655,7 @@ async def get_config() -> JSONResponse:
         "adsgram_block_id": os.getenv("ADSGRAM_BLOCK_ID", "31923"),
         "adsgram_platform_id": os.getenv("ADSGRAM_PLATFORM_ID", "30613"),
         "bot_id": os.getenv("BOT_ID", "8960200640"),
+        "maintenance_mode": os.getenv("MAINTENANCE_MODE", "false").lower() == "true",
     })
 
 # ── Global User Stats API ──────────────────────────────────────────────

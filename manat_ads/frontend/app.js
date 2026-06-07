@@ -24,6 +24,57 @@ async function fetchConfigAndInitAdsgram() {
         const resp = await fetch(`${API_BASE}/api/config`);
         if (resp.ok) {
             globalConfig = await resp.json();
+            
+            // Dynamic maintenance mode check
+            if (globalConfig.maintenance_mode === true) {
+                document.body.innerHTML = `
+                <div style="
+                    background-color: #0f172a;
+                    color: #f8fafc;
+                    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    height: 100vh;
+                    margin: 0;
+                    text-align: center;
+                    padding: 20px;
+                    box-sizing: border-box;
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100vw;
+                    z-index: 999999;
+                ">
+                    <div style="
+                        max-width: 400px;
+                        padding: 30px;
+                        background: rgba(30, 41, 59, 0.7);
+                        border-radius: 16px;
+                        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+                        border: 1px solid rgba(255,255,255,0.1);
+                        backdrop-filter: blur(10px);
+                    ">
+                        <div style="
+                            font-size: 48px;
+                            margin-bottom: 20px;
+                            animation: spin 3s linear infinite;
+                            display: inline-block;
+                        ">⚙️</div>
+                        <h1 style="color: #38bdf8; margin-top: 0; font-size: 24px;">Texniki İşlər Gedir</h1>
+                        <p style="color: #94a3b8; line-height: 1.6; font-size: 16px;">Sistemdə optimallaşdırma və təmir işləri aparılır. Tezliklə yenidən xidmətinizdə olacağıq. Anlayışınız üçün təşəkkür edirik!</p>
+                    </div>
+                    <style>
+                        @keyframes spin {
+                            0% { transform: rotate(0deg); }
+                            100% { transform: rotate(360deg); }
+                        }
+                    </style>
+                </div>`;
+                return;
+            }
+
             if (window.Adsgram && globalConfig.adsgram_block_id) {
                 AdController = window.Adsgram.init({ blockId: globalConfig.adsgram_block_id.toString() });
             }
