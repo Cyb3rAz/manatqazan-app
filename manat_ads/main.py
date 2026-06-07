@@ -101,10 +101,10 @@ def _get_vip_params(vip_status: str, now: datetime) -> tuple[int, int, int]:
     """
     tier = (vip_status or "free").lower().strip()
     if tier == "pro":
-        return (22, 45, 260)
+        return (22, 45, 311)
     if tier == "elite":
-        return (20, 40, 350)
-    return (25, 50, 200)  # free / fallback
+        return (20, 40, 420)
+    return (25, 50, 240)  # free / fallback
 
 if not commands_router.parent_router:
     dp.include_router(commands_router)

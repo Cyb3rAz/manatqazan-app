@@ -93,10 +93,10 @@ def _get_mc_for_tier(vip_status: str | None) -> int:
     """
     tier = (vip_status or "free").lower().strip()
     if tier == "pro":
-        return 260
+        return 311
     if tier == "elite":
-        return 350
-    return 200  # free / fallback
+        return 420
+    return 240  # free / fallback
 
 raw_webhook_url = os.getenv("WEBHOOK_URL", "").strip()
 if not raw_webhook_url or "your-domain" in raw_webhook_url:
