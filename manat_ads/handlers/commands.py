@@ -1216,7 +1216,7 @@ async def _get_admin_stats_text() -> str:
 ADMIN_HELP_TEXT = (
     "🛠️ <b>VibeCash — Aktiv Admin Əmrləri:</b>\n\n"
     "• /admin — Ümumi sistem statistikası və idarəetmə paneli.\n"
-    "• /users — Bota son qoşulan 20 istifadəçi və balansları.\n"
+    "• /aktiv — Son 15 aktiv istifadəçi və onların detallı statistikası.\n"
     "• /info [ID/Username] — İstifadəçinin bütün detallı profili (Məs: /info CVb3rAz).\n"
     "• /give [ID/Username] [Miqdar] — Balansa manual VC əlavə edir/silir (Məs: /give CVb3rAz 500).\n"
     "• /ban [ID] — Şübhəli şəxsi dondurur, botu və Mini App-i onun üçün bağlayır.\n"
