@@ -1261,23 +1261,38 @@ async def cb_admin_main_menu(callback: types.CallbackQuery) -> None:
         await callback.message.edit_text(text, reply_markup=ADMIN_PANEL_KB)
 
 
-@router.message(Command("users"), IsAdminFilter())
-async def cmd_users(message: types.Message) -> None:
+@router.message(Command("aktiv"), IsAdminFilter())
+async def cmd_aktiv(message: types.Message) -> None:
     async with async_session() as session:
-        stmt = select(User).order_by(User.id.desc()).limit(20)
+        # Sort by updated_at to get truly active users
+        stmt = select(User).order_by(User.updated_at.desc()).limit(15)
         res = await session.execute(stmt)
         users = res.scalars().all()
         
     if not users:
-        await message.answer("👥 Heç bir istifadəçi tapılmadı.")
+        await message.answer("👥 Heç bir aktiv istifadəçi tapılmadı.")
         return
         
-    lines = ["👥 Son Aktiv İstifadəçilər:"]
+    lines = ["🟢 <b>Son 15 Aktiv İstifadəçi:</b>\n"]
     for i, u in enumerate(users, 1):
         username_str = f"@{u.username}" if u.username else "Yoxdur"
-        lines.append(f"{i}. ID: {u.telegram_id} | {username_str} | Balans: {(u.balance_mc * 140000):,.0f} VC")
+        first_name = u.first_name or "Anonim"
         
-    await message.answer("\n".join(lines))
+        # Calculate stats
+        total_videos = u.session_1_count + u.session_2_count
+        bal_vc = u.balance_mc * 140000
+        earned_vc = u.total_earned_mc * 140000
+        vip_str = "💎 ELITE" if u.vip_status == "elite" else "⭐ PRO" if u.vip_status == "pro" else "🆓 Standart"
+        
+        lines.append(
+            f"<b>{i}. {first_name}</b> ({username_str})\n"
+            f"🆔 <code>{u.telegram_id}</code> | {vip_str}\n"
+            f"💰 Balans: {bal_vc:,.0f} VC | 📈 Qazanc: {earned_vc:,.0f} VC\n"
+            f"🎬 Baxılan Video: {total_videos} | 👥 Referal: {u.referral_count}\n"
+            f"{'─' * 20}"
+        )
+        
+    await message.answer("\n".join(lines), parse_mode="HTML")
 
 
 @router.message(Command("info"), IsAdminFilter())
