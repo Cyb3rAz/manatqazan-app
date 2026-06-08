@@ -1041,7 +1041,8 @@ async function initApp() {
         }
         renderDashboard();
         setLanguage(currentLang);
-        showToast(t('toastLoadFail'), "error");
+        document.getElementById("total-earned").textContent = err.toString();
+        showToast(err.toString(), "error");
     }
 }
 
