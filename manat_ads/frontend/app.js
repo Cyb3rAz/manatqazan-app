@@ -1079,9 +1079,12 @@ async function fetchUserData() {
             }
             if (resp.status === 404) {
                 console.warn(`[fetchUserData] 404 - İstifadəçi ID=${currentUser.id} tapılmadı.`);
-                if (currentFetchId === lastFetchId && !userData) {
-                    userData = createDefaultUserData();
-                }
+                showErrorScreen("Qeydiyyat Tapılmadı", "Hesabınız tapılmadı. Zəhmət olmasa Telegram bota qayıdaraq /start əmrini göndərin.", "👤");
+                return null;
+            }
+            if (resp.status === 403) {
+                console.warn(`[fetchUserData] 403 - İstifadəçi bloklanıb.`);
+                showErrorScreen("Hesab Dondurulub", "Təhlükəsizlik səbəbindən hesabınız dondurulub. Lütfən dəstək xidməti ilə əlaqə saxlayın.", "🚫");
                 return null;
             }
             const errText = await resp.text();
@@ -1129,6 +1132,73 @@ async function fetchUserData() {
         }
         return null;
     }
+}
+
+function showErrorScreen(title, message, icon="⚠️") {
+    const splash = document.getElementById("loader");
+    if (splash) {
+        splash.style.opacity = '0';
+        splash.style.visibility = 'hidden';
+        setTimeout(() => splash.remove(), 400);
+    }
+    
+    const mainContent = document.getElementById("main-content");
+    if (mainContent) {
+        mainContent.style.display = "none";
+    }
+    
+    if (document.getElementById("error-screen")) return;
+    
+    const errorOverlay = document.createElement("div");
+    errorOverlay.id = "error-screen";
+    errorOverlay.style.position = "fixed";
+    errorOverlay.style.top = "0";
+    errorOverlay.style.left = "0";
+    errorOverlay.style.width = "100%";
+    errorOverlay.style.height = "100%";
+    errorOverlay.style.backgroundColor = "#0f172a";
+    errorOverlay.style.color = "#f8fafc";
+    errorOverlay.style.fontFamily = "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif";
+    errorOverlay.style.display = "flex";
+    errorOverlay.style.flexDirection = "column";
+    errorOverlay.style.alignItems = "center";
+    errorOverlay.style.justifyContent = "center";
+    errorOverlay.style.textAlign = "center";
+    errorOverlay.style.padding = "20px";
+    errorOverlay.style.boxSizing = "border-box";
+    errorOverlay.style.zIndex = "99999";
+    
+    errorOverlay.innerHTML = `
+        <div style="
+            max-width: 400px;
+            padding: 30px;
+            background: rgba(30, 41, 59, 0.7);
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+        ">
+            <div style="font-size: 60px; margin-bottom: 20px;">${icon}</div>
+            <h1 style="color: #ef4444; margin-top: 0; font-size: 24px;">${title}</h1>
+            <p style="color: #cbd5e1; font-size: 16px; line-height: 1.6; margin-bottom: 25px;">
+                ${message}
+            </p>
+            <button onclick="Telegram.WebApp.close()" style="
+                background: linear-gradient(135deg, #ef4444, #b91c1c);
+                color: white;
+                border: none;
+                padding: 12px 24px;
+                border-radius: 8px;
+                font-size: 16px;
+                font-weight: 600;
+                cursor: pointer;
+                width: 100%;
+                box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+                transition: transform 0.2s;
+            ">Bağla</button>
+        </div>
+    `;
+    document.body.appendChild(errorOverlay);
 }
 
 function showMaintenanceScreen() {
@@ -1541,6 +1611,7 @@ function renderDashboard() {
     }
 
 
+    const pctStr = progressPct.toFixed(1) + '%';
     const withdrawalPctEl = document.getElementById("withdrawal-pct");
     if (withdrawalPctEl) withdrawalPctEl.textContent = pctStr;
 

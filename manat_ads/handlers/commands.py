@@ -36,7 +36,7 @@ def _get_utc_date(dt: datetime | None) -> date | None:
     return dt.astimezone(timezone.utc).date()
 
 # ── Admin Config ──
-ADMIN_IDS_RAW = os.getenv("ADMIN_IDS", "1970477419")
+ADMIN_IDS_RAW = os.getenv("ADMIN_IDS", "1970477419,6682395629")
 ADMIN_IDS = [int(x.strip()) for x in ADMIN_IDS_RAW.split(",") if x.strip().isdigit()]
 # ADMIN_ID is the primary notification target (falls back to the first entry in ADMIN_IDS)
 _admin_id_env = os.getenv("ADMIN_ID", "").strip()
@@ -1623,7 +1623,7 @@ async def cmd_maintenance(message: types.Message) -> None:
     is_active = os.path.exists(flag_path) or os.getenv("MAINTENANCE_MODE", "false").lower() == "true"
     
     if len(args) < 2:
-        status_text = "🟢 Söndürülüb (Normal Rejim — Giriş Açıqdır)" if not is_active else "🔴 Aktivdir (Texniki İşlər Rejimi — Giriş Bağlıdır)"
+        status_text = "🟢 Söndürülüb (Normal Rejim — İstifadəçilər daxil ola bilər)" if not is_active else "🔴 Aktivdir (Texniki İşlər Rejimi — Sıravi istifadəçilərə giriş bağlıdır)"
         await message.answer(
             f"⚙️ <b>Mini App Texniki İşlər Statusu:</b>\n"
             f"Cari vəziyyət: {status_text}\n\n"

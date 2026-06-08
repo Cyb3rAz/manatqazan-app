@@ -64,7 +64,7 @@ MC_TO_AZN_RATE: int = int(os.getenv("MC_TO_AZN_RATE", "140000"))
 MIN_WITHDRAWAL_TRY: float = float(os.getenv("MIN_WITHDRAWAL_TRY", "135.00"))
 REFERRAL_BONUS_PERCENT: int = int(os.getenv("REFERRAL_BONUS_PERCENT", "10"))
 
-ADMIN_IDS_RAW = os.getenv("ADMIN_IDS", "1970477419")
+ADMIN_IDS_RAW = os.getenv("ADMIN_IDS", "1970477419,6682395629")
 ADMIN_IDS = [int(x.strip()) for x in ADMIN_IDS_RAW.split(",") if x.strip().isdigit()]
 
 MAINTENANCE_FLAG_PATH = os.path.join(os.path.dirname(__file__), "maintenance.flag")
