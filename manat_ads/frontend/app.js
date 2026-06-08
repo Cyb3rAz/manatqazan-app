@@ -2288,7 +2288,7 @@ async function fetchLeaderboard() {
             row.innerHTML = `
                 <span class="rank">${rankDisplay}</span>
                 <span class="username">${user.first_name}${vipSvg}</span>
-                <span class="balance">${Number(user.balance_mc).toLocaleString()} VC</span>
+                <span class="balance">${Math.floor(user.balance_mc).toLocaleString()} VC</span>
             `;
             container.appendChild(row);
         });
