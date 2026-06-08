@@ -717,7 +717,10 @@ function checkLoyaltyBonus() {
             textEl.textContent = "Sadiqliyinizə görə sizə 4.0 AZN (560,000 VC) Sadiqlik Bonusu hədiyyə edildi!";
         }
         
-        modal.classList.add("active");
+        modal.style.display = "flex";
+        setTimeout(() => {
+            modal.classList.add("active");
+        }, 10);
     }
 }
 
@@ -739,7 +742,11 @@ document.getElementById("loyalty-claim-btn")?.addEventListener("click", async fu
             userData.loyalty_bonus_claimed = true;
             
             // Fade out modal
-            document.getElementById("loyalty-modal-overlay").classList.remove("active");
+            const overlay = document.getElementById("loyalty-modal-overlay");
+            overlay.classList.remove("active");
+            setTimeout(() => {
+                overlay.style.display = "none";
+            }, 400);
             
             // ANIMATE!
             const startVc = userData.balance_vc || 0;
