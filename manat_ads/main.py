@@ -692,7 +692,7 @@ async def get_leaderboard():
         for row in users:
             leaderboard.append({
                 "first_name": row.first_name or "Anonim",
-                "balance_mc": row.balance_mc,
+                "balance_mc": row.balance_mc * 140000,
                 "vip_status": row.vip_status
             })
             
