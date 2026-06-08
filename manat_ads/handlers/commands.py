@@ -1222,7 +1222,9 @@ ADMIN_HELP_TEXT = (
     "• /ban [ID] — Şübhəli şəxsi dondurur, botu və Mini App-i onun üçün bağlayır.\n"
     "• /unban [ID] — Ban olunmuş şəxsin blokunu qaldırır.\n"
     "• /broadcast [Mesaj] — Bazardakı BÜTÜN istifadəçilərə kütləvi bildiriş göndərir.\n"
-    "• /setvip [ID] [pro/elite] — 7 Günlük VIP təyin edər."
+    "• /setvip [ID] [pro/elite] — 7 Günlük VIP təyin edər.\n"
+    "• /find [Ad/Username/ID] — İstifadəçiləri axtarır.\n"
+    "• /maintenance [on/off] — Texniki işlər rejimini tənzimləyir."
 )
 
 ADMIN_PANEL_KB = InlineKeyboardMarkup(inline_keyboard=[
@@ -1559,3 +1561,90 @@ async def cmd_setvip(message: types.Message) -> None:
             f"Status: <b>{status.upper()}</b>\n"
             f"Müddət: 7 Gün"
         )
+
+
+@router.message(Command("find"), IsAdminFilter())
+async def cmd_find(message: types.Message) -> None:
+    args = message.text.split(maxsplit=1)
+    if len(args) < 2:
+        await message.answer("⚠️ Lütfən axtarış sözünü yazın.\nMəsələn: <code>/find Cyber</code> və ya <code>/find 1970477419</code>", parse_mode="HTML")
+        return
+        
+    query = args[1].strip()
+    if len(query) < 2:
+        await message.answer("⚠️ Axtarış sözü ən azı 2 simvoldan ibarət olmalıdır.")
+        return
+        
+    async with async_session() as session:
+        from sqlalchemy import or_, cast, String
+        # Search username, first_name, last_name, or telegram_id (cast to string for partial matching)
+        stmt = select(User).where(
+            or_(
+                User.username.ilike(f"%{query}%"),
+                User.first_name.ilike(f"%{query}%"),
+                User.last_name.ilike(f"%{query}%"),
+                cast(User.telegram_id, String).like(f"%{query}%")
+            )
+        ).limit(21)
+        
+        res = await session.execute(stmt)
+        users = res.scalars().all()
+        
+        if not users:
+            await message.answer(f"🔍 <b>'{query}'</b> üçün heç bir istifadəçi tapılmadı.", parse_mode="HTML")
+            return
+            
+        lines = []
+        for u in users[:20]:
+            username_str = f"@{u.username}" if u.username else "Yoxdur"
+            name_str = f"{u.first_name or ''} {u.last_name or ''}".strip() or "Adsız"
+            balance_vc = u.balance_mc * 140000
+            lines.append(
+                f"👤 <b>{name_str}</b> ({username_str})\n"
+                f"  • ID: <code>{u.telegram_id}</code>\n"
+                f"  • Balans: <code>{balance_vc:,.0f} VC</code>"
+            )
+            
+        result_text = f"🔍 <b>Axtarış nəticəsi ('{query}'):</b>\n\n" + "\n\n".join(lines)
+        if len(users) > 20:
+            result_text += "\n\n⚠️ <i>20-dən çox nəticə tapıldı. Lütfən axtarışı dəqiqləşdirin.</i>"
+            
+        await message.answer(result_text, parse_mode="HTML")
+
+
+@router.message(Command("maintenance"), IsAdminFilter())
+async def cmd_maintenance(message: types.Message) -> None:
+    args = message.text.split(maxsplit=1)
+    
+    # Path to maintenance flag file in manat_ads/maintenance.flag
+    flag_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "maintenance.flag")
+    
+    # Check current status
+    is_active = os.path.exists(flag_path) or os.getenv("MAINTENANCE_MODE", "false").lower() == "true"
+    
+    if len(args) < 2:
+        status_text = "🟢 AÇIQ (Normal Rejim)" if not is_active else "🔴 QAPALI (Texniki İşlər Rejimi)"
+        await message.answer(
+            f"⚙️ <b>Mini App Texniki İşlər Statusu:</b>\n"
+            f"Cari vəziyyət: {status_text}\n\n"
+            f"Dəyişmək üçün:\n"
+            f"• <code>/maintenance on</code> — Texniki rejimi aktivləşdirir (Sıravi istifadəçilər bloklanır).\n"
+            f"• <code>/maintenance off</code> — Texniki rejimi deaktivləşdirir (Normal fəaliyyət bərpa olunur).",
+            parse_mode="HTML"
+        )
+        return
+        
+    action = args[1].strip().lower()
+    if action == "on":
+        with open(flag_path, "w") as f:
+            f.write("true")
+        await message.answer("🔴 <b>Texniki işlər rejimi AKTİVLƏŞDİRİLDİ!</b>\nSıravi istifadəçilərin Mini App-ə girişi bağlandı. Yalnız adminlər daxil ola bilər.", parse_mode="HTML")
+    elif action == "off":
+        if os.path.exists(flag_path):
+            os.remove(flag_path)
+        env_msg = ""
+        if os.getenv("MAINTENANCE_MODE", "false").lower() == "true":
+            env_msg = "\n\n⚠️ <i>Qeyd: .env faylında MAINTENANCE_MODE=true təyin edilib. Tam söndürmək üçün docker-compose.yml-də onu false etməlisiniz.</i>"
+        await message.answer(f"🟢 <b>Texniki işlər rejimi DEAKTİVLƏŞDİRİLDİ!</b>\nBütün istifadəçilər normal rejimdə daxil ola bilər.{env_msg}", parse_mode="HTML")
+    else:
+        await message.answer("⚠️ Yanlış parametr. Lütfən <code>on</code> və ya <code>off</code> yazın.", parse_mode="HTML")

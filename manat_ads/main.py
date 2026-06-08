@@ -64,6 +64,16 @@ MC_TO_AZN_RATE: int = int(os.getenv("MC_TO_AZN_RATE", "140000"))
 MIN_WITHDRAWAL_TRY: float = float(os.getenv("MIN_WITHDRAWAL_TRY", "135.00"))
 REFERRAL_BONUS_PERCENT: int = int(os.getenv("REFERRAL_BONUS_PERCENT", "10"))
 
+ADMIN_IDS_RAW = os.getenv("ADMIN_IDS", "1970477419")
+ADMIN_IDS = [int(x.strip()) for x in ADMIN_IDS_RAW.split(",") if x.strip().isdigit()]
+
+MAINTENANCE_FLAG_PATH = os.path.join(os.path.dirname(__file__), "maintenance.flag")
+
+def is_maintenance_mode() -> bool:
+    if os.getenv("MAINTENANCE_MODE", "false").lower() == "true":
+        return True
+    return os.path.exists(MAINTENANCE_FLAG_PATH)
+
 WEBHOOK_PATH = f"/webhook/{BOT_TOKEN}"
 FRONTEND_DIR = Path(__file__).resolve().parent / "frontend"
 
@@ -727,6 +737,14 @@ async def get_user_info(telegram_id: str) -> JSONResponse:
             logger.error("[USER-INFO] User %s NOT FOUND in database!", telegram_id)
             raise HTTPException(status_code=404, detail="User not found.")
 
+        # Maintenance mode check
+        if is_maintenance_mode() and user.telegram_id not in ADMIN_IDS:
+            logger.warning("[MAINTENANCE] Non-admin user %s blocked by maintenance mode.", user.telegram_id)
+            return JSONResponse(
+                {"ok": False, "maintenance": True, "message": "Sistemdə texniki işlər aparılır."},
+                status_code=503
+            )
+
         if not user.is_active:
             logger.warning("[USER-INFO] Banned user %s tried to fetch user info!", telegram_id)
             raise HTTPException(status_code=403, detail="Hesabınız dondurulub.")
@@ -1086,7 +1104,7 @@ async def add_task(req: AddTaskRequest) -> JSONResponse:
         
     telegram_id = user_data["id"]
     
-    if int(telegram_id) != 1970477419:
+    if int(telegram_id) not in ADMIN_IDS:
         logger.warning("[ADMIN-ADD-TASK] Unauthorized access attempt by ID %s.", telegram_id)
         return JSONResponse({"ok": False, "message": "Forbidden"}, status_code=403)
         
@@ -1366,69 +1384,7 @@ async def _midnight_broadcast_scheduler() -> None:
 # ── Mini App Frontend Serving ──────────────────────────────────────────
 @app.get("/miniapp", response_class=HTMLResponse, response_model=None)
 async def serve_miniapp() -> Any:
-    """Serve the Mini App index.html or Maintenance page."""
-    if os.getenv("MAINTENANCE_MODE", "false").lower() == "true":
-        return HTMLResponse(content="""
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <meta charset="utf-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Texniki İşlər</title>
-            <style>
-                body {
-                    background-color: #0f172a;
-                    color: #f8fafc;
-                    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-                    display: flex;
-                    flex-direction: column;
-                    align-items: center;
-                    justify-content: center;
-                    height: 100vh;
-                    margin: 0;
-                    text-align: center;
-                    padding: 20px;
-                }
-                .container {
-                    max-width: 400px;
-                    padding: 30px;
-                    background: rgba(30, 41, 59, 0.7);
-                    border-radius: 16px;
-                    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-                    border: 1px solid rgba(255,255,255,0.1);
-                    backdrop-filter: blur(10px);
-                }
-                h1 {
-                    color: #38bdf8;
-                    margin-top: 0;
-                    font-size: 24px;
-                }
-                p {
-                    color: #94a3b8;
-                    line-height: 1.6;
-                    font-size: 16px;
-                }
-                .icon {
-                    font-size: 48px;
-                    margin-bottom: 20px;
-                    animation: spin 3s linear infinite;
-                    display: inline-block;
-                }
-                @keyframes spin {
-                    0% { transform: rotate(0deg); }
-                    100% { transform: rotate(360deg); }
-                }
-            </style>
-        </head>
-        <body>
-            <div class="container">
-                <div class="icon">⚙️</div>
-                <h1>Texniki İşlər Gedir</h1>
-                <p>Sistemdə optimallaşdırma və təmir işləri aparılır. Tezliklə yenidən xidmətinizdə olacağıq. Anlayışınız üçün təşəkkür edirik!</p>
-            </div>
-        </body>
-        </html>
-        """)
+    """Serve the Mini App index.html."""
     return FileResponse(FRONTEND_DIR / "index.html", media_type="text/html")
 
 

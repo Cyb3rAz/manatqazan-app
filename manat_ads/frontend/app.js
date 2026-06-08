@@ -235,6 +235,8 @@ const LOCALES = {
         balance_label: "Qazanc",
         global_users: "istifadəçi",
         videoPreparing: "Yeni video hazırlanır...",
+        maint_title: "Texniki İşlər Gedir",
+        maint_desc: "Sistemdə optimallaşdırma və təmir işləri aparılır. Tezliklə yenidən xidmətinizdə olacağıq. Anlayışınız üçün təşəkkür edirik!",
     },
     tr: {
         wbTitle: "Başarılı Kayıt! ✅",
@@ -342,6 +344,8 @@ const LOCALES = {
         balance_label: "Kazanç",
         global_users: "kullanıcı",
         videoPreparing: "Yeni video hazırlanıyor...",
+        maint_title: "Teknik Çalışma Yapılıyor",
+        maint_desc: "Sistemde optimizasyon ve bakım çalışmaları yapılıyor. Yakında tekrar hizmetinizde olacağız. Anlayışınız için teşekkür ederiz!",
     },
     en: {
         wbTitle: "Successful Registration! ✅",
@@ -449,6 +453,8 @@ const LOCALES = {
         balance_label: "Earnings",
         global_users: "users",
         videoPreparing: "Preparing new video...",
+        maint_title: "Maintenance Underway",
+        maint_desc: "System optimization and maintenance are in progress. We will be back online shortly. Thank you for your patience!",
     },
     ru: {
         wbTitle: "Успешная Регистрация! ✅",
@@ -553,6 +559,8 @@ const LOCALES = {
         balance_label: "Заработок",
         global_users: "пользователей",
         videoPreparing: "Подготовка нового видео...",
+        maint_title: "Технические работы",
+        maint_desc: "На сервере ведутся технические работы. Мы скоро вернемся в строй. Спасибо за ваше понимание!",
     }
 };
 
@@ -854,6 +862,7 @@ function animateLoyaltyClaim(startVc, endVc) {
 const tg = window.Telegram?.WebApp;
 let currentUser = null;
 let userData = null;
+let isMaintenanceActive = false;
 
 // ── Başlanğıc ─────────────────────────────────────────────────────────
 document.addEventListener("DOMContentLoaded", () => {
@@ -936,6 +945,11 @@ async function initApp() {
 
         // Backend-dən istifadəçi məlumatlarını çək
         await fetchUserData();
+
+        if (isMaintenanceActive) {
+            console.log("Texniki işlər rejimi aktivdir. Yükləmə dayandırıldı.");
+            return;
+        }
 
         // Phase 2 (Post-Network Hydration Sync)
         let finalLang = bootLang;
@@ -1051,6 +1065,18 @@ async function fetchUserData() {
         console.log(`[fetchUserData] Cavab #${currentFetchId} alındı: status=${resp.status}`);
 
         if (!resp.ok) {
+            if (resp.status === 503) {
+                try {
+                    const errData = await resp.clone().json();
+                    if (errData && errData.maintenance) {
+                        isMaintenanceActive = true;
+                        showMaintenanceScreen();
+                        return null;
+                    }
+                } catch(e) {
+                    console.error("Failed to parse maintenance JSON error:", e);
+                }
+            }
             if (resp.status === 404) {
                 console.warn(`[fetchUserData] 404 - İstifadəçi ID=${currentUser.id} tapılmadı.`);
                 if (currentFetchId === lastFetchId && !userData) {
@@ -1103,6 +1129,77 @@ async function fetchUserData() {
         }
         return null;
     }
+}
+
+function showMaintenanceScreen() {
+    // Hide the loader screen
+    const splash = document.getElementById("loader");
+    if (splash) {
+        splash.style.opacity = '0';
+        splash.style.visibility = 'hidden';
+        setTimeout(() => splash.remove(), 400);
+    }
+    
+    // Hide main content
+    const mainContent = document.getElementById("main-content");
+    if (mainContent) {
+        mainContent.style.display = "none";
+    }
+    
+    // Check if maintenance screen already exists
+    if (document.getElementById("maintenance-screen")) return;
+    
+    // Create maintenance overlay
+    const maintenanceOverlay = document.createElement("div");
+    maintenanceOverlay.id = "maintenance-screen";
+    maintenanceOverlay.style.position = "fixed";
+    maintenanceOverlay.style.top = "0";
+    maintenanceOverlay.style.left = "0";
+    maintenanceOverlay.style.width = "100%";
+    maintenanceOverlay.style.height = "100%";
+    maintenanceOverlay.style.backgroundColor = "#0f172a";
+    maintenanceOverlay.style.color = "#f8fafc";
+    maintenanceOverlay.style.fontFamily = "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif";
+    maintenanceOverlay.style.display = "flex";
+    maintenanceOverlay.style.flexDirection = "column";
+    maintenanceOverlay.style.alignItems = "center";
+    maintenanceOverlay.style.justifyContent = "center";
+    maintenanceOverlay.style.textAlign = "center";
+    maintenanceOverlay.style.padding = "20px";
+    maintenanceOverlay.style.boxSizing = "border-box";
+    maintenanceOverlay.style.zIndex = "99999";
+    
+    const titleText = t('maint_title') || "Texniki İşlər Gedir";
+    const descText = t('maint_desc') || "Sistemdə optimallaşdırma və təmir işləri aparılır. Tezliklə yenidən xidmətinizdə olacağıq. Anlayışınız üçün təşəkkür edirik!";
+    
+    maintenanceOverlay.innerHTML = `
+        <div style="
+            max-width: 400px;
+            padding: 30px;
+            background: rgba(30, 41, 59, 0.7);
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+        ">
+            <div style="
+                font-size: 50px;
+                margin-bottom: 20px;
+                animation: spin 3s linear infinite;
+                display: inline-block;
+            ">⚙️</div>
+            <h1 style="color: #38bdf8; margin-top: 0; font-size: 24px;">${titleText}</h1>
+            <p style="color: #94a3b8; line-height: 1.6; font-size: 16px;">${descText}</p>
+        </div>
+        <style>
+            @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+            }
+        </style>
+    `;
+    
+    document.body.appendChild(maintenanceOverlay);
 }
 
 function syncAdStateFromUserData() {
