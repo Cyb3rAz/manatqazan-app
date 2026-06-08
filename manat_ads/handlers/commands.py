@@ -867,8 +867,9 @@ async def _show_balance(tg_user: types.User, message: types.Message) -> None:
     if session_1_completion_time is not None and session_1_completion_time.tzinfo is None:
         session_1_completion_time = session_1_completion_time.replace(tzinfo=timezone.utc)
         
-    balance_mc = user.balance_mc
-    total_earned_mc = user.total_earned_mc
+    MC_TO_AZN_RATE = 140000
+    balance_mc = user.balance_mc * MC_TO_AZN_RATE
+    total_earned_mc = user.total_earned_mc * MC_TO_AZN_RATE
 
     # Calculate lock text using localized strings
     s2_status = loc['balance_locked']
@@ -1054,7 +1055,7 @@ async def handle_user_text_message(message: types.Message) -> None:
                 "📥 <b>Yeni Çıxarış Sorğusu!</b>\n\n"
                 f"👤 <b>İstifadəçi:</b> {name_display} ({uname_display})\n"
                 f"🆔 <b>Telegram ID:</b> <code>{user.telegram_id}</code>\n"
-                f"🪙 <b>Balans:</b> {user.balance_mc:,.0f} VC\n"
+                f"🪙 <b>Balans:</b> {(user.balance_mc * 140000):,.0f} VC\n"
                 f"💬 <b>Kart/Məhsul Məlumatları:</b>\n"
                 f"<code>{message.text}</code>"
             )
