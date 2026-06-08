@@ -345,25 +345,47 @@ async def adsgram_reward_get(
 
     print(f"[ADSGRAM-GET] userId={user_id_val!r} | blockId={block_id!r}")
 
-    # Log and bypass signature/secret verification
-    sig_keys = ["hash", "signature", "sign", "secret_key", "secret"]
-    received_sigs = {k: params.get(k) for k in sig_keys if k in params}
+    # -- HMAC-SHA256 Signature Verification --
+    received_signature = params.get("signature") or params.get("hash") or params.get("sign")
+    
+    if not received_signature:
+        logger.error("[ADSGRAM-GET] REJECTED: Missing signature in request.")
+        raise HTTPException(status_code=403, detail="Forbidden: Missing signature")
 
-    print(f"[ADSGRAM-GET] Security params: {received_sigs}")
-    logger.warning(
-        "[SIGNATURE-DEBUG-GET] Received security parameters: %s | Local SECRET=%r (bypass active)",
-        received_sigs,
-        ADSGRAM_SECRET[:10] + "..." if ADSGRAM_SECRET else "(empty)"
-    )
+    # Exclude signature fields from the hash calculation
+    verify_params = {k: v for k, v in params.items() if k not in ["signature", "hash", "sign"]}
+    
+    # Adsgram standard verification:
+    # 1. Sort the parameters alphabetically by key.
+    # 2. Concatenate them into a string.
+    # Example string format: "blockId=123&eventId=xyz&userId=123..." (or just values depending on the specific integration)
+    # The prompt specified "sort the keys alphabetically, concatenate them into a string"
+    # Actually Adsgram generally sorts keys, creates `key=value` strings, joins by `&`. Let's use standard URL encoding format without actual url encoding unless needed.
+    # Often it is just joined values or key=value joined by empty string or `&`. 
+    # Based on prompt: "sort the keys alphabetically, concatenate them into a string"
+    
+    sorted_keys = sorted(verify_params.keys())
+    data_check_string = "".join([f"{k}={verify_params[k]}" for k in sorted_keys])
+    
+    # Calculate HMAC-SHA256
+    secret_key = ADSGRAM_SECRET.encode()
+    calculated_hash = hmac.new(secret_key, data_check_string.encode(), hashlib.sha256).hexdigest()
+    
+    if calculated_hash != received_signature:
+        logger.error(
+            "[ADSGRAM-GET] REJECTED: Signature mismatch! IP=%s | Calculated=%s | Received=%s",
+            request.client.host if request.client else "unknown", calculated_hash, received_signature
+        )
+        raise HTTPException(status_code=403, detail="Forbidden: Invalid signature")
+        
+    logger.info("[ADSGRAM-GET] Signature verified successfully.")
 
     if not user_id_val:
-        print(f"[ADSGRAM-GET] ERROR: userId not found! All params: {params}")
         logger.error("[ADSGRAM-GET] Missing userId or user_id in request query parameters! All params: %s", params)
-        raise HTTPException(status_code=400, detail=f"userId parametri tapilmadi. Alinan parametrler: {list(params.keys())}")
+        raise HTTPException(status_code=400, detail="userId parametri tapilmadi.")
 
     event_id = params.get("event_id") or params.get("eventId")
     if not event_id:
-        print(f"[ADSGRAM-GET] ERROR: event_id not found! All params: {params}")
         logger.error("[ADSGRAM-GET] Missing event_id in request query parameters! All params: %s", params)
         raise HTTPException(status_code=400, detail="event_id parametri tapilmadi.")
 
@@ -405,22 +427,37 @@ async def adsgram_callback(request: Request) -> JSONResponse:
         or payload.get("uid")
     )
     event_id = payload.get("event_id") or payload.get("eventId")
-    signature = payload.get("signature") or payload.get("hash") or payload.get("sign") or ""
+    # -- HMAC-SHA256 Signature Verification --
+    received_signature = payload.get("signature") or payload.get("hash") or payload.get("sign")
+    
+    if not received_signature:
+        logger.error("[ADSGRAM-POST] REJECTED: Missing signature in payload.")
+        raise HTTPException(status_code=403, detail="Forbidden: Missing signature")
 
-    print(f"[ADSGRAM-POST] userId={user_id_val!r} | signature={signature!r}")
-    logger.warning(
-        "[SIGNATURE-DEBUG-POST] SECRET=%r | user_id=%s | event_id=%s | received_sig=%s (bypass active)",
-        ADSGRAM_SECRET[:10] + "..." if ADSGRAM_SECRET else "(empty)",
-        user_id_val, event_id, signature[:20] if signature else "(none)"
-    )
+    # Exclude signature fields from the hash calculation
+    verify_params = {k: v for k, v in payload.items() if k not in ["signature", "hash", "sign"]}
+    
+    sorted_keys = sorted(verify_params.keys())
+    data_check_string = "".join([f"{k}={verify_params[k]}" for k in sorted_keys])
+    
+    # Calculate HMAC-SHA256
+    secret_key = ADSGRAM_SECRET.encode()
+    calculated_hash = hmac.new(secret_key, data_check_string.encode(), hashlib.sha256).hexdigest()
+    
+    if calculated_hash != received_signature:
+        logger.error(
+            "[ADSGRAM-POST] REJECTED: Signature mismatch! IP=%s | Calculated=%s | Received=%s",
+            request.client.host if request.client else "unknown", calculated_hash, received_signature
+        )
+        raise HTTPException(status_code=403, detail="Forbidden: Invalid signature")
+        
+    logger.info("[ADSGRAM-POST] Signature verified successfully.")
 
     if not user_id_val:
-        print(f"[ADSGRAM-POST] ERROR: userId not found! Keys: {list(payload.keys())}")
         logger.error("[ADSGRAM-POST] Missing user_id in payload! Keys: %s", list(payload.keys()))
-        raise HTTPException(status_code=400, detail=f"user_id parametri tapilmadi. Alinan acarlar: {list(payload.keys())}")
+        raise HTTPException(status_code=400, detail="user_id parametri tapilmadi.")
 
     if not event_id:
-        print(f"[ADSGRAM-POST] ERROR: event_id not found! Keys: {list(payload.keys())}")
         logger.error("[ADSGRAM-POST] Missing event_id in payload! Keys: %s", list(payload.keys()))
         raise HTTPException(status_code=400, detail="event_id parametri tapilmadi.")
 
