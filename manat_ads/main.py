@@ -842,6 +842,7 @@ async def get_user_info(telegram_id: str) -> JSONResponse:
         "unlock_at": unlock_at,
         "referral_count": referral_count,
         "referral_earnings_mc": referral_earnings_mc,
+        "referral_earnings_vc": int(round(referral_earnings_mc * MC_TO_AZN_RATE)),
         "mc_per_video": dyn_mc,
         "mc_to_azn_rate": MC_TO_AZN_RATE,
         "language": language,

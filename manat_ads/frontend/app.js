@@ -1078,8 +1078,13 @@ async function fetchUserData() {
             if (isRewardSyncing) {
                 console.log(`[fetchUserData-GUARD] Stale server data ignored during active reward sync.`);
                 if (userData) {
-                    userData.referral_count = newData.referral_count;
-                    userData.referral_earnings_mc = newData.referral_earnings_mc;
+                    if (newData.referral_count !== undefined) {
+                        userData.referral_count = newData.referral_count;
+                    }
+                    if (newData.referral_earnings_mc !== undefined) {
+                        userData.referral_earnings_mc = newData.referral_earnings_mc;
+                        userData.referral_earnings_vc = newData.referral_earnings_vc;
+                    }
                 }
                 return newData;
             }
@@ -1454,7 +1459,7 @@ function renderDashboard() {
     const dynDailyLimit = userData.daily_limit || (LEVEL_LIMIT * MAX_LEVELS);
     document.getElementById("videos-count").textContent = `${(userData.session_1_count || 0) + (userData.session_2_count || 0)}/${dynDailyLimit}`;
     document.getElementById("referral-count").textContent = userData.referral_count;
-    document.getElementById("referral-earnings").textContent = formatNumber(userData.referral_earnings_mc);
+    document.getElementById("referral-earnings").textContent = formatNumber(userData.referral_earnings_vc || 0);
 
     // ── 2-Level Ad System Rendering ──────────────────────────────────
     evaluateAdState();
@@ -1569,7 +1574,7 @@ function renderDashboard() {
     const refLink = `https://t.me/${botUsername}?start=${currentUser.id}`;
     document.getElementById("referral-link").textContent = refLink;
     document.getElementById("ref-friends").textContent = userData.referral_count;
-    document.getElementById("ref-earned").textContent = formatNumber(userData.referral_earnings_mc);
+    document.getElementById("ref-earned").textContent = formatNumber(userData.referral_earnings_vc || 0);
 }
 
 // ── Level 2 Countdown Ticker ─────────────────────────────────────────
