@@ -20,7 +20,7 @@ async def run_rollback():
             # Only target legacy users who got the 4.0 AZN injection (balance_mc - total_earned_mc >= 3.0)
             rollback_sql = text("""
                 UPDATE users 
-                SET balance_mc = balance_mc - 4.0, loyalty_bonus_claimed = 0
+                SET balance_mc = balance_mc - 4.0, loyalty_bonus_claimed = FALSE
                 WHERE (balance_mc - total_earned_mc) >= 3.0;
             """)
             res = await conn.execute(rollback_sql)
