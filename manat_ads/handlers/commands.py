@@ -1623,7 +1623,7 @@ async def cmd_maintenance(message: types.Message) -> None:
     is_active = os.path.exists(flag_path) or os.getenv("MAINTENANCE_MODE", "false").lower() == "true"
     
     if len(args) < 2:
-        status_text = "🟢 AÇIQ (Normal Rejim)" if not is_active else "🔴 QAPALI (Texniki İşlər Rejimi)"
+        status_text = "🟢 Söndürülüb (Normal Rejim — Giriş Açıqdır)" if not is_active else "🔴 Aktivdir (Texniki İşlər Rejimi — Giriş Bağlıdır)"
         await message.answer(
             f"⚙️ <b>Mini App Texniki İşlər Statusu:</b>\n"
             f"Cari vəziyyət: {status_text}\n\n"
