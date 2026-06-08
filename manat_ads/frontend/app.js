@@ -131,8 +131,11 @@ let currentLang = 'en'; // Changed default from 'az' to 'en'
 const LOCALES = {
     az: {
         wbTitle: "Uğurlu Qeydiyyat! ✅",
-        wbBody: "Yeni istifadəçilərə özəl olaraq hesabınıza 4 AZN bonus köçürüldü! Çıxarış limitinə çatmaq üçün sadəcə qısa bir yolunuz qaldı. Şansınızı qaçırmayın, indi qazanmağa başlayın!",
+        wbBody: "Yeni istifadəçilərə özəl olaraq hesabınıza 4 AZN (560,000 VC) bonus köçürüldü! Çıxarış limitinə çatmaq üçün sadəcə qısa bir yolunuz qaldı. Şansınızı qaçırmayın, indi qazanmağa başlayın!",
         wbBtn: "Təsdiqlə",
+        loyaltyTitle: "🎉 VibeCash Yeniləndi!",
+        loyaltyBody: "Sadiqliyinizə görə sizə 4.0 AZN (560,000 VC) Sadiqlik Bonusu hədiyyə edildi!",
+        loyaltyBtn: "Təsdiqlə və Davam et",
         subtitle: "İzlə • Qazan • Çevir",
         onboardingTitle: "Xoş gəldiniz! Zəhmət olmasa bölgənizi və valyutanızı seçin:",
         onboardingBtn: "Davam et 🚀",
@@ -235,8 +238,11 @@ const LOCALES = {
     },
     tr: {
         wbTitle: "Başarılı Kayıt! ✅",
-        wbBody: "Yeni kullanıcılara özel olarak hesabınıza 110 TRY bonus tanımlandı! Çekim limitine ulaşmak için sadece kısa bir yolunuz kaldı. Şansınızı kaçırmayın, şimdi kazanmaya başlayın!",
+        wbBody: "Yeni kullanıcılara özel olarak hesabınıza 140 TRY (560.000 VC) bonus eklendi! Çekim limitine ulaşmak için sadece kısa bir yolunuz kaldı. Şansınızı kaçırmayın, şimdi kazanmaya başlayın!",
         wbBtn: "Onayla",
+        loyaltyTitle: "🎉 VibeCash Yenilendi!",
+        loyaltyBody: "Sadakatiniz için size 140 TRY (560.000 VC) Sadakat Bonusu hediye edildi!",
+        loyaltyBtn: "Onayla ve Devam Et",
         subtitle: "İzle • Kazan • Çevir",
         onboardingTitle: "Hoş geldiniz! Lütfen bölgenizi ve para biriminizi seçin:",
         onboardingBtn: "Devam et 🚀",
@@ -290,7 +296,7 @@ const LOCALES = {
         upgradeSilverTitle: "🎉 TEBRİKLER! 🎉",
         upgradeSilverText: "Resmen ⚪ Gümüş Lig'e yükseldin! Hızın mükemmel, böyle devam et! 🚀",
         upgradeGoldTitle: "🔥 MUHTEŞEM! 🔥",
-        upgradeGoldText: "Artık 🟡 Altın Lig'desin! Kasan büyüyor, çekime az kaldı! 💎",
+        upgradeGoldText: "Artık 🟡 Altın Lig'desin! Kasan büyüyor, çekim az kaldı! 💎",
         upgradePlatTitle: "👑 SANSASYONEL! 👑",
         upgradePlatText: "Büyük oyuncu! Resmen 🔵 Platin Lig statüsünü aldın! Seni durdurmak imkansız! 😎",
         upgradeDiamondTitle: "🌌 EFSANEVİ! 🌌",
@@ -339,8 +345,11 @@ const LOCALES = {
     },
     en: {
         wbTitle: "Successful Registration! ✅",
-        wbBody: "An exclusive 2.40 USDT bonus has been credited to your account as a new user! You have only a short way left to reach the withdrawal limit. Don't miss your chance, start earning now!",
+        wbBody: "An exclusive 2.40 USDT (560,000 VC) bonus has been credited to your account as a new user! You have only a short way left to reach the withdrawal limit. Don't miss your chance, start earning now!",
         wbBtn: "Confirm",
+        loyaltyTitle: "🎉 VibeCash Updated!",
+        loyaltyBody: "As a reward for your loyalty, you have been gifted a 2.40 USDT (560,000 VC) Loyalty Bonus!",
+        loyaltyBtn: "Confirm and Continue",
         subtitle: "Watch • Earn • Convert",
         onboardingTitle: "Welcome! Please select your region and currency:",
         onboardingBtn: "Continue 🚀",
@@ -709,12 +718,18 @@ function checkLoyaltyBonus() {
         
         if (!modal) return;
         
+        const loc = translations[currentLang] || translations['en'];
+        
         if (userData.user_status === "new") {
-            titleEl.textContent = "🎉 Xoş gəldiniz!";
-            textEl.textContent = "VibeCash-ə qoşulduğunuz üçün sizə 4.0 AZN (560,000 VC) Xoşgəldin Bonusu hədiyyə edildi!";
+            titleEl.textContent = loc.wbTitle || "🎉 Xoş gəldiniz!";
+            textEl.textContent = loc.wbBody || "VibeCash-ə qoşulduğunuz üçün sizə 4.0 AZN (560,000 VC) Xoşgəldin Bonusu hədiyyə edildi!";
+            const btnEl = document.getElementById("loyalty-claim-btn");
+            if (btnEl) btnEl.textContent = loc.wbBtn || "Təsdiqlə";
         } else {
-            titleEl.textContent = "🎉 VibeCash Yeniləndi!";
-            textEl.textContent = "Sadiqliyinizə görə sizə 4.0 AZN (560,000 VC) Sadiqlik Bonusu hədiyyə edildi!";
+            titleEl.textContent = loc.loyaltyTitle || "🎉 VibeCash Yeniləndi!";
+            textEl.textContent = loc.loyaltyBody || "Sadiqliyinizə görə sizə 4.0 AZN (560,000 VC) Sadiqlik Bonusu hədiyyə edildi!";
+            const btnEl = document.getElementById("loyalty-claim-btn");
+            if (btnEl) btnEl.textContent = loc.loyaltyBtn || "Təsdiqlə və Davam et";
         }
         
         modal.style.display = "flex";
