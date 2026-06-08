@@ -66,11 +66,12 @@ async def init_db() -> None:
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
         
-        # HOTFIX: Ensure welcome_bonus_claimed exists in production PostgreSQL
+        # HOTFIX: Ensure welcome_bonus_claimed and loyalty_bonus_claimed exist in production PostgreSQL
         try:
             await conn.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS welcome_bonus_claimed BOOLEAN DEFAULT FALSE;"))
+            await conn.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS loyalty_bonus_claimed BOOLEAN DEFAULT FALSE;"))
         except Exception as e:
-            print(f"Migration fallback: column may already exist or syntax unsupported: {e}")
+            print(f"Migration fallback: columns may already exist or syntax unsupported: {e}")
 
 
 async def close_db() -> None:

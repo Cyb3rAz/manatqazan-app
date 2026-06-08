@@ -696,37 +696,136 @@ function completeOnboarding() {
         obModal.classList.remove("active");
         setTimeout(() => {
             obModal.style.display = "none";
-            checkWelcomeBonus(); // Check for welcome bonus after onboarding closes
+            checkLoyaltyBonus(); // Check for loyalty/welcome bonus after onboarding closes
         }, 400);
     }
 }
 
-function checkWelcomeBonus() {
-    if (userData && userData.is_eligible_for_welcome_bonus) {
-        const wbModal = document.getElementById("welcome-bonus-modal");
-        if (wbModal) {
-            wbModal.style.display = "flex";
-            setTimeout(() => wbModal.classList.add("active"), 100);
+function checkLoyaltyBonus() {
+    if (userData && userData.can_claim_loyalty === true) {
+        const modal = document.getElementById("loyalty-modal-overlay");
+        const titleEl = document.getElementById("loyalty-modal-title");
+        const textEl = document.getElementById("loyalty-modal-text");
+        
+        if (!modal) return;
+        
+        if (userData.user_status === "new") {
+            titleEl.textContent = "🎉 Xoş gəldiniz!";
+            textEl.textContent = "VibeCash-ə qoşulduğunuz üçün sizə 4.0 AZN (560,000 VC) Xoşgəldin Bonusu hədiyyə edildi!";
+        } else {
+            titleEl.textContent = "🎉 VibeCash Yeniləndi!";
+            textEl.textContent = "Sadiqliyinizə görə sizə 4.0 AZN (560,000 VC) Sadiqlik Bonusu hədiyyə edildi!";
         }
+        
+        modal.classList.add("active");
     }
 }
 
-async function closeWelcomeBonusModal() {
-    const wbModal = document.getElementById("welcome-bonus-modal");
-    if (wbModal) {
-        wbModal.classList.remove("active");
-        setTimeout(() => {
-            wbModal.style.display = "none";
-        }, 400);
+document.getElementById("loyalty-claim-btn")?.addEventListener("click", async function() {
+    const btn = this;
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<div class="cyber-spinner" style="width: 20px; height: 20px; margin: 0 auto;"></div>';
+    btn.disabled = true;
+    
+    try {
+        const resp = await fetch(`${API_BASE}/api/user/${currentUser.id}/claim_loyalty`, {
+            method: "POST"
+        });
+        const res = await resp.json();
+        
+        if (res.ok) {
+            // Update userData locally
+            userData.can_claim_loyalty = false;
+            userData.loyalty_bonus_claimed = true;
+            
+            // Fade out modal
+            document.getElementById("loyalty-modal-overlay").classList.remove("active");
+            
+            // ANIMATE!
+            const startVc = userData.balance_vc || 0;
+            const endVc = res.new_balance_vc;
+            userData.balance_vc = endVc;
+            userData.balance_mc = (userData.balance_mc || 0) + 4.0;
+            
+            animateLoyaltyClaim(startVc, endVc);
+        } else {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+            showToast("Xəta baş verdi, yenidən cəhd edin.", "error");
+        }
+    } catch(e) {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+        showToast("Şəbəkə xətası.", "error");
     }
-    if (currentUser && currentUser.id) {
-        try {
-            await fetch(`/api/user/${currentUser.id}/claim_welcome_bonus`, { method: "POST" });
-            if (userData) userData.is_eligible_for_welcome_bonus = false;
-        } catch (e) {
-            console.error("Failed to mark welcome bonus as claimed", e);
+});
+
+function animateLoyaltyClaim(startVc, endVc) {
+    const duration = 2500; // 2.5 seconds
+    const startTime = performance.now();
+    
+    // Play confetti at the end
+    setTimeout(() => {
+        if (window.confetti) {
+            confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 } });
+        }
+    }, duration);
+    
+    function updateFrame(currentTime) {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        
+        // Easing out cubic
+        const easeOut = 1 - Math.pow(1 - progress, 3);
+        
+        const currentVc = Math.floor(startVc + (endVc - startVc) * easeOut);
+        const balanceMcEl = document.getElementById("balance-mc");
+        if (balanceMcEl) {
+            balanceMcEl.textContent = formatNumber(currentVc);
+        }
+        
+        // Also animate progress bar
+        const currentMc = (userData.balance_mc - 4.0) + (4.0 * easeOut);
+        let progressPct = Math.min(100, Math.max(0, (currentMc / 10) * 100));
+        
+        const withdrawalFillEl = document.getElementById("withdrawal-progress-fill");
+        if (withdrawalFillEl) withdrawalFillEl.style.width = `${progressPct}%`;
+        
+        const withdrawalPctEl = document.getElementById("withdrawal-pct");
+        if (withdrawalPctEl) withdrawalPctEl.textContent = progressPct.toFixed(1);
+        
+        // Flash leagues dynamically
+        let newLeagueIndex = 0;
+        if (progressPct < 20) newLeagueIndex = 0;
+        else if (progressPct < 40) newLeagueIndex = 1;
+        else if (progressPct < 60) newLeagueIndex = 2;
+        else if (progressPct < 80) newLeagueIndex = 3;
+        else newLeagueIndex = 4;
+        
+        if (newLeagueIndex > currentLeagueIndex) {
+            currentLeagueIndex = newLeagueIndex;
+            const LEAGUE_NAMES = [
+                t('leagueBronze'), t('leagueSilver'), t('leagueGold'),
+                t('leaguePlatinum'), t('leagueDiamond')
+            ];
+            
+            const leagueNameEl = document.getElementById("league-name-label");
+            if (leagueNameEl) leagueNameEl.textContent = LEAGUE_NAMES[newLeagueIndex];
+            
+            const ICONS = ['🥉', '🥈', '🥇', '💎', '👑'];
+            const badgeEl = document.getElementById("league-badge");
+            if (badgeEl) badgeEl.textContent = ICONS[newLeagueIndex];
+        }
+        
+        if (progress < 1) {
+            requestAnimationFrame(updateFrame);
+        } else {
+            // Make sure final render hits
+            renderDashboard();
         }
     }
+    
+    requestAnimationFrame(updateFrame);
 }
 
 // ── Telegram Web App ──────────────────────────────────────────────────
@@ -880,7 +979,7 @@ async function initApp() {
                 obModal.classList.remove("active");
             }
             console.log(`[LangDebug] Onboarding already completed, skipping modal.`);
-            checkWelcomeBonus(); // Since onboarding is skipped, check for welcome bonus right away
+            checkLoyaltyBonus(); // Since onboarding is skipped, check for loyalty/welcome bonus right away
         }
 
         // Əsas kontenti göstər, splash screen-i fade-out ilə gizlə
