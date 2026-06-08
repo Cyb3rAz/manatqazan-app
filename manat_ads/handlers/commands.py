@@ -1103,10 +1103,11 @@ async def _send_welcome_back(message: types.Message, user: User) -> None:
         pass
 
     name = user.first_name or "friend"
+    MC_TO_AZN_RATE = 140000
     welcome_text = loc['welcome_back'].format(
         name=name,
-        balance=f"{user.balance_mc:,.0f}",
-        total=f"{user.total_earned_mc:,.0f}",
+        balance=f"{(user.balance_mc * MC_TO_AZN_RATE):,.0f}",
+        total=f"{(user.total_earned_mc * MC_TO_AZN_RATE):,.0f}",
     )
 
     await message.answer(
