@@ -38,6 +38,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy import select, update, func
 
 from bot_instance import bot, dp
@@ -678,6 +679,10 @@ async def _credit_user(user_id_val: int | str, event_id: str, source: str = "unk
                 await session.commit()  # Emeliyyati qeti mohurle
                 print(f"[CREDIT] SUCCESS: DB COMMITTED! user={user_telegram_id} | new_balance={final_new_balance:.2f} MC")
                 logger.info("[CREDIT] COMMITTED DATABASE TRANS! user=%s new_balance=%.2f", user_telegram_id, final_new_balance)
+            except IntegrityError as db_err:
+                await session.rollback()
+                logger.warning("[CREDIT] REJECTED: IntegrityError caught during commit (likely concurrent duplicate event_id=%s). Blocking replay attack.", event_id)
+                return JSONResponse({"error": "Duplicate event_id. Replay attack blocked at commit phase."}, status_code=403)
             except Exception as db_err:
                 await session.rollback()
                 print(f"[CREDIT] FAILED: Commit error: {db_err}")
