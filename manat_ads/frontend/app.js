@@ -1612,7 +1612,7 @@ function renderDashboard() {
     }
 
 
-    const pctStrFormatted = progressPct.toFixed(1) + '%';
+    const pctStrFormatted = progressPct.toFixed(1);
     const withdrawalPctEl = document.getElementById("withdrawal-pct");
     if (withdrawalPctEl) withdrawalPctEl.textContent = pctStrFormatted;
 
