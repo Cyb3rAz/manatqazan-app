@@ -1206,8 +1206,8 @@ async def _get_admin_stats_text() -> str:
         f"📊 <b>VIBECASH — ADMİN PANELİ</b>\n"
         f"{'─' * 30}\n\n"
         f"👤 <b>Ümumi İstifadəçi Sayı:</b> {total_users} nəfər\n"
-        f"🪙 <b>Dövriyyədəki Cəmi VC:</b> {total_mc:,.0f} VC\n"
-        f"📈 <b>Ümumi Qazanılan VC:</b> {total_earned:,.0f} VC\n\n"
+        f"🪙 <b>Dövriyyədəki Cəmi VC:</b> {(total_mc * 140000):,.0f} VC\n"
+        f"📈 <b>Ümumi Qazanılan VC:</b> {(total_earned * 140000):,.0f} VC\n\n"
         f"🕒 <b>Son Qoşulan 5 İstifadəçi:</b>\n"
         f"{last5_block}"
     )
@@ -1275,7 +1275,7 @@ async def cmd_users(message: types.Message) -> None:
     lines = ["👥 Son Aktiv İstifadəçilər:"]
     for i, u in enumerate(users, 1):
         username_str = f"@{u.username}" if u.username else "Yoxdur"
-        lines.append(f"{i}. ID: {u.telegram_id} | {username_str} | Balans: {u.balance_mc:,.0f} VC")
+        lines.append(f"{i}. ID: {u.telegram_id} | {username_str} | Balans: {(u.balance_mc * 140000):,.0f} VC")
         
     await message.answer("\n".join(lines))
 
@@ -1321,8 +1321,8 @@ async def cmd_info(message: types.Message) -> None:
         f"ℹ️ <b>İstifadəçi Məlumatı:</b>\n"
         f"• <b>Telegram ID:</b> <code>{user.telegram_id}</code>\n"
         f"• <b>Username:</b> {username_display}\n"
-        f"• <b>Hazırkı Balans:</b> {user.balance_mc:,.0f} VC\n"
-        f"• <b>Ümumi Qazanc:</b> {user.total_earned_mc:,.0f} VC\n"
+        f"• <b>Hazırkı Balans:</b> {(user.balance_mc * 140000):,.0f} VC\n"
+        f"• <b>Ümumi Qazanc:</b> {(user.total_earned_mc * 140000):,.0f} VC\n"
         f"• <b>Bugünkü Videolar:</b> {total_videos}/{daily_limit} (S1: {session_1}/{session_limit} | S2: {session_2}/{session_limit})\n"
         f"• <b>Dəvət Etdiyi Şəxslər:</b> {user.referral_count} nəfər\n"
         f"• <b>Status:</b> {status_str}"
@@ -1369,9 +1369,9 @@ async def cmd_give(message: types.Message) -> None:
         await message.answer(
             f"✅ <b>Balans yeniləndi!</b>\n\n"
             f"👤 İstifadəçi: <code>{user.telegram_id}</code>\n"
-            f"🪙 Əvvəlki balans: {old_bal:,.0f} VC\n"
-            f"➕ Dəyişiklik: {amount:+,.0f} VC\n"
-            f"💰 Yeni balans: {user.balance_mc:,.0f} VC"
+            f"🪙 Əvvəlki balans: {(old_bal * 140000):,.0f} VC\n"
+            f"➕ Dəyişiklik: {(amount * 140000):+,.0f} VC\n"
+            f"💰 Yeni balans: {(user.balance_mc * 140000):,.0f} VC"
         )
 
 
