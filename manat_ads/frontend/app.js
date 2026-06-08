@@ -1611,9 +1611,9 @@ function renderDashboard() {
     }
 
 
-    const pctStr = progressPct.toFixed(1) + '%';
+    const pctStrFormatted = progressPct.toFixed(1) + '%';
     const withdrawalPctEl = document.getElementById("withdrawal-pct");
-    if (withdrawalPctEl) withdrawalPctEl.textContent = pctStr;
+    if (withdrawalPctEl) withdrawalPctEl.textContent = pctStrFormatted;
 
     const withdrawalFillEl = document.getElementById("withdrawal-progress-fill");
     if (withdrawalFillEl) withdrawalFillEl.style.width = `${progressPct}%`;
