@@ -726,7 +726,7 @@ function checkLoyaltyBonus() {
         
         if (!modal) return;
         
-        const loc = translations[currentLang] || translations['en'];
+        const loc = LOCALES[currentLang] || LOCALES['en'];
         
         if (userData.user_status === "new") {
             titleEl.textContent = loc.wbTitle || "🎉 Xoş gəldiniz!";
