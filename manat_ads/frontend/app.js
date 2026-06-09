@@ -1979,12 +1979,14 @@ async function executeAdSuccessReward(sessionNum) {
     isRewardSyncing = true;
 
     const reward = userData.mc_per_video || 200;
+    const rate = userData.mc_to_azn_rate || 140000;
+    const aznReward = reward / rate;
 
     // ── 1. Optimistic UI update ────────────────────────────────────────
-    userData.balance_mc      += reward; // Keep internal AZN float updated if needed
-    userData.balance_vc      = (userData.balance_vc || 0) + (userData.mc_per_video || 200);
-    userData.total_earned_mc += reward;
-    userData.total_earned_vc = (userData.total_earned_vc || 0) + (userData.mc_per_video || 200);
+    userData.balance_mc      += aznReward; // Keep internal AZN float updated if needed
+    userData.balance_vc      = (userData.balance_vc || 0) + reward;
+    userData.total_earned_mc += aznReward;
+    userData.total_earned_vc = (userData.total_earned_vc || 0) + reward;
     userData.videos_today    = (userData.videos_today || 0) + 1;
 
     if (sessionNum === 1) {
