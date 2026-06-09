@@ -98,11 +98,8 @@ def _get_mc_for_tier(vip_status: str | None) -> int:
         return 420
     return 240  # free / fallback
 
-raw_webhook_url = os.getenv("WEBHOOK_URL", "").strip()
-if not raw_webhook_url or "your-domain" in raw_webhook_url:
-    WEBHOOK_URL = "https://manatqazan.vercel.app"
-else:
-    WEBHOOK_URL = raw_webhook_url.rstrip("/")
+WEBHOOK_URL = os.getenv("WEBHOOK_URL", "").strip().rstrip("/")
+FRONTEND_URL = os.getenv("FRONTEND_URL", "https://manatqazan.vercel.app").strip().rstrip("/")
 
 
 # ── Safe UPSERT helper ─────────────────────────────────────────────────
@@ -433,7 +430,7 @@ def get_main_keyboard(lang: str, vip_status: str | None = None) -> InlineKeyboar
     loc = BOT_LOCALES.get(lang, BOT_LOCALES['en'])
     tier_mc = _get_mc_for_tier(vip_status)
     btn_video_text = loc['btn_video'].format(mc=tier_mc)
-    webapp_url = f"{WEBHOOK_URL}/miniapp?lang={lang}&v={int(datetime.now().timestamp())}"
+    webapp_url = f"{FRONTEND_URL}?lang={lang}&v={int(datetime.now().timestamp())}"
     return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text=btn_video_text, web_app=types.WebAppInfo(url=webapp_url))],
         [
@@ -784,7 +781,7 @@ async def cb_set_bot_lang(callback: types.CallbackQuery) -> None:
     await callback.answer(loc['lang_set'], show_alert=False)
 
     # Set menu button WebApp URL with chosen lang
-    webapp_url = f"{WEBHOOK_URL}/miniapp?lang={chosen_lang}&v={int(datetime.now().timestamp())}"
+    webapp_url = f"{FRONTEND_URL}?lang={chosen_lang}&v={int(datetime.now().timestamp())}"
     try:
         await callback.bot.set_chat_menu_button(
             chat_id=tg_user.id,
@@ -1089,7 +1086,7 @@ async def _send_welcome_back(message: types.Message, user: User) -> None:
     """Greet a returning user with their current stats in their chosen language."""
     lang = user.language if user.language in BOT_LOCALES else 'en'
     loc = BOT_LOCALES[lang]
-    webapp_url = f"{WEBHOOK_URL}/miniapp?lang={lang}&v={int(datetime.now().timestamp())}"
+    webapp_url = f"{FRONTEND_URL}?lang={lang}&v={int(datetime.now().timestamp())}"
 
     # Update menu button to match user's language
     try:

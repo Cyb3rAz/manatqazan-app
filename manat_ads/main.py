@@ -58,6 +58,7 @@ logger = logging.getLogger("manatads")
 # ── Configuration ───────────────────────────────────────────────────────
 BOT_TOKEN: str = os.getenv("BOT_TOKEN", "")
 WEBHOOK_URL: str = os.getenv("WEBHOOK_URL", "").rstrip("/")
+FRONTEND_URL: str = os.getenv("FRONTEND_URL", "https://manatqazan.vercel.app").rstrip("/")
 ADSGRAM_SECRET: str = os.getenv("ADSGRAM_SECRET", "")
 MC_PER_VIDEO: int = int(os.getenv("MC_PER_VIDEO", "50"))
 DAILY_VIDEO_LIMIT: int = int(os.getenv("DAILY_VIDEO_LIMIT", "50"))
@@ -203,7 +204,7 @@ async def lifespan(application: FastAPI):
         await bot.set_chat_menu_button(
             menu_button=aio_types.MenuButtonWebApp(
                 text="🚀 Aç",
-                web_app=aio_types.WebAppInfo(url=f"{WEBHOOK_URL}/miniapp?v=4.8.0")
+                web_app=aio_types.WebAppInfo(url=f"{FRONTEND_URL}?v=4.8.0")
             )
         )
         logger.info("Chat menu button (WebApp) restored.")
@@ -1041,7 +1042,7 @@ async def update_user_language(telegram_id: int, body: LanguageUpdate) -> JSONRe
         'ru': "🚀 Запустить"
     }
     btn_text = btn_start_texts.get(lang, "🚀 Start")
-    webapp_url = f"{WEBHOOK_URL}/miniapp?lang={lang}&v={int(datetime.now().timestamp())}"
+    webapp_url = f"{FRONTEND_URL}?lang={lang}&v={int(datetime.now().timestamp())}"
     try:
         from aiogram.types import MenuButtonWebApp, WebAppInfo
         await bot.set_chat_menu_button(
@@ -1336,7 +1337,7 @@ _MIDNIGHT_BROADCAST = {
         "button": "Watch Videos 🎬",
     },
 }
-_WEBAPP_URL = f"{WEBHOOK_URL}/miniapp?v={int(datetime.now().timestamp())}"
+_WEBAPP_URL = f"{FRONTEND_URL}?v={int(datetime.now().timestamp())}"
 
 
 async def _midnight_broadcast_scheduler() -> None:
@@ -1386,7 +1387,7 @@ async def _midnight_broadcast_scheduler() -> None:
                         [
                             aio_types.InlineKeyboardButton(
                                 text=btn_label,
-                                web_app=aio_types.WebAppInfo(url=f"{WEBHOOK_URL}/miniapp?v={int(datetime.now().timestamp())}"),
+                                web_app=aio_types.WebAppInfo(url=f"{FRONTEND_URL}?v={int(datetime.now().timestamp())}"),
                             )
                         ]
                     ]
