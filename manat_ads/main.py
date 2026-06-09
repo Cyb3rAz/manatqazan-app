@@ -322,8 +322,8 @@ async def frontend_reward(request: Request) -> JSONResponse:
     if not init_data:
         raise HTTPException(status_code=401, detail="Missing X-Init-Data header")
         
-    is_valid, user_data_tg = _validate_telegram_data(init_data)
-    if not is_valid or not user_data_tg:
+    user_data_tg = validate_init_data(init_data, BOT_TOKEN)
+    if not user_data_tg:
         logger.error("[FRONTEND-REWARD] Invalid initData")
         raise HTTPException(status_code=401, detail="Invalid Telegram InitData")
         
