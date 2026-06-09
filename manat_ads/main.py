@@ -311,6 +311,40 @@ async def telegram_webhook(request: Request) -> JSONResponse:
     return JSONResponse({"ok": True})
 
 
+# ── Frontend-Triggered Secure Reward ─────────────────────────────────────
+@app.post("/api/reward/frontend", summary="Frontend-triggered secure reward")
+async def frontend_reward(request: Request) -> JSONResponse:
+    """
+    Secure alternative to S2S webhook. Verified using Telegram's initData.
+    """
+    # Verify Telegram WebApp Data
+    init_data = request.headers.get("X-Init-Data")
+    if not init_data:
+        raise HTTPException(status_code=401, detail="Missing X-Init-Data header")
+        
+    is_valid, user_data_tg = _validate_telegram_data(init_data)
+    if not is_valid or not user_data_tg:
+        logger.error("[FRONTEND-REWARD] Invalid initData")
+        raise HTTPException(status_code=401, detail="Invalid Telegram InitData")
+        
+    user_id_val = user_data_tg.get("id")
+    if not user_id_val:
+        raise HTTPException(status_code=400, detail="User ID not found in InitData")
+        
+    # Get payload
+    try:
+        body = await request.json()
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid JSON body")
+        
+    event_id = body.get("event_id")
+    if not event_id:
+        raise HTTPException(status_code=400, detail="Missing event_id")
+        
+    logger.info("[FRONTEND-REWARD] Verified trigger for user=%s, event=%s", user_id_val, event_id)
+    return await _credit_user(user_id_val, event_id=event_id, source="frontend_secure")
+
+
 # ── Adsgram S2S Reward – GET (əsl Adsgram formatı) ─────────────────────
 @app.get("/api/reward", summary="Adsgram S2S reward callback (GET)")
 async def adsgram_reward_get(

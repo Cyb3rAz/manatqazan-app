@@ -2022,8 +2022,17 @@ async function executeAdSuccessReward(sessionNum) {
 
     // ── 3. Fire backend sync (non-blocking) ───────────────────────────
     try {
-        // Explicitly trigger the reward on the backend (Adsgram backend configuration uses event_id uniquely)
-        await fetch(`${API_BASE}/api/reward?userId=${currentUser.id}&event_id=adsgram_${Date.now()}_${Math.random()}`);
+        // Securely trigger the reward on the backend using Telegram initData
+        await fetch(`${API_BASE}/api/reward/frontend`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Init-Data': window.Telegram.WebApp.initData
+            },
+            body: JSON.stringify({
+                event_id: `adsgram_${Date.now()}_${Math.random()}`
+            })
+        });
     } catch (err) {
         console.error("[Reward] Backend trigger error:", err);
     }
