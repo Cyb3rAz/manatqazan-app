@@ -705,8 +705,8 @@ async def _credit_user(user_id_val: int | str, event_id: str, source: str = "unk
 @app.get("/api/config", summary="Get global frontend configuration")
 async def get_config() -> JSONResponse:
     return JSONResponse({
-        "adsgram_block_id": os.getenv("ADSGRAM_BLOCK_ID", "31453"),
-        "adsgram_platform_id": os.getenv("ADSGRAM_PLATFORM_ID", "30613"),
+        "adsgram_block_id": os.getenv("ADSGRAM_BLOCK_ID", "34616"),
+        "adsgram_platform_id": os.getenv("ADSGRAM_PLATFORM_ID", "32725"),
         "bot_id": os.getenv("BOT_ID", "8960200640"),
         "maintenance_mode": os.getenv("MAINTENANCE_MODE", "false").lower() == "true",
     })
