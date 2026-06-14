@@ -1,6 +1,6 @@
 {
   "rewrites": [
-    { "source": "/api/(.*)", "destination": "https://pirates-span-explaining-peterson.trycloudflare.com/api/$1" },
+    { "source": "/api/(.*)", "destination": "https://api.newsupport.site/api/$1" },
     { "source": "/static/(.*)", "destination": "/manat_ads/frontend/$1" },
     { "source": "/(.*)", "destination": "/manat_ads/frontend/$1" }
   ]
