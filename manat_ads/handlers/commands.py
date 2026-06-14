@@ -1652,3 +1652,67 @@ async def cmd_maintenance(message: types.Message) -> None:
         await message.answer(f"🟢 <b>Texniki işlər rejimi DEAKTİVLƏŞDİRİLDİ!</b>\nBütün istifadəçilər normal rejimdə daxil ola bilər.{env_msg}", parse_mode="HTML")
     else:
         await message.answer("⚠️ Yanlış parametr. Lütfən <code>on</code> və ya <code>off</code> yazın.", parse_mode="HTML")
+
+
+@router.message(Command("wake_up"), IsAdminFilter())
+async def cmd_wake_up(message: types.Message) -> None:
+    """Send a re-engagement message to users inactive for 3+ days."""
+    cutoff = datetime.now(tz=timezone.utc) - timedelta(days=3)
+
+    async with async_session() as session:
+        # Users who never watched OR haven't watched in 3+ days
+        stmt = select(User.telegram_id, User.first_name).where(
+            User.is_active == True,
+            (User.last_watch_date == None) | (User.last_watch_date < cutoff),
+        )
+        res = await session.execute(stmt)
+        inactive_users = res.all()
+
+    if not inactive_users:
+        await message.answer("✅ Hər kəs aktivdir, heç bir passiv istifadəçi yoxdur!")
+        return
+
+    webapp_url = f"{FRONTEND_URL}?v={int(datetime.now().timestamp())}"
+    inline_kb = InlineKeyboardMarkup(inline_keyboard=[[
+        InlineKeyboardButton(
+            text="💸 İndi Qazan",
+            web_app=types.WebAppInfo(url=webapp_url)
+        )
+    ]])
+
+    wake_text = (
+        "Sistem yeniləndi (bütün səbəb gecikmələri və xətalar artıq tarix oldu!) "
+        "və yeni VIP badgelər gəldi. ✨\n\n"
+        "Bu gün sənin üçün xüsusi sürətli limitlər aktivləşdirilib. "
+        "Həm yeni sürəti yoxla, həm də Liderlərdə yerini tut: 🎁"
+    )
+
+    await message.answer(
+        f"⏳ <b>Wake-Up göndərişi başladı...</b>\n"
+        f"🎯 Hədəf: <b>{len(inactive_users)}</b> passiv istifadəçi (son 3 gün aktiv olmayan).",
+        parse_mode="HTML"
+    )
+
+    success_count = 0
+    fail_count = 0
+
+    for tg_id, first_name in inactive_users:
+        try:
+            personal_text = f"Salam, {first_name}! 👋\n\n{wake_text}"
+            await message.bot.send_message(
+                chat_id=tg_id,
+                text=personal_text,
+                reply_markup=inline_kb,
+            )
+            success_count += 1
+            await asyncio.sleep(0.05)  # Telegram rate-limit üçün kiçik fasilə
+        except Exception as e:
+            logger.warning("wake_up: failed to send to %s: %s", tg_id, e)
+            fail_count += 1
+
+    await message.answer(
+        f"🎉 <b>Wake-Up tamamlandı!</b>\n\n"
+        f"✅ Göndərildi: <b>{success_count}</b>\n"
+        f"❌ Uğursuz: <b>{fail_count}</b>",
+        parse_mode="HTML"
+    )
