@@ -107,16 +107,18 @@ def _get_vip_params(vip_status: str, now: datetime) -> tuple[int, int, int]:
     Return (session_limit, daily_limit, mc_reward) for a given VIP tier.
 
     Tiers (MC_TO_AZN_RATE=140,000 | Withdrawal threshold=700,000 MC = 5 AZN):
-      free  -> session=25, daily=50, reward=200 MC  (50×200=10,000 MC/day → 70 days)
-      pro   -> session=22, daily=45, reward=260 MC  (45×260=11,700 MC/day → ~60 days)
-      elite -> session=20, daily=40, reward=350 MC  (40×350=14,000 MC/day → 50 days)
+      free    -> session=25, daily=50, reward=240 MC  (50×240=12,000 MC/day)
+      pro     -> session=22, daily=45, reward=311 MC  (45×311=13,995 MC/day)
+      elite   -> session=20, daily=40, reward=420 MC  (40×420=16,800 MC/day)
+      passive -> same as free (video rewards unchanged; passive income is separate)
     """
     tier = (vip_status or "free").lower().strip()
     if tier == "pro":
         return (22, 45, 311)
     if tier == "elite":
         return (20, 40, 420)
-    return (25, 50, 240)  # free / fallback
+    # passive intentionally falls through to free params
+    return (25, 50, 240)  # free / passive / fallback
 
 if not commands_router.parent_router:
     dp.include_router(commands_router)
@@ -130,7 +132,7 @@ async def lifespan(application: FastAPI):
     await init_db()
     logger.info("Database initialised.")
 
-    # ── Database Migration for VIP ──
+    # ── Database Migration for VIP + Passive Income ──
     try:
         from database import DB_IS_POSTGRES
         from sqlalchemy import text
@@ -138,8 +140,10 @@ async def lifespan(application: FastAPI):
             async with async_session() as session:
                 await session.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS vip_status VARCHAR(255) DEFAULT 'free';"))
                 await session.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS vip_expires_at TIMESTAMP WITH TIME ZONE;"))
+                await session.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS passive_last_paid_at TIMESTAMP WITH TIME ZONE;"))
+                await session.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS had_passive_vip BOOLEAN DEFAULT FALSE;"))
                 await session.commit()
-            logger.info("PostgreSQL database auto-migration completed successfully (vip_status, vip_expires_at).")
+            logger.info("PostgreSQL auto-migration done (vip_status, vip_expires_at, passive_last_paid_at, had_passive_vip).")
         else:
             logger.info("SQLite database detected; auto-migration for PostgreSQL columns skipped.")
     except Exception as e:
@@ -154,6 +158,11 @@ async def lifespan(application: FastAPI):
     broadcast_task = asyncio.create_task(_midnight_broadcast_scheduler())
     application.state.broadcast_task = broadcast_task
     logger.info("Midnight broadcast scheduler started.")
+
+    # ── Launch passive income worker ──
+    passive_task = asyncio.create_task(_passive_income_worker())
+    application.state.passive_task = passive_task
+    logger.info("Passive income worker started.")
 
     # ── Set Bot Commands Menu ──
     try:
@@ -878,6 +887,7 @@ async def get_user_info(telegram_id: str) -> JSONResponse:
         language = getattr(user, 'language', 'az')
         vip_status = getattr(user, 'vip_status', 'free') or 'free'
         vip_expires_at = getattr(user, 'vip_expires_at', None)
+        had_passive_vip = getattr(user, 'had_passive_vip', False) or False
         welcome_bonus_claimed = getattr(user, 'welcome_bonus_claimed', False)
         loyalty_bonus_claimed = getattr(user, 'loyalty_bonus_claimed', False)
         
@@ -947,6 +957,7 @@ async def get_user_info(telegram_id: str) -> JSONResponse:
         "language": language,
         "vip_status": vip_status,
         "vip_expires_at": vip_expires_at.isoformat() if vip_expires_at else None,
+        "had_passive_vip": had_passive_vip,
         "is_eligible_for_welcome_bonus": is_eligible_for_welcome_bonus,
         "user_status": user_status,
         "can_claim_loyalty": not loyalty_bonus_claimed,
@@ -1462,11 +1473,87 @@ async def _midnight_broadcast_scheduler() -> None:
             await asyncio.sleep(60)
 
 
+# ── Passive Income Worker ───────────────────────────────────────────────
+_PASSIVE_DAILY_VC: float = 140_000.0   # 1 AZN worth of VC per day
+_PASSIVE_CHECK_INTERVAL: int = 3600    # check every hour (seconds)
+
+async def _passive_income_worker() -> None:
+    """
+    Background task: every hour, find users with an active 'passive' VIP
+    subscription whose last payout was ≥24 hours ago (or never) and credit
+    them with 140,000 VC (= 1 AZN). Fires up to 7 times total (once per day
+    for 7 days), after which vip_expires_at causes the tier to revert to free.
+    """
+    logger.info("[PASSIVE] Passive income worker initialised.")
+    while True:
+        try:
+            await asyncio.sleep(_PASSIVE_CHECK_INTERVAL)
+
+            now = datetime.now(timezone.utc)
+            cutoff = now - timedelta(hours=24)
+
+            # Find eligible users:
+            #   • vip_status = 'passive'
+            #   • vip_expires_at is still in the future (not expired)
+            #   • passive_last_paid_at is NULL (first payout) OR older than 24 h
+            async with async_session() as session:
+                stmt = select(User).where(
+                    User.vip_status == "passive",
+                    User.vip_expires_at > now,
+                    User.is_active == True,
+                    (User.passive_last_paid_at == None) | (User.passive_last_paid_at <= cutoff),
+                )
+                result = await session.execute(stmt)
+                users = result.scalars().all()
+
+                if not users:
+                    logger.info("[PASSIVE] No eligible users for passive payout this cycle.")
+                    continue
+
+                logger.info("[PASSIVE] Crediting %d user(s) with %.0f VC each.", len(users), _PASSIVE_DAILY_VC)
+                credited = 0
+                for user in users:
+                    user.balance_mc += _PASSIVE_DAILY_VC
+                    user.total_earned_mc += _PASSIVE_DAILY_VC
+                    user.passive_last_paid_at = now
+                    credited += 1
+
+                await session.commit()
+                logger.info("[PASSIVE] Payout complete — credited %d user(s).", credited)
+
+            # Notify credited users via Telegram (best-effort, non-blocking)
+            for user in users:
+                try:
+                    await bot.send_message(
+                        chat_id=user.telegram_id,
+                        text=(
+                            f"💰 <b>Pasiv Qazancınız Gəldi!</b>\n\n"
+                            f"Hesabınıza avtomatik olaraq <b>+140,000 VC (≈1 AZN)</b> əlavə olundu. 🎉\n\n"
+                            f"Cari balansınız: <b>{user.balance_mc:,.0f} VC</b>\n"
+                            f"Paket bitişi: <b>{user.vip_expires_at.strftime('%d.%m.%Y') if user.vip_expires_at else '—'}</b>"
+                        ),
+                        parse_mode="HTML",
+                    )
+                    await asyncio.sleep(0.05)
+                except Exception as notify_err:
+                    logger.debug("[PASSIVE] Could not notify user %s: %s", user.telegram_id, notify_err)
+
+        except asyncio.CancelledError:
+            logger.info("[PASSIVE] Worker cancelled — shutting down cleanly.")
+            break
+        except Exception as worker_err:
+            logger.exception("[PASSIVE] Unexpected error in passive income worker: %s", worker_err)
+            await asyncio.sleep(60)
+
 # ── Mini App Frontend Serving ──────────────────────────────────────────
 @app.get("/miniapp", response_class=HTMLResponse, response_model=None)
 async def serve_miniapp() -> Any:
     """Serve the Mini App index.html."""
-    return FileResponse(FRONTEND_DIR / "index.html", media_type="text/html")
+    response = FileResponse(FRONTEND_DIR / "index.html", media_type="text/html")
+    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+    return response
 
 
 # Mount static assets (JS, CSS, images)

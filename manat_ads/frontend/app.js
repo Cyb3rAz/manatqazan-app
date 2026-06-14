@@ -232,8 +232,11 @@ const LOCALES = {
         vip_free_perk: "Hər video +200 VC",
         vip_pro_title: "PRO Nitro",
         vip_elite_title: "ELITE Ultra",
+        vip_passive_title: "Pasiv Qazanc",
+        vip_passive_badge: "💤 Əl Vurmadan Qazan",
         Pro_Price: "2.50 AZN / 1 Həftə",
         Elite_Price: "3.50 AZN / 1 Həftə",
+        Passive_Price: "4.99 AZN / 1 Həftə",
         Pro_Line_1: "Gündəlik: 45 video (Daha az yorucu)",
         Pro_Line_2: "Hər gün +11,700 VC-yə qədər böyük qazanc",
         Pro_Line_3: "🚀 130% Turbo Sürətli qazanc gücü",
@@ -242,6 +245,10 @@ const LOCALES = {
         Elite_Line_2: "Hər gün +14,000 VC-yə qədər rekord qazanc",
         Elite_Line_3: "🔥 175% Ultra Sürət və 0% komissiyalı çıxarış",
         Elite_Line_4: "+400 VC hər tapşırıq üçün",
+        Passive_Line_1: "Hər 24 saatda <b>+140,000 VC</b> avtomatik",
+        Passive_Line_2: "7 gün ərzində cəmi <b>≈7 AZN</b> passiv qazanc",
+        Passive_Line_3: "💤 Heç bir düyməyə basmadan qazanc",
+        Passive_Line_4: "🔐 Min çıxarış limiti <b>daimi 15 AZN</b>",
         vip_buy_btn: "Satın Al",
         Modal_Confirm_Text: "Siz bu paketi almaq istədiyinizi təsdiqləyirsiniz?", 
         Modal_Btn_Cancel: "İmtina", 
@@ -341,8 +348,11 @@ const LOCALES = {
         vip_free_perk: "Her video +200 VC",
         vip_pro_title: "PRO Nitro",
         vip_elite_title: "ELITE Ultra",
+        vip_passive_title: "Pasif Kazanç",
+        vip_passive_badge: "💤 Dokunmadan Kazan",
         Pro_Price: "70 TRY / 1 Hafta",
         Elite_Price: "95 TRY / 1 Hafta",
+        Passive_Price: "140 TRY / 1 Hafta",
         Pro_Line_1: "Günlük: 45 video (Daha az yorucu)",
         Pro_Line_2: "Her gün +11.700 VC'ye varan büyük kazanç",
         Pro_Line_3: "🚀 130% Turbo Hızlı kazanç gücü",
@@ -351,6 +361,10 @@ const LOCALES = {
         Elite_Line_2: "Her gün +14.000 VC'ye varan rekor kazanç",
         Elite_Line_3: "🔥 175% Ultra Hız ve 0% komisyonlu çekim",
         Elite_Line_4: "+400 VC her görev için",
+        Passive_Line_1: "Her 24 saatte otomatik <b>+140.000 VC</b>",
+        Passive_Line_2: "7 gün boyunca toplam <b>≈980.000 VC</b> pasif kazanç",
+        Passive_Line_3: "💤 Hiçbir düğmeye basmadan kazanç",
+        Passive_Line_4: "🔐 Min çekim limiti <b>kalıcı 15 AZN (202.50 TRY)</b>",
         vip_buy_btn: "Satın Al",
         Modal_Confirm_Text: "Bu paketi almak istediğinizi onaylıyor musunuz?", 
         Modal_Btn_Cancel: "İptal", 
@@ -450,8 +464,11 @@ const LOCALES = {
         vip_free_perk: "+200 VC per video",
         vip_pro_title: "PRO Nitro",
         vip_elite_title: "ELITE Ultra",
+        vip_passive_title: "Passive Income",
+        vip_passive_badge: "💤 Hands-Free Earning",
         Pro_Price: "1.60 USDT / 1 Week",
         Elite_Price: "2.10 USDT / 1 Week",
+        Passive_Price: "3.20 USDT / 1 Week",
         Pro_Line_1: "Daily: 45 videos (Less exhausting)",
         Pro_Line_2: "Earn up to +11,700 VC massive daily drop",
         Pro_Line_3: "🚀 130% Turbo Earnings velocity multiplier",
@@ -460,6 +477,10 @@ const LOCALES = {
         Elite_Line_2: "Earn up to +14,000 VC record daily drop",
         Elite_Line_3: "🔥 175% Ultra Speed & 0% withdrawal commission",
         Elite_Line_4: "+400 VC per task",
+        Passive_Line_1: "Every 24 hours <b>+140,000 VC</b> automatically",
+        Passive_Line_2: "Total <b>≈980,000 VC</b> passive income in 7 days",
+        Passive_Line_3: "💤 Earn without pressing any buttons",
+        Passive_Line_4: "🔐 Min withdrawal limit <b>permanent 15 AZN</b>",
         vip_buy_btn: "Buy Now",
         Modal_Confirm_Text: "Do you confirm buying this package?", 
         Modal_Btn_Cancel: "Cancel", 
@@ -556,8 +577,11 @@ const LOCALES = {
         vip_free_perk: "+200 VC за видео",
         vip_pro_title: "PRO Nitro",
         vip_elite_title: "ELITE Ultra",
+        vip_passive_title: "Пассивный Заработок",
+        vip_passive_badge: "💤 Пассивный Доход",
         Pro_Price: "1.60 USDT / 1 Неделя",
         Elite_Price: "2.10 USDT / 1 Неделя",
+        Passive_Price: "3.20 USDT / 1 Неделя",
         Pro_Line_1: "Ежедневно: 45 видео (Меньше усталости)",
         Pro_Line_2: "До +11 700 VC крупного заработка каждый день",
         Pro_Line_3: "🚀 130% Турбо Скорость генерации прибыли",
@@ -566,6 +590,10 @@ const LOCALES = {
         Elite_Line_2: "До +14 000 VC рекордного заработка каждый день",
         Elite_Line_3: "🔥 175% Ультра Скорость и 0% комиссия на вывод",
         Elite_Line_4: "+400 VC за задание",
+        Passive_Line_1: "Каждые 24 часа <b>+140,000 VC</b> автоматически",
+        Passive_Line_2: "Всего <b>≈980,000 VC</b> пассивного дохода за 7 дней",
+        Passive_Line_3: "💤 Заработок без нажатия кнопок",
+        Passive_Line_4: "🔐 Мин лимит на вывод <b>навсегда 15 AZN</b>",
         vip_buy_btn: "Купить",
         Modal_Confirm_Text: "Вы подтверждаете покупку этого пакета?", 
         Modal_Btn_Cancel: "Отмена", 
@@ -583,6 +611,26 @@ const LOCALES = {
         maint_desc: "На сервере ведутся технические работы. Мы скоро вернемся в строй. Спасибо за ваше понимание!",
     }
 };
+
+function getWithdrawalTargetText(lang, hadPassive) {
+    if (hadPassive) {
+        if (lang === 'az') return "Çıxarış: 15 AZN - 100 AZN";
+        if (lang === 'tr') return "Çekim: 412.5 TRY - 2750 TRY";
+        if (lang === 'en') return "Withdrawal: 9 USDT - 60 USDT";
+        if (lang === 'ru') return "Вывод: 9 USDT - 60 USDT";
+    }
+    return LOCALES[lang]?.withdrawalTarget || "Çıxarış: 10 AZN - 100 AZN";
+}
+
+function getWithdrawNoticeText(lang, hadPassive) {
+    if (hadPassive) {
+        if (lang === 'az') return "Birdəfəlik Çıxarış Limiti: 15 AZN - 100 AZN";
+        if (lang === 'tr') return "Tek Seferlik Çekim Limiti: 412.5 TRY - 2750 TRY";
+        if (lang === 'en') return "Single Withdrawal Limit: 9 USDT - 60 USDT";
+        if (lang === 'ru') return "Лимит разового вывода: 9 USDT - 60 USDT";
+    }
+    return LOCALES[lang]?.Withdraw_Range_Notice || "Birdəfəlik Çıxarış Limiti: 10 AZN - 100 AZN";
+}
 
 function t(key) {
     return (LOCALES[currentLang] && LOCALES[currentLang][key]) || (LOCALES['az'] && LOCALES['az'][key]) || key;
@@ -610,7 +658,7 @@ function setLanguage(lang) {
         const key = el.getAttribute('data-i18n');
         const val = t(key);
         if (val) {
-            if (val.includes('<svg')) {
+            if (val.includes('<')) {
                 el.innerHTML = val;
             } else {
                 el.textContent = val;
@@ -624,11 +672,16 @@ function setLanguage(lang) {
     const elitePriceEl = document.getElementById('elite-price-tag');
     if (elitePriceEl) elitePriceEl.innerText = LOCALES[currentLang].Elite_Price;
 
+    const passivePriceEl = document.getElementById('passive-price-tag');
+    if (passivePriceEl) passivePriceEl.innerText = LOCALES[currentLang].Passive_Price;
+
+    const hadPassive = userData && userData.had_passive_vip;
     const withdrawNoticeEl = document.getElementById('store-withdraw-notice');
-    if (withdrawNoticeEl) withdrawNoticeEl.innerText = LOCALES[currentLang].Withdraw_Range_Notice;
+    if (withdrawNoticeEl) withdrawNoticeEl.innerText = getWithdrawNoticeText(currentLang, hadPassive);
 
     // Minimalist Withdrawal Range on dashboard card
-    document.getElementById('dashboard-target-text').innerText = LOCALES[currentLang].withdrawalTarget;
+    const targetEl = document.getElementById('dashboard-target-text');
+    if (targetEl) targetEl.innerText = getWithdrawalTargetText(currentLang, hadPassive);
 
     // Manually translate tasks-empty-msg if present in DOM
     const emptyMsgEl = document.getElementById('tasks-empty-msg');
@@ -836,7 +889,8 @@ function animateLoyaltyClaim(startVc, endVc) {
         
         // Also animate progress bar
         const currentMc = (userData.balance_mc - 4.0) + (4.0 * easeOut);
-        let progressPct = Math.min(100, Math.max(0, (currentMc / 10) * 100));
+        const targetAznLimit = (userData && userData.had_passive_vip) ? 15 : 10;
+        let progressPct = Math.min(100, Math.max(0, (currentMc / targetAznLimit) * 100));
         
         const withdrawalFillEl = document.getElementById("withdrawal-progress-fill");
         if (withdrawalFillEl) withdrawalFillEl.style.width = `${progressPct}%`;
@@ -1649,11 +1703,12 @@ function renderDashboard() {
     const balanceMcEl = document.getElementById("balance-mc");
     balanceMcEl.textContent = formatNumber(userData.balance_vc !== undefined ? userData.balance_vc : 0);
 
-    // Çıxarış Progress Bar -> Natively calculated against 10 AZN target
+    // Çıxarış Progress Bar -> Natively calculated against 10 AZN or 15 AZN (passive) target
     const currentMc = userData.balance_mc || 0;
+    const targetAznLimit = userData.had_passive_vip ? 15 : 10;
     
-    // Natively compute progress percentage against the 10 AZN target
-    let progressPct = Math.min(100, Math.max(0, (currentMc / 10) * 100));
+    // Natively compute progress percentage against the target limit
+    let progressPct = Math.min(100, Math.max(0, (currentMc / targetAznLimit) * 100));
     
     // Assign a league based on the progress (5 tiers, 20% each)
     let newLeagueIndex = 0;
@@ -1786,7 +1841,9 @@ function renderDashboard() {
 
     // Withdrawal target label
     const dashboardTargetEl = document.getElementById("dashboard-target-text");
-    if (dashboardTargetEl) dashboardTargetEl.innerText = LOCALES[currentLang].withdrawalTarget;
+    if (dashboardTargetEl) {
+        dashboardTargetEl.innerText = getWithdrawalTargetText(currentLang, userData.had_passive_vip);
+    }
 
     // Statistika
     document.getElementById("total-earned").textContent = formatNumber(userData.total_earned_vc !== undefined ? userData.total_earned_vc : 0);
@@ -2661,8 +2718,18 @@ function closeVipModal() {
 }
 
 function confirmVipPurchase() {
-    const tierName = selectedVipPackage === 'pro' ? t('vip_pro_title') : t('vip_elite_title');
-    const priceStr = selectedVipPackage === 'pro' ? LOCALES[currentLang].Pro_Price : LOCALES[currentLang].Elite_Price;
+    let tierName = "";
+    let priceStr = "";
+    if (selectedVipPackage === 'pro') {
+        tierName = t('vip_pro_title');
+        priceStr = LOCALES[currentLang].Pro_Price;
+    } else if (selectedVipPackage === 'elite') {
+        tierName = t('vip_elite_title');
+        priceStr = LOCALES[currentLang].Elite_Price;
+    } else if (selectedVipPackage === 'passive') {
+        tierName = t('vip_passive_title');
+        priceStr = LOCALES[currentLang].Passive_Price;
+    }
     const packageInfo = `${tierName} (${priceStr})`;
     
     const msgTemplate = t('Modal_Order_Msg');

@@ -58,9 +58,13 @@ class User(Base):
     cooldown_notified: Mapped[bool] = mapped_column(Boolean, default=True, server_default="1")
 
     # ── VIP Subscription ──
-    # Values: "free" | "pro" | "elite"
+    # Values: "free" | "pro" | "elite" | "passive"
     vip_status: Mapped[str] = mapped_column(String(20), default="free", server_default="free")
     vip_expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+    # ── Passive Income Package ──
+    passive_last_paid_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    had_passive_vip: Mapped[bool] = mapped_column(Boolean, default=False, server_default="0")
 
     # ── Referral ──
     referrer_id: Mapped[int | None] = mapped_column(

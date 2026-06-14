@@ -1547,14 +1547,14 @@ async def cmd_setvip(message: types.Message) -> None:
         
     parts = message.text.split()
     if len(parts) < 3:
-        await message.answer("⚠️ Format: <code>/setvip &lt;telegram_id&gt; &lt;pro/elite&gt;</code>", parse_mode="HTML")
+        await message.answer("⚠️ Format: <code>/setvip &lt;telegram_id&gt; &lt;pro/elite/passive&gt;</code>", parse_mode="HTML")
         return
         
     target = parts[1].strip()
     status = parts[2].strip().lower()
     
-    if status not in ['pro', 'elite']:
-        await message.answer("⚠️ Format: <code>/setvip &lt;telegram_id&gt; &lt;pro/elite&gt;</code>", parse_mode="HTML")
+    if status not in ['pro', 'elite', 'passive']:
+        await message.answer("⚠️ Format: <code>/setvip &lt;telegram_id&gt; &lt;pro/elite/passive&gt;</code>", parse_mode="HTML")
         return
         
     if not target.isdigit():
@@ -1573,8 +1573,13 @@ async def cmd_setvip(message: types.Message) -> None:
             return
             
         user.vip_status = status
-        user.vip_expires_at = datetime.utcnow() + timedelta(days=7)
+        user.vip_expires_at = datetime.now(timezone.utc) + timedelta(days=7)
         user_lang = user.language if user.language in ['az', 'tr', 'en', 'ru'] else 'en'
+        # Passive-specific fields
+        if status == 'passive':
+            user.had_passive_vip = True
+            # Set passive_last_paid_at = None so worker pays out on the NEXT cycle
+            user.passive_last_paid_at = None
         await session.commit()
         
         VIP_NOTIFS = {
@@ -1589,6 +1594,12 @@ async def cmd_setvip(message: types.Message) -> None:
                 "tr": "Ve bitti! Artık zirvedesin! Hesabın ELITE Ultra statüsüne yükseltildi! 🔥\n\nKazanç hızın maksimumda: **175% Ultra Hız** ve **%0 komisyon**! Tüm kapılar açıldı, gir ve rekorları darmadağın et!",
                 "en": "Boom! You are at the absolute top now! Account upgraded to ELITE Ultra! 🔥\n\nMax velocity engaged: **175% Ultra Speed** & **0% commission**! All gateways unlocked, go smash some records!",
                 "ru": "Изи! Ты теперь на самом пике! Твой аккаунт взлетел до ELITE Ultra! 🔥\n\nСкорость на максимуме: **175% Ультра** и **0% комиссия**! Все шлюзы открыты, залетай и разноси рекорды в щепки!"
+            },
+            "passive": {
+                "az": "🎉 Pasiv Qazanc Paketi aktivləşdi!\n\nNovbəti 7 gün ərzində hər 24 saatdan bir hesabına avtomatik olaraq **+140,000 VC (≈1 AZN)** əlavə olunacaq. Heç bir düyməyə basmağına ehtiyac yoxdur — pul özü gəlir! 💰",
+                "tr": "🎉 Pasif Kazanç Paketi aktifleşti!\n\nSonraki 7 gün boyunca her 24 saatte bir hesabına otomatik olarak **+140.000 VC (≈1 AZN)** eklenecek. Hiçbir butona basmana gerek yok — para kendisi gelir! 💰",
+                "en": "🎉 Passive Income Package activated!\n\nFor the next 7 days, **+140,000 VC (≈1 AZN)** will be credited to your account automatically every 24 hours. No button presses needed — money comes to you! 💰",
+                "ru": "🎉 Пакет Пассивного Дохода активирован!\n\nВ течение следующих 7 дней каждые 24 часа на твой счёт будет автоматически начисляться **+140 000 VC (≈1 AZN)**. Не нужно нажимать никаких кнопок — деньги приходят сами! 💰"
             }
         }
         
