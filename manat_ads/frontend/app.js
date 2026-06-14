@@ -19,6 +19,18 @@ const COOLDOWN_MS = 3 * 60 * 60 * 1000; // 3 hours in milliseconds
 let AdController = null;
 let globalConfig = null;
 
+// Adsgram SDK-sı yüklənənə qədər gözləyib init edir (max 10 dəfə, 500ms interval)
+function initAdsgramWhenReady(blockId, retries = 10) {
+    if (window.Adsgram) {
+        AdController = window.Adsgram.init({ blockId: blockId.toString() });
+        console.log('[Adsgram] SDK initialized with blockId:', blockId);
+    } else if (retries > 0) {
+        setTimeout(() => initAdsgramWhenReady(blockId, retries - 1), 500);
+    } else {
+        console.warn('[Adsgram] SDK yüklənmədi — reklam düyməsi deaktiv qalacaq.');
+    }
+}
+
 async function fetchConfigAndInitAdsgram() {
     try {
         const resp = await fetch(`${API_BASE}/api/config`);
@@ -75,8 +87,9 @@ async function fetchConfigAndInitAdsgram() {
                 return;
             }
 
-            if (window.Adsgram && globalConfig.adsgram_block_id) {
-                AdController = window.Adsgram.init({ blockId: globalConfig.adsgram_block_id.toString() });
+            if (globalConfig.adsgram_block_id) {
+                // SDK hazır olana qədər gözlə
+                initAdsgramWhenReady(globalConfig.adsgram_block_id);
             }
         }
     } catch(e) {
@@ -2207,9 +2220,9 @@ function switchTab(tabId) {
         fetchTasks();
         
         // Auto-trigger AdsGram Task Wall on tab switch
-        if (window.Adsgram) {
+        if (window.Adsgram && globalConfig && globalConfig.adsgram_block_id) {
             try {
-                const taskBlock = window.Adsgram.initTask({ blockId: "task-34381" });
+                const taskBlock = window.Adsgram.initTask({ blockId: globalConfig.adsgram_block_id.toString() });
                 taskBlock.show().then((result) => {
                     let calcAmount = 250;
                     if (userData && userData.vip_status) {
