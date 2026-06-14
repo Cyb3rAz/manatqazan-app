@@ -876,6 +876,8 @@ const tg = window.Telegram?.WebApp;
 let currentUser = null;
 let userData = null;
 let isMaintenanceActive = false;
+let lastWatchTime = 0; // Timestamp of the last ad watch to prevent balance flickering
+
 
 // ── Başlanğıc ─────────────────────────────────────────────────────────
 document.addEventListener("DOMContentLoaded", () => {
@@ -956,36 +958,95 @@ async function initApp() {
             taglineEl.textContent = t('splashTagline'); 
         }
 
-        // Backend-dən istifadəçi məlumatlarını çək
-        await fetchUserData();
-
-        if (isMaintenanceActive) {
-            console.log("Texniki işlər rejimi aktivdir. Yükləmə dayandırıldı.");
-            return;
+        // Load cached global stats instantly
+        const cachedGlobalCount = localStorage.getItem('cached_global_user_count');
+        if (cachedGlobalCount) {
+            globalUserCount = parseInt(cachedGlobalCount, 10);
+            updateGlobalUserCountUI(globalUserCount);
         }
 
-        // Phase 2 (Post-Network Hydration Sync)
-        let finalLang = bootLang;
-        if (userData && userData.language && SUPPORTED_LANGS.includes(userData.language)) {
-            finalLang = userData.language;
-            localStorage.setItem('saved_language', finalLang);
-            localStorage.setItem('user_lang', finalLang);
-            localStorage.setItem('onboarding_completed', 'true');
-        }
-
-        if (finalLang !== bootLang) {
-            console.log(`[LangDebug] Dual-phase sync: User language updated from ${bootLang} to ${finalLang}`);
-            currentLang = finalLang;
-            if (taglineEl) {
-                taglineEl.textContent = t('splashTagline');
+        // Load cached userData if exists
+        const onboardingCompleted = localStorage.getItem('onboarding_completed');
+        const cachedUserStr = localStorage.getItem('cached_user_data');
+        let hasCache = false;
+        if (onboardingCompleted === 'true' && cachedUserStr) {
+            try {
+                userData = JSON.parse(cachedUserStr);
+                if (userData && userData.telegram_id === currentUser.id) {
+                    syncAdStateFromUserData();
+                    renderDashboard();
+                    setLanguage(currentLang);
+                    hasCache = true;
+                    
+                    // Show the app content immediately so user doesn't wait
+                    document.getElementById("main-content").style.display = "block";
+                    const splash = document.getElementById("loader");
+                    if (splash) {
+                        splash.style.opacity = '0';
+                        splash.style.visibility = 'hidden';
+                        setTimeout(() => splash.remove(), 400);
+                    }
+                    console.log("[initApp] Loaded from cache, instant load triggered.");
+                } else {
+                    userData = null;
+                }
+            } catch (e) {
+                console.error("[initApp] Error parsing cached user data:", e);
+                userData = null;
             }
         }
 
-        // UI-ı yenilə
-        renderDashboard();
+        if (!hasCache) {
+            // Backend-dən istifadəçi məlumatlarını çək (Synchronous block for uncached users)
+            await fetchUserData();
+            
+            if (isMaintenanceActive) {
+                console.log("Texniki işlər rejimi aktivdir. Yükləmə dayandırıldı.");
+                return;
+            }
 
-        // Apply language to all static elements
-        setLanguage(currentLang);
+            // Phase 2 (Post-Network Hydration Sync)
+            let finalLang = bootLang;
+            if (userData && userData.language && SUPPORTED_LANGS.includes(userData.language)) {
+                finalLang = userData.language;
+                localStorage.setItem('saved_language', finalLang);
+                localStorage.setItem('user_lang', finalLang);
+                localStorage.setItem('onboarding_completed', 'true');
+            }
+
+            if (finalLang !== bootLang) {
+                console.log(`[LangDebug] Dual-phase sync: User language updated from ${bootLang} to ${finalLang}`);
+                currentLang = finalLang;
+                if (taglineEl) {
+                    taglineEl.textContent = t('splashTagline');
+                }
+            }
+
+            // UI-ı yenilə
+            renderDashboard();
+
+            // Apply language to all static elements
+            setLanguage(currentLang);
+        } else {
+            // Background fetch for cached users to keep it snappy
+            fetchUserData().then((freshData) => {
+                if (freshData && isMaintenanceActive) {
+                    return;
+                }
+                if (userData) {
+                    renderDashboard();
+                    localStorage.setItem('cached_user_data', JSON.stringify(userData));
+                    
+                    // Check loyalty bonus
+                    checkLoyaltyBonus();
+                    
+                    // Sync Phase 2 language if updated from backend
+                    if (userData.language && SUPPORTED_LANGS.includes(userData.language) && userData.language !== currentLang) {
+                        setLanguage(userData.language);
+                    }
+                }
+            }).catch(e => console.warn("[initApp] Background hydration failed:", e));
+        }
 
         // ── Sınaq / Reset Mexanizmi ──────────────────────────────────────────
         if (urlParams.get('reset') === 'true') {
@@ -993,11 +1054,11 @@ async function initApp() {
             localStorage.removeItem('onboarding_completed');
         }
 
-        // Check if onboarding is completed (set above if userData.language was present)
-        const onboardingCompleted = localStorage.getItem('onboarding_completed');
-        console.log(`[LangDebug] onboardingCompleted flag:`, onboardingCompleted);
+        // Check if onboarding is completed
+        const onboardingCompletedCheck = localStorage.getItem('onboarding_completed');
+        console.log(`[LangDebug] onboardingCompleted check:`, onboardingCompletedCheck);
         
-        if (onboardingCompleted !== 'true') {
+        if (onboardingCompletedCheck !== 'true') {
             console.log(`[LangDebug] Showing onboarding modal for lang: ${currentLang}`);
             // Preset the onboarding selection according to initial currentLang
             onboardingSelectedLang = currentLang;
@@ -1017,27 +1078,30 @@ async function initApp() {
             const obModal = document.getElementById("onboarding-modal");
             if (obModal) {
                 obModal.style.display = "flex";
-                // If user meant 'display: block', we could use block, but 'flex' is what style.css uses to center it. 
                 setTimeout(() => obModal.classList.add("active"), 10);
             }
         } else {
-            // Ensure the modal stays hidden / is not rendered when onboarding is complete
+            // Ensure the modal stays hidden
             const obModal = document.getElementById("onboarding-modal");
             if (obModal) {
                 obModal.style.display = "none";
                 obModal.classList.remove("active");
             }
             console.log(`[LangDebug] Onboarding already completed, skipping modal.`);
-            checkLoyaltyBonus(); // Since onboarding is skipped, check for loyalty/welcome bonus right away
+            if (!hasCache) {
+                checkLoyaltyBonus(); // Only trigger here if not already handled by background fetch
+            }
         }
 
-        // Əsas kontenti göstər, splash screen-i fade-out ilə gizlə
-        document.getElementById("main-content").style.display = "block";
-        const splashSuccess = document.getElementById("loader");
-        if (splashSuccess) {
-            splashSuccess.style.opacity = '0';
-            splashSuccess.style.visibility = 'hidden';
-            setTimeout(() => splashSuccess.remove(), 400);
+        // For uncached users: show app content and remove loader
+        if (!hasCache) {
+            document.getElementById("main-content").style.display = "block";
+            const splashSuccess = document.getElementById("loader");
+            if (splashSuccess) {
+                splashSuccess.style.opacity = '0';
+                splashSuccess.style.visibility = 'hidden';
+                setTimeout(() => splashSuccess.remove(), 400);
+            }
         }
 
         // Start global user counter polling
@@ -1122,6 +1186,25 @@ async function fetchUserData() {
             return newData;
         }
 
+        // Recent Watch Guard: If user recently watched an ad, keep their higher optimistic balance
+        if (userData && newData) {
+            const timeSinceLastWatch = Date.now() - lastWatchTime;
+            const isRecentWatch = timeSinceLastWatch < 45000; // 45 seconds
+            
+            if (isRecentWatch && typeof newData.balance_vc === 'number' && typeof userData.balance_vc === 'number' && newData.balance_vc < userData.balance_vc) {
+                console.log(`[fetchUserData] Server balance (${newData.balance_vc}) is lower than optimistic local balance (${userData.balance_vc}) within recent watch window (${timeSinceLastWatch}ms). Preserving local balance.`);
+                
+                // Preserve optimistic fields in the new data
+                newData.balance_vc = userData.balance_vc;
+                newData.balance_mc = userData.balance_mc;
+                newData.total_earned_vc = userData.total_earned_vc;
+                newData.total_earned_mc = userData.total_earned_mc;
+                newData.session_1_count = Math.max(newData.session_1_count || 0, userData.session_1_count || 0);
+                newData.session_2_count = Math.max(newData.session_2_count || 0, userData.session_2_count || 0);
+                newData.videos_today = Math.max(newData.videos_today || 0, userData.videos_today || 0);
+            }
+        }
+
         if (newData && typeof newData.session_1_count === 'number' && typeof newData.session_2_count === 'number') {
             if (isRewardSyncing) {
                 console.log(`[fetchUserData-GUARD] Stale server data ignored during active reward sync.`);
@@ -1134,6 +1217,8 @@ async function fetchUserData() {
                         userData.referral_earnings_vc = newData.referral_earnings_vc;
                     }
                 }
+                // Save to cache
+                localStorage.setItem('cached_user_data', JSON.stringify(userData));
                 return newData;
             }
 
@@ -1141,6 +1226,11 @@ async function fetchUserData() {
             syncAdStateFromUserData();
         } else {
             userData = newData;
+        }
+
+        // Save to cache
+        if (userData) {
+            localStorage.setItem('cached_user_data', JSON.stringify(userData));
         }
         return newData;
 
@@ -2000,6 +2090,7 @@ async function executeAdSuccessReward(sessionNum) {
 
     // Set reward syncing flag to true
     isRewardSyncing = true;
+    lastWatchTime = Date.now();
 
     const reward = userData.mc_per_video || 200;
     const rate = userData.mc_to_azn_rate || 140000;
@@ -2554,6 +2645,7 @@ async function fetchGlobalStats() {
             if (data && typeof data.total_users === 'number') {
                 // Guarantee counter never jumps backwards
                 globalUserCount = Math.max(globalUserCount, data.total_users);
+                localStorage.setItem('cached_global_user_count', globalUserCount);
                 updateGlobalUserCountUI(globalUserCount);
             }
         }
