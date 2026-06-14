@@ -972,7 +972,7 @@ async function initApp() {
         if (onboardingCompleted === 'true' && cachedUserStr) {
             try {
                 userData = JSON.parse(cachedUserStr);
-                if (userData && userData.telegram_id === currentUser.id) {
+                if (userData && String(userData.telegram_id) === String(currentUser.id)) {
                     syncAdStateFromUserData();
                     renderDashboard();
                     setLanguage(currentLang);
@@ -998,7 +998,11 @@ async function initApp() {
 
         if (!hasCache) {
             // Backend-dən istifadəçi məlumatlarını çək (Synchronous block for uncached users)
-            await fetchUserData();
+            const freshData = await fetchUserData();
+            if (!freshData) {
+                showConnectionErrorScreen();
+                return;
+            }
             
             if (isMaintenanceActive) {
                 console.log("Texniki işlər rejimi aktivdir. Yükləmə dayandırıldı.");
@@ -1109,17 +1113,7 @@ async function initApp() {
 
     } catch (err) {
         console.error("Başlanğıc xətası:", err);
-        document.getElementById("main-content").style.display = "block";
-        const splashError = document.getElementById("loader");
-        if (splashError) {
-            splashError.style.opacity = '0';
-            splashError.style.visibility = 'hidden';
-            setTimeout(() => splashError.remove(), 400);
-        }
-        renderDashboard();
-        setLanguage(currentLang);
-        document.getElementById("total-earned").textContent = err.toString();
-        showToast(err.toString(), "error");
+        showConnectionErrorScreen();
     }
 }
 
@@ -1310,6 +1304,73 @@ function showErrorScreen(title, message, icon="⚠️") {
                 box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
                 transition: transform 0.2s;
             ">Bağla</button>
+        </div>
+    `;
+    document.body.appendChild(errorOverlay);
+}
+
+function showConnectionErrorScreen() {
+    const splash = document.getElementById("loader");
+    if (splash) {
+        splash.style.opacity = '0';
+        splash.style.visibility = 'hidden';
+        setTimeout(() => splash.remove(), 400);
+    }
+    
+    const mainContent = document.getElementById("main-content");
+    if (mainContent) {
+        mainContent.style.display = "none";
+    }
+    
+    if (document.getElementById("connection-error-screen")) return;
+    
+    const errorOverlay = document.createElement("div");
+    errorOverlay.id = "connection-error-screen";
+    errorOverlay.style.position = "fixed";
+    errorOverlay.style.top = "0";
+    errorOverlay.style.left = "0";
+    errorOverlay.style.width = "100%";
+    errorOverlay.style.height = "100%";
+    errorOverlay.style.backgroundColor = "#0f172a";
+    errorOverlay.style.color = "#f8fafc";
+    errorOverlay.style.fontFamily = "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif";
+    errorOverlay.style.display = "flex";
+    errorOverlay.style.flexDirection = "column";
+    errorOverlay.style.alignItems = "center";
+    errorOverlay.style.justifyContent = "center";
+    errorOverlay.style.textAlign = "center";
+    errorOverlay.style.padding = "20px";
+    errorOverlay.style.boxSizing = "border-box";
+    errorOverlay.style.zIndex = "99999";
+    
+    errorOverlay.innerHTML = `
+        <div style="
+            max-width: 400px;
+            padding: 30px;
+            background: rgba(30, 41, 59, 0.7);
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+        ">
+            <div style="font-size: 60px; margin-bottom: 20px;">🔌</div>
+            <h1 style="color: #38bdf8; margin-top: 0; font-size: 24px;">Bağlantı Xətası</h1>
+            <p style="color: #cbd5e1; font-size: 16px; line-height: 1.6; margin-bottom: 25px;">
+                Serverlə əlaqə qurulmadı. İnternet bağlantınızı yoxlayın və yenidən cəhd edin.
+            </p>
+            <button onclick="location.reload()" style="
+                background: linear-gradient(135deg, #38bdf8, #0284c7);
+                color: white;
+                border: none;
+                padding: 12px 24px;
+                border-radius: 8px;
+                font-size: 16px;
+                font-weight: 600;
+                cursor: pointer;
+                width: 100%;
+                box-shadow: 0 4px 15px rgba(56, 189, 248, 0.3);
+                transition: transform 0.2s;
+            ">Yenidən Cəhd Et</button>
         </div>
     `;
     document.body.appendChild(errorOverlay);
