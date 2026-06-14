@@ -1,6 +1,6 @@
 {
   "rewrites": [
-    { "source": "/api/(.*)", "destination": "https://api.newsupport.site/api/$1" },
+    { "source": "/api/(.*)", "destination": "https://api.nowsupport.site/api/$1" },
     { "source": "/static/(.*)", "destination": "/manat_ads/frontend/$1" },
     { "source": "/(.*)", "destination": "/manat_ads/frontend/$1" }
   ]
