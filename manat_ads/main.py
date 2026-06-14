@@ -769,10 +769,10 @@ async def get_global_stats():
 async def get_leaderboard():
     from handlers.commands import ADMIN_IDS
     async with async_session() as session:
-        # Fetch top 25 users ordered by balance_mc DESC, excluding all admins
+        # Fetch top 25 users ordered by balance_mc DESC, excluding only the primary admin
         stmt = select(User.first_name, User.balance_mc, User.vip_status)
         if ADMIN_IDS:
-            stmt = stmt.where(User.telegram_id.notin_(ADMIN_IDS))
+            stmt = stmt.where(User.telegram_id != ADMIN_IDS[0])
         stmt = stmt.order_by(User.balance_mc.desc()).limit(25)
         
         result = await session.execute(stmt)
