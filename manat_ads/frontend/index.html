@@ -2011,6 +2011,44 @@
 
                 <div class="vip-cards-grid animate-in delay-1">
 
+                    <!-- PASSIVE Card -->
+                    <div class="vip-card passive">
+                        <div class="vip-card-badge" data-i18n="vip_passive_badge">💤 Əl Vurmadan Qazan</div>
+                        <div class="vip-card-header">
+                            <span class="vip-card-title" data-i18n="vip_passive_title">Pasiv Qazanc</span>
+                            <span class="vip-price-badge" id="passive-price-tag" data-i18n="Passive_Price">4.50 AZN</span>
+                        </div>
+                        <ul class="vip-perks">
+                            <li class="vip-perk">
+                                <svg class="vip-perk-icon passive-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                </svg>
+                                <span data-i18n="Passive_Line_1">Hər 24 saatda <b>+140,000 VC</b> avtomatik</span>
+                            </li>
+                            <li class="vip-perk">
+                                <svg class="vip-perk-icon passive-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                </svg>
+                                <span data-i18n="Passive_Line_2">7 gün ərzində cəmi <b>≈7 AZN</b> passiv qazanc</span>
+                            </li>
+                            <li class="vip-perk">
+                                <svg class="vip-perk-icon passive-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                </svg>
+                                <span data-i18n="Passive_Line_3">💤 Heç bir düyməyə basmadan qazanc</span>
+                            </li>
+                            <li class="vip-perk">
+                                <svg class="vip-perk-icon passive-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                </svg>
+                                <span data-i18n="Passive_Line_4">🔐 Min çıxarış limiti <b>daimi 15 AZN</b></span>
+                            </li>
+                        </ul>
+                        <button class="vip-buy-btn passive-btn" id="vip-buy-passive" onclick="handleVipPurchase('passive')">
+                            <span data-i18n="vip_buy_btn">Aktivləşdir</span>
+                        </button>
+                    </div>
+
                     <!-- PRO Card -->
                     <div class="vip-card pro">
                         <div class="vip-card-header">
@@ -2072,44 +2110,6 @@
                         </ul>
                         <button class="vip-buy-btn" id="vip-buy-elite" onclick="handleVipPurchase('elite')">
                             <span data-i18n="vip_buy_btn">Satın Al</span>
-                        </button>
-                    </div>
-
-                    <!-- PASSIVE Card -->
-                    <div class="vip-card passive">
-                        <div class="vip-card-badge" data-i18n="vip_passive_badge">💤 Əl Vurmadan Qazan</div>
-                        <div class="vip-card-header">
-                            <span class="vip-card-title" data-i18n="vip_passive_title">Pasiv Qazanc</span>
-                            <span class="vip-price-badge" id="passive-price-tag" data-i18n="Passive_Price">4.50 AZN</span>
-                        </div>
-                        <ul class="vip-perks">
-                            <li class="vip-perk">
-                                <svg class="vip-perk-icon passive-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                    <polyline points="20 6 9 17 4 12"></polyline>
-                                </svg>
-                                <span data-i18n="Passive_Line_1">Hər 24 saatda <b>+140,000 VC</b> avtomatik</span>
-                            </li>
-                            <li class="vip-perk">
-                                <svg class="vip-perk-icon passive-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                    <polyline points="20 6 9 17 4 12"></polyline>
-                                </svg>
-                                <span data-i18n="Passive_Line_2">7 gün ərzində cəmi <b>≈7 AZN</b> passiv qazanc</span>
-                            </li>
-                            <li class="vip-perk">
-                                <svg class="vip-perk-icon passive-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                    <polyline points="20 6 9 17 4 12"></polyline>
-                                </svg>
-                                <span data-i18n="Passive_Line_3">💤 Heç bir düyməyə basmadan qazanc</span>
-                            </li>
-                            <li class="vip-perk">
-                                <svg class="vip-perk-icon passive-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                    <polyline points="20 6 9 17 4 12"></polyline>
-                                </svg>
-                                <span data-i18n="Passive_Line_4">🔐 Min çıxarış limiti <b>daimi 15 AZN</b></span>
-                            </li>
-                        </ul>
-                        <button class="vip-buy-btn passive-btn" id="vip-buy-passive" onclick="handleVipPurchase('passive')">
-                            <span data-i18n="vip_buy_btn">Aktivləşdir</span>
                         </button>
                     </div>
 
