@@ -38,9 +38,8 @@ def _get_utc_date(dt: datetime | None) -> date | None:
 # ── Admin Config ──
 ADMIN_IDS_RAW = os.getenv("ADMIN_IDS", "1970477419,6682395629")
 ADMIN_IDS = [int(x.strip()) for x in ADMIN_IDS_RAW.split(",") if x.strip().isdigit()]
-# ADMIN_ID is the primary notification target (falls back to the first entry in ADMIN_IDS)
-_admin_id_env = os.getenv("ADMIN_ID", "").strip()
-ADMIN_ID: int | None = int(_admin_id_env) if _admin_id_env.isdigit() else (ADMIN_IDS[0] if ADMIN_IDS else None)
+# ADMIN_ID kept for backward-compat (first admin in list). All notifications go to every admin.
+ADMIN_ID: int | None = ADMIN_IDS[0] if ADMIN_IDS else None
 
 class IsAdminFilter(BaseFilter):
     async def __call__(self, message: types.Message) -> bool:
@@ -547,10 +546,10 @@ async def _upsert_user(
 # ── Admin new-user notification ────────────────────────────────────────
 async def _notify_admin_new_user(bot, user_id: int, first_name: str | None, username: str | None, referrer_text: str = "Doğrudan Keçid (Yoxdur)") -> None:
     """
-    Send a real-time notification to ADMIN_ID about a brand-new user registration.
+    Send a real-time notification to ALL admins about a brand-new user registration.
     Runs as a fire-and-forget background task — NEVER raises; registration flow must not be affected.
     """
-    if ADMIN_ID is None:
+    if not ADMIN_IDS:
         return
     try:
         uname_display = f"@{username}" if username else "Yoxdur"
@@ -561,7 +560,11 @@ async def _notify_admin_new_user(bot, user_id: int, first_name: str | None, user
             f"\U0001f3f7 <b>Username:</b> {uname_display}\n"
             f"👥 <b>Dəvət Edən:</b> {referrer_text}"
         )
-        await bot.send_message(chat_id=ADMIN_ID, text=text, parse_mode="HTML")
+        for admin_id in ADMIN_IDS:
+            try:
+                await bot.send_message(chat_id=admin_id, text=text, parse_mode="HTML")
+            except Exception as per_admin_err:
+                logger.warning("[ADMIN NOTIFY] Failed to notify admin %s: %s", admin_id, per_admin_err)
     except Exception as notify_err:
         logger.warning("[ADMIN NOTIFY] Failed to send new-user notification: %s", notify_err)
 
@@ -1045,7 +1048,7 @@ async def handle_user_text_message(message: types.Message) -> None:
         
     # If the user has enough balance to withdraw, we forward the message to admin
     if user.balance_mc >= _WITHDRAWAL_THRESHOLD_MC:
-        if ADMIN_ID:
+        if ADMIN_IDS:
             uname_display = f"@{user.username}" if user.username else "Yoxdur"
             name_display = user.first_name or "Namelum"
             admin_text = (
@@ -1057,10 +1060,14 @@ async def handle_user_text_message(message: types.Message) -> None:
                 f"<code>{message.text}</code>"
             )
             try:
-                await message.bot.send_message(chat_id=ADMIN_ID, text=admin_text, parse_mode="HTML")
+                # Broadcast withdrawal request to ALL admins
+                for admin_id in ADMIN_IDS:
+                    try:
+                        await message.bot.send_message(chat_id=admin_id, text=admin_text, parse_mode="HTML")
+                    except Exception as per_admin_err:
+                        logger.warning("[WITHDRAW] Failed to notify admin %s: %s", admin_id, per_admin_err)
                 # Send confirmation in user's language
                 lang = user.language if user.language in BOT_LOCALES else 'en'
-                # Simple localized messages
                 confirm_msgs = {
                     'az': "✅ <b>Çıxarış sorğunuz qəbul edildi!</b>\nMəlumatlarınız adminlərə göndərildi. Tezliklə ödənişiniz icra olunacaq.",
                     'tr': "✅ <b>Çekim talebiniz alındı!</b>\nBilgileriniz yöneticilere iletildi. En kısa sürede ödemeniz yapılacaktır.",
@@ -1069,9 +1076,9 @@ async def handle_user_text_message(message: types.Message) -> None:
                 }
                 user_msg = confirm_msgs.get(lang, confirm_msgs['en'])
                 await message.answer(user_msg, parse_mode="HTML")
-                logger.info("[WITHDRAW] Request from user %s forwarded to admin %s", user.telegram_id, ADMIN_ID)
+                logger.info("[WITHDRAW] Request from user %s forwarded to all admins %s", user.telegram_id, ADMIN_IDS)
             except Exception as e:
-                logger.exception("Failed to forward withdrawal request to admin: %s", e)
+                logger.exception("Failed to forward withdrawal request to admins: %s", e)
                 err_msgs = {
                     'az': "⚠️ Xəta baş verdi. Zəhmət olmasa bir az sonra yenidən cəhd edin.",
                     'tr': "⚠️ Bir hata oluştu. Lütfen daha sonra tekrar deneyin.",

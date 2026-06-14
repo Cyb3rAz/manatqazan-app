@@ -182,18 +182,22 @@ async def lifespan(application: FastAPI):
         await bot.set_my_commands(commands_en, scope=aio_types.BotCommandScopeDefault(), language_code="en")
         await bot.set_my_commands(commands_ru, scope=aio_types.BotCommandScopeDefault(), language_code="ru")
         
-        # Admin scope commands
-        from handlers.commands import ADMIN_ID
-        if ADMIN_ID:
+        # Admin scope commands – set for every admin
+        from handlers.commands import ADMIN_IDS
+        if ADMIN_IDS:
             admin_commands = [
                 aio_types.BotCommand(command="start", description="Botu başlat ve Yenile"),
                 aio_types.BotCommand(command="lang", description="Dil seçimini dəyiş"),
                 aio_types.BotCommand(command="admin", description="Admin panelini aç")
             ]
-            await bot.set_my_commands(
-                commands=admin_commands,
-                scope=aio_types.BotCommandScopeChat(chat_id=ADMIN_ID)
-            )
+            for admin_chat_id in ADMIN_IDS:
+                try:
+                    await bot.set_my_commands(
+                        commands=admin_commands,
+                        scope=aio_types.BotCommandScopeChat(chat_id=admin_chat_id)
+                    )
+                except Exception as cmd_err:
+                    logger.warning("Failed to set admin commands for %s: %s", admin_chat_id, cmd_err)
             
         logger.info("Bot commands menu set for multiple languages and admin scope.")
     except Exception as e:
@@ -763,12 +767,12 @@ async def get_global_stats():
 # ── Leaderboard API (for Mini App) ─────────────────────────────────────
 @app.get("/api/leaderboard", summary="Get Top 25 users for Gamification Leaderboard")
 async def get_leaderboard():
-    from handlers.commands import ADMIN_ID
+    from handlers.commands import ADMIN_IDS
     async with async_session() as session:
-        # Fetch top 25 users ordered by balance_mc DESC, excluding the admin
+        # Fetch top 25 users ordered by balance_mc DESC, excluding all admins
         stmt = select(User.first_name, User.balance_mc, User.vip_status)
-        if ADMIN_ID is not None:
-            stmt = stmt.where(User.telegram_id != ADMIN_ID)
+        if ADMIN_IDS:
+            stmt = stmt.where(User.telegram_id.notin_(ADMIN_IDS))
         stmt = stmt.order_by(User.balance_mc.desc()).limit(25)
         
         result = await session.execute(stmt)
