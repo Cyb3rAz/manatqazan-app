@@ -1675,16 +1675,15 @@ async def cmd_wake_up(message: types.Message) -> None:
     webapp_url = f"{FRONTEND_URL}?v={int(datetime.now().timestamp())}"
     inline_kb = InlineKeyboardMarkup(inline_keyboard=[[
         InlineKeyboardButton(
-            text="💸 İndi Qazan",
+            text="🏆 Yarışa Qoşul",
             web_app=types.WebAppInfo(url=webapp_url)
         )
     ]])
 
     wake_text = (
-        "Sistem yeniləndi (bütün səbəb gecikmələri və xətalar artıq tarix oldu!) "
-        "və yeni VIP badgelər gəldi. ✨\n\n"
-        "Bu gün sənin üçün xüsusi sürətli limitlər aktivləşdirilib. "
-        "Həm yeni sürəti yoxla, həm də Liderlərdə yerini tut: 🎁"
+        "Sistemi elə sürətləndirmişik ki, reklamlar göz qırpımında açılır. "
+        "Camaat da yeni PRO və ELITE nişanları ilə Liderlər lövhəsində bir-birini ötür.\n\n"
+        "Gəl görək kim kimin balansını keçir. Çox geridə qalmısan, sürətlən! 🏃‍♂️💨"
     )
 
     await message.answer(
@@ -1698,7 +1697,7 @@ async def cmd_wake_up(message: types.Message) -> None:
 
     for tg_id, first_name in inactive_users:
         try:
-            personal_text = f"Salam, {first_name}! 👋\n\n{wake_text}"
+            personal_text = f"Hardasan, {first_name}? Hamı burdadır, sən yoxsan! 😂\n\n{wake_text}"
             await message.bot.send_message(
                 chat_id=tg_id,
                 text=personal_text,
