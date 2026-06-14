@@ -1066,15 +1066,20 @@ async function fetchUserData() {
     const url = `${API_BASE}/api/user/${currentUser.id}?_t=${cacheBuster}`;
     console.log(`[fetchUserData] Sorgu #${currentFetchId} göndərilir: ${url}`);
 
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 8000);
+
     try {
         const resp = await fetch(url, {
             method: "GET",
+            signal: controller.signal,
             headers: {
                 "Cache-Control": "no-cache, no-store, must-revalidate",
                 "Pragma": "no-cache",
                 "ngrok-skip-browser-warning": "true"
             }
         });
+        clearTimeout(timeoutId);
 
         console.log(`[fetchUserData] Cavab #${currentFetchId} alındı: status=${resp.status}`);
 
@@ -1140,7 +1145,12 @@ async function fetchUserData() {
         return newData;
 
     } catch (err) {
-        console.error("[fetchUserData] Şəbəkə xətası:", err);
+        clearTimeout(timeoutId);
+        if (err.name === 'AbortError') {
+            console.warn('[fetchUserData] Timeout 8s - mövcud userData qorunur.');
+        } else {
+            console.error("[fetchUserData] Şəbəkə xətası:", err);
+        }
         if (currentFetchId === lastFetchId && !userData) {
             userData = createDefaultUserData();
         }
@@ -2526,25 +2536,35 @@ let globalUserCount = 0;
 let statsFetchIntervalId = null;
 
 async function fetchGlobalStats() {
+    const ctrl = new AbortController();
+    const tid = setTimeout(() => ctrl.abort(), 5000);
     try {
         const resp = await fetch(`${API_BASE}/api/global-stats`, {
             method: "GET",
+            signal: ctrl.signal,
             headers: {
                 "Cache-Control": "no-cache, no-store, must-revalidate",
                 "Pragma": "no-cache",
                 "ngrok-skip-browser-warning": "true"
             }
         });
+        clearTimeout(tid);
         if (resp.ok) {
             const data = await resp.json();
             if (data && typeof data.total_users === 'number') {
-                // To completely guarantee the counter never jumps backwards
+                // Guarantee counter never jumps backwards
                 globalUserCount = Math.max(globalUserCount, data.total_users);
                 updateGlobalUserCountUI(globalUserCount);
             }
         }
     } catch (err) {
-        console.error("Error fetching global stats:", err);
+        clearTimeout(tid);
+        if (err.name === 'AbortError') {
+            console.warn('[fetchGlobalStats] Timeout 5s - k\u00f6hn\u0259 say qorunur.');
+        } else {
+            console.error("Error fetching global stats:", err);
+        }
+        // Do NOT reset counter on error - keep previous value
     }
 }
 
