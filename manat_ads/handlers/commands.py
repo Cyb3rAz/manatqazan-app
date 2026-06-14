@@ -101,6 +101,39 @@ WEBHOOK_URL = os.getenv("WEBHOOK_URL", "").strip().rstrip("/")
 FRONTEND_URL = os.getenv("FRONTEND_URL", "https://manatqazan.vercel.app").strip().rstrip("/")
 
 
+# ── Wake-Up Config (JSON-backed, admin-editable via bot) ───────────────────
+import json
+
+_WAKE_CONFIG_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "wake_config.json")
+
+_WAKE_DEFAULTS = {
+    "message": (
+        "Sistemi elə sürətləndirmişik ki, reklamlar göz qırpımında açılır. "
+        "Camaat da yeni PRO və ELITE nişanları ilə Liderlər lövhəsində bir-birini ötür.\n\n"
+        "Gəl görək kim kimin balansını keçir. Çox geridə qalmısan, sürətlən! 🏃‍♂️💨"
+    ),
+    "button": "🏆 Yarışa Qoşul",
+    "greeting": "Hardasan, {ad}? Hamı burdadır, sən yoxsan! 😂",
+}
+
+def _load_wake_config() -> dict:
+    """Load wake_up config from JSON file, falling back to defaults."""
+    try:
+        with open(_WAKE_CONFIG_PATH, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        # Fill any missing keys with defaults
+        for k, v in _WAKE_DEFAULTS.items():
+            data.setdefault(k, v)
+        return data
+    except (FileNotFoundError, json.JSONDecodeError):
+        return dict(_WAKE_DEFAULTS)
+
+def _save_wake_config(cfg: dict) -> None:
+    """Persist wake_up config to JSON file."""
+    with open(_WAKE_CONFIG_PATH, "w", encoding="utf-8") as f:
+        json.dump(cfg, f, ensure_ascii=False, indent=2)
+
+
 # ── Safe UPSERT helper ─────────────────────────────────────────────────
 SUPPORTED_LANGS = ['az', 'tr', 'en', 'ru']
 
@@ -1228,7 +1261,13 @@ ADMIN_HELP_TEXT = (
     "• /broadcast [Mesaj] — Bazardakı BÜTÜN istifadəçilərə kütləvi bildiriş göndərir.\n"
     "• /setvip [ID] [pro/elite] — 7 Günlük VIP təyin edər.\n"
     "• /find [Ad/Username/ID] — İstifadəçiləri axtarır.\n"
-    "• /maintenance [on/off] — Texniki işlər rejimini tənzimləyir."
+    "• /maintenance [on/off] — Texniki işlər rejimini tənzimləyir.\n\n"
+    "💤 <b>Passiv İstifadəçi (Wake-Up) Əmrləri:</b>\n"
+    "• /wake_up — Son 3 gündə aktiv olmayan istifadəçilərə cari mesajı göndərir.\n"
+    "• /wake_preview — Göndəriləcək mesajın tam önizləməsini göstərir.\n"
+    "• /set_wake_msg [Mətn] — Mesaj gövdəsini dəyişir ({ad} → istifadəçi adı).\n"
+    "• /set_wake_btn [Mətn] — Düymədəki yazını dəyişir (Məs: 🔥 Tətbiqi Aç).\n"
+    "• /set_wake_greet [Mətn] — Salamlama cümləsini dəyişir ({ad} → istifadəçi adı)."
 )
 
 ADMIN_PANEL_KB = InlineKeyboardMarkup(inline_keyboard=[
@@ -1657,10 +1696,10 @@ async def cmd_maintenance(message: types.Message) -> None:
 @router.message(Command("wake_up"), IsAdminFilter())
 async def cmd_wake_up(message: types.Message) -> None:
     """Send a re-engagement message to users inactive for 3+ days."""
+    cfg = _load_wake_config()
     cutoff = datetime.now(tz=timezone.utc) - timedelta(days=3)
 
     async with async_session() as session:
-        # Users who never watched OR haven't watched in 3+ days
         stmt = select(User.telegram_id, User.first_name).where(
             User.is_active == True,
             (User.last_watch_date == None) | (User.last_watch_date < cutoff),
@@ -1675,16 +1714,10 @@ async def cmd_wake_up(message: types.Message) -> None:
     webapp_url = f"{FRONTEND_URL}?v={int(datetime.now().timestamp())}"
     inline_kb = InlineKeyboardMarkup(inline_keyboard=[[
         InlineKeyboardButton(
-            text="🏆 Yarışa Qoşul",
+            text=cfg["button"],
             web_app=types.WebAppInfo(url=webapp_url)
         )
     ]])
-
-    wake_text = (
-        "Sistemi elə sürətləndirmişik ki, reklamlar göz qırpımında açılır. "
-        "Camaat da yeni PRO və ELITE nişanları ilə Liderlər lövhəsində bir-birini ötür.\n\n"
-        "Gəl görək kim kimin balansını keçir. Çox geridə qalmısan, sürətlən! 🏃‍♂️💨"
-    )
 
     await message.answer(
         f"⏳ <b>Wake-Up göndərişi başladı...</b>\n"
@@ -1697,14 +1730,15 @@ async def cmd_wake_up(message: types.Message) -> None:
 
     for tg_id, first_name in inactive_users:
         try:
-            personal_text = f"Hardasan, {first_name}? Hamı burdadır, sən yoxsan! 😂\n\n{wake_text}"
+            greeting = cfg["greeting"].replace("{ad}", first_name)
+            personal_text = f"{greeting}\n\n{cfg['message']}"
             await message.bot.send_message(
                 chat_id=tg_id,
                 text=personal_text,
                 reply_markup=inline_kb,
             )
             success_count += 1
-            await asyncio.sleep(0.05)  # Telegram rate-limit üçün kiçik fasilə
+            await asyncio.sleep(0.05)
         except Exception as e:
             logger.warning("wake_up: failed to send to %s: %s", tg_id, e)
             fail_count += 1
@@ -1713,5 +1747,97 @@ async def cmd_wake_up(message: types.Message) -> None:
         f"🎉 <b>Wake-Up tamamlandı!</b>\n\n"
         f"✅ Göndərildi: <b>{success_count}</b>\n"
         f"❌ Uğursuz: <b>{fail_count}</b>",
+        parse_mode="HTML"
+    )
+
+
+@router.message(Command("set_wake_msg"), IsAdminFilter())
+async def cmd_set_wake_msg(message: types.Message) -> None:
+    """Set the body text of the wake_up message."""
+    parts = message.text.split(maxsplit=1)
+    if len(parts) < 2:
+        await message.answer(
+            "⚠️ İstifadə: <code>/set_wake_msg Yeni mesaj mətni buraya yazılır...</code>\n\n"
+            "<i>İpucu: {ad} yazsan, istifadəçinin adı avtomatik əlavə olunur.</i>",
+            parse_mode="HTML"
+        )
+        return
+    cfg = _load_wake_config()
+    cfg["message"] = parts[1].strip()
+    _save_wake_config(cfg)
+    await message.answer(
+        f"✅ <b>Wake-Up mesajı yeniləndi!</b>\n\n"
+        f"📝 Yeni mətn:\n<i>{cfg['message']}</i>\n\n"
+        f"Önizləmə üçün: /wake_preview",
+        parse_mode="HTML"
+    )
+
+
+@router.message(Command("set_wake_btn"), IsAdminFilter())
+async def cmd_set_wake_btn(message: types.Message) -> None:
+    """Set the button label of the wake_up message."""
+    parts = message.text.split(maxsplit=1)
+    if len(parts) < 2:
+        await message.answer(
+            "⚠️ İstifadə: <code>/set_wake_btn 🔥 Tətbiqi Aç</code>",
+            parse_mode="HTML"
+        )
+        return
+    cfg = _load_wake_config()
+    cfg["button"] = parts[1].strip()
+    _save_wake_config(cfg)
+    await message.answer(
+        f"✅ <b>Düymə mətni yeniləndi!</b>\n\n"
+        f"🔘 Yeni düymə: <b>{cfg['button']}</b>\n\n"
+        f"Önizləmə üçün: /wake_preview",
+        parse_mode="HTML"
+    )
+
+
+@router.message(Command("set_wake_greet"), IsAdminFilter())
+async def cmd_set_wake_greet(message: types.Message) -> None:
+    """Set the greeting line of the wake_up message. Use {ad} for the user's name."""
+    parts = message.text.split(maxsplit=1)
+    if len(parts) < 2:
+        await message.answer(
+            "⚠️ İstifadə: <code>/set_wake_greet Hardasan, {ad}? 😊</code>\n\n"
+            "<i>İpucu: {ad} istifadəçinin adına çevrilir.</i>",
+            parse_mode="HTML"
+        )
+        return
+    cfg = _load_wake_config()
+    cfg["greeting"] = parts[1].strip()
+    _save_wake_config(cfg)
+    preview_greeting = cfg["greeting"].replace("{ad}", "Əli")
+    await message.answer(
+        f"✅ <b>Salamlama mətni yeniləndi!</b>\n\n"
+        f"👋 Nümunə (Əli üçün): <i>{preview_greeting}</i>\n\n"
+        f"Önizləmə üçün: /wake_preview",
+        parse_mode="HTML"
+    )
+
+
+@router.message(Command("wake_preview"), IsAdminFilter())
+async def cmd_wake_preview(message: types.Message) -> None:
+    """Show a full preview of the current wake_up message."""
+    cfg = _load_wake_config()
+    webapp_url = f"{FRONTEND_URL}?v={int(datetime.now().timestamp())}"
+    inline_kb = InlineKeyboardMarkup(inline_keyboard=[[
+        InlineKeyboardButton(
+            text=cfg["button"],
+            web_app=types.WebAppInfo(url=webapp_url)
+        )
+    ]])
+    preview_greeting = cfg["greeting"].replace("{ad}", message.from_user.first_name or "Siz")
+    preview_text = f"{preview_greeting}\n\n{cfg['message']}"
+
+    await message.answer("👁 <b>Wake-Up mesajının cari önizləməsi:</b>", parse_mode="HTML")
+    await message.answer(preview_text, reply_markup=inline_kb)
+    await message.answer(
+        f"🔧 <b>Dəyişmək üçün:</b>\n"
+        f"• <code>/set_wake_msg</code> — mesaj mətnini dəyiş\n"
+        f"• <code>/set_wake_btn</code> — düymə yazısını dəyiş\n"
+        f"• <code>/set_wake_greet</code> — salamlama cümləsini dəyiş\n"
+        f"• <code>/wake_up</code> — göndər!",
         parse_mode="HTML"
     )
