@@ -1674,55 +1674,91 @@
 
         /* ── PASSIVE Card ──────────────────────────────────────────── */
         .vip-card.passive {
-            border: 1px solid rgba(251, 191, 36, 0.45);
-            box-shadow: 0 0 36px rgba(251, 191, 36, 0.14), 0 4px 24px rgba(0, 0, 0, 0.35);
+            border: 1px solid rgba(255, 215, 0, 0.6);
+            box-shadow: 0 0 40px rgba(255, 215, 0, 0.25), inset 0 0 20px rgba(255, 215, 0, 0.1);
+            background: linear-gradient(180deg, rgba(30, 25, 0, 0.9) 0%, rgba(15, 12, 0, 0.95) 100%);
+            transform: scale(1.02);
+            z-index: 2;
         }
         .vip-card.passive::before {
             content: '';
             position: absolute;
             top: 0; left: 0; right: 0;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, #fbbf24, #f59e0b, transparent);
+            height: 3px;
+            background: linear-gradient(90deg, transparent, #ffd700, #ffaa00, transparent);
+            box-shadow: 0 0 15px #ffd700;
         }
 
         /* Floating badge above card title */
         .vip-card-badge {
             display: inline-block;
-            font-size: 11px;
-            font-weight: 700;
-            letter-spacing: 0.5px;
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: 0.8px;
             text-transform: uppercase;
-            padding: 4px 10px;
+            padding: 5px 12px;
             border-radius: 20px;
-            margin-bottom: 10px;
-            background: rgba(251, 191, 36, 0.15);
-            border: 1px solid rgba(251, 191, 36, 0.40);
-            color: #fbbf24;
-            animation: passive-pulse 2.4s ease-in-out infinite;
+            margin-bottom: 12px;
+            background: rgba(255, 215, 0, 0.2);
+            border: 1px solid rgba(255, 215, 0, 0.5);
+            color: #ffd700;
+            animation: passive-pulse 2s ease-in-out infinite;
+            text-shadow: 0 0 8px rgba(255, 215, 0, 0.5);
         }
         @keyframes passive-pulse {
-            0%, 100% { box-shadow: 0 0 6px rgba(251,191,36,0.2); }
-            50%       { box-shadow: 0 0 14px rgba(251,191,36,0.55); }
+            0%, 100% { box-shadow: 0 0 8px rgba(255, 215, 0, 0.3); transform: translateY(0); }
+            50%       { box-shadow: 0 0 18px rgba(255, 215, 0, 0.7); transform: translateY(-2px); }
         }
 
         .vip-card.passive .vip-card-title {
-            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            background: linear-gradient(135deg, #ffd700, #ffaa00);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+            font-size: 1.5rem;
+            text-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
         }
         .vip-card.passive .vip-price-badge {
-            background: rgba(251, 191, 36, 0.10);
-            border: 1px solid rgba(251, 191, 36, 0.35);
-            color: #fbbf24;
+            background: rgba(255, 215, 0, 0.15);
+            border: 1px solid rgba(255, 215, 0, 0.4);
+            color: #ffd700;
+            font-size: 1.1rem;
+            font-weight: bold;
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.2);
+            padding: 6px 12px;
         }
-        .vip-perk-icon.passive-check { color: #fbbf24; }
+        .vip-card.passive .vip-perk {
+            margin-bottom: 14px;
+            font-size: 1rem;
+        }
+        .vip-card.passive .vip-perk b {
+            color: #ffd700;
+            text-shadow: 0 0 5px rgba(255, 215, 0, 0.3);
+        }
+        .vip-perk-icon.passive-check { 
+            color: #ffd700; 
+            filter: drop-shadow(0 0 4px rgba(255, 215, 0, 0.4));
+        }
 
         .vip-card.passive .vip-buy-btn,
         .passive-btn {
-            background: linear-gradient(135deg, #d97706, #fbbf24);
+            background: linear-gradient(135deg, #ffaa00, #ffd700);
             color: #1a0e00;
-            box-shadow: 0 4px 16px rgba(251, 191, 36, 0.28), inset 0 1px 0 rgba(255,255,255,0.18);
+            font-weight: 800;
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            box-shadow: 0 4px 20px rgba(255, 215, 0, 0.4), inset 0 1px 0 rgba(255,255,255,0.4);
+            transition: all 0.3s ease;
+            animation: passive-btn-glow 2s infinite;
+        }
+        .vip-card.passive .vip-buy-btn:hover,
+        .passive-btn:hover {
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 8px 25px rgba(255, 215, 0, 0.6), inset 0 2px 0 rgba(255,255,255,0.6);
+        }
+        @keyframes passive-btn-glow {
+            0%, 100% { box-shadow: 0 4px 20px rgba(255, 215, 0, 0.4); }
+            50% { box-shadow: 0 4px 30px rgba(255, 215, 0, 0.8); }
         }
 
         /* ── Global User Counter Badge ────────────────────────────── */
@@ -2066,7 +2102,7 @@
                         <div class="vip-card-badge" data-i18n="vip_passive_badge">💤 Əl Vurmadan Qazan</div>
                         <div class="vip-card-header">
                             <span class="vip-card-title" data-i18n="vip_passive_title">Pasiv Qazanc</span>
-                            <span class="vip-price-badge" id="passive-price-tag">4.99 AZN / 1 Həftə</span>
+                            <span class="vip-price-badge" id="passive-price-tag" data-i18n="Passive_Price">4.50 AZN</span>
                         </div>
                         <ul class="vip-perks">
                             <li class="vip-perk">
