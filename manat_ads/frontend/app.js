@@ -18,9 +18,10 @@ const COOLDOWN_MS = 3 * 60 * 60 * 1000; // 3 hours in milliseconds
 // ── Adsgram TMA SDK Bootstrap ──────────────────────────────────────────
 let AdController = null;
 let globalConfig = null;
+const FALLBACK_ADSGRAM_BLOCK_ID = 35141; // Production block fallback
 
-// Adsgram SDK-sı yüklənənə qədər gözləyib init edir (max 10 dəfə, 500ms interval)
-function initAdsgramWhenReady(blockId, retries = 10) {
+// Adsgram SDK-sı yüklənənə qədər gözləyib init edir (max 40 dəfə, 500ms interval = 20 saniyə)
+function initAdsgramWhenReady(blockId, retries = 40) {
     if (window.Adsgram) {
         AdController = window.Adsgram.init({ blockId: blockId.toString() });
         console.log('[Adsgram] SDK initialized with blockId:', blockId);
@@ -90,10 +91,16 @@ async function fetchConfigAndInitAdsgram() {
             if (globalConfig.adsgram_block_id) {
                 // SDK hazır olana qədər gözlə
                 initAdsgramWhenReady(globalConfig.adsgram_block_id);
+            } else {
+                initAdsgramWhenReady(FALLBACK_ADSGRAM_BLOCK_ID);
             }
+        } else {
+            console.warn("Failed to fetch global config, using fallback Adsgram Block ID.");
+            initAdsgramWhenReady(FALLBACK_ADSGRAM_BLOCK_ID);
         }
     } catch(e) {
         console.error("Failed to fetch global config:", e);
+        initAdsgramWhenReady(FALLBACK_ADSGRAM_BLOCK_ID);
     }
 }
 fetchConfigAndInitAdsgram();
@@ -1976,7 +1983,15 @@ async function _watchAdImpl(sessionNum = 1) {
     // Guard: mutex cooldown
     if (isBtnCooldownActive) return;
 
-    // Guard: Adsgram SDK not yet ready
+    // Guard: Adsgram SDK not yet ready (try to initialize late on click)
+    if (!AdController) {
+        const blockId = (globalConfig && globalConfig.adsgram_block_id) || FALLBACK_ADSGRAM_BLOCK_ID;
+        if (window.Adsgram) {
+            console.log('[Adsgram] Late initialization of Adsgram SDK on button click.');
+            AdController = window.Adsgram.init({ blockId: blockId.toString() });
+        }
+    }
+
     if (!AdController) {
         showToast(t('toastAdNotAvail'), "error");
         return;
