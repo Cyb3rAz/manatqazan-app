@@ -2466,17 +2466,17 @@ async function fetchLeaderboard() {
                 row.classList.add(rankClass);
             }
             
-            // VIP SVGs
-            let vipSvg = "";
+            // VIP Badges
+            let vipBadge = "";
             if (user.vip_status === "elite") {
-                vipSvg = `<svg class="vip-icon elite-glow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;margin-left:5px;vertical-align:middle;color:#00ffcc;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>`;
+                vipBadge = `<span class="vip-badge elite">ELITE</span>`;
             } else if (user.vip_status === "pro") {
-                vipSvg = `<svg class="vip-icon pro-glow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;margin-left:5px;vertical-align:middle;color:#ff00ff;"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2l.5-.5m10-10l-10 10-3-3 10-10c2.76-2.76 7.24-2.76 7.24-2.76s0 4.48-2.76 7.24z"></path></svg>`;
+                vipBadge = `<span class="vip-badge pro">PRO</span>`;
             }
 
             row.innerHTML = `
                 <span class="rank">${rankDisplay}</span>
-                <span class="username">${user.first_name}${vipSvg}</span>
+                <span class="username">${user.first_name}${vipBadge}</span>
                 <span class="balance">${Math.floor(user.balance_mc).toLocaleString()} VC</span>
             `;
             container.appendChild(row);
