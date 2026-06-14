@@ -1207,22 +1207,6 @@ async function fetchUserData() {
         }
 
         if (newData && typeof newData.session_1_count === 'number' && typeof newData.session_2_count === 'number') {
-            if (isRewardSyncing) {
-                console.log(`[fetchUserData-GUARD] Stale server data ignored during active reward sync.`);
-                if (userData) {
-                    if (newData.referral_count !== undefined) {
-                        userData.referral_count = newData.referral_count;
-                    }
-                    if (newData.referral_earnings_mc !== undefined) {
-                        userData.referral_earnings_mc = newData.referral_earnings_mc;
-                        userData.referral_earnings_vc = newData.referral_earnings_vc;
-                    }
-                }
-                // Save to cache
-                localStorage.setItem('cached_user_data', JSON.stringify(userData));
-                return newData;
-            }
-
             userData = newData;
             syncAdStateFromUserData();
         } else {
@@ -1954,7 +1938,6 @@ let currentWatchingSession = 1;
 
 // Mutex: prevents re-entry during the post-ad cooldown
 let isBtnCooldownActive = false;
-let isRewardSyncing = false;
 let lastFetchId = 0;
 let cooldownRemaining = 0;
 let _btnCooldownTimerId = null;
@@ -2164,16 +2147,23 @@ function startButtonCooldown(sessionNum, seconds = null) {
 async function executeAdSuccessReward(sessionNum) {
     if (!userData) return;
 
-    // Set reward syncing flag to true
-    isRewardSyncing = true;
     lastWatchTime = Date.now();
-
     const reward = userData.mc_per_video || 200;
     const rate = userData.mc_to_azn_rate || 140000;
     const aznReward = reward / rate;
 
+    // Yadda saxlayaq ki, əgər xəta olarsa geri qaytara bilək
+    const prevBalanceMc = userData.balance_mc;
+    const prevBalanceVc = userData.balance_vc;
+    const prevTotalMc = userData.total_earned_mc;
+    const prevTotalVc = userData.total_earned_vc;
+    const prevVideosToday = userData.videos_today;
+    const prevS1 = userData.session_1_count;
+    const prevS2 = userData.session_2_count;
+    const prevCooldown = cooldownEndTime;
+
     // ── 1. Optimistic UI update ────────────────────────────────────────
-    userData.balance_mc      += aznReward; // Keep internal AZN float updated if needed
+    userData.balance_mc      += aznReward;
     userData.balance_vc      = (userData.balance_vc || 0) + reward;
     userData.total_earned_mc += aznReward;
     userData.total_earned_vc = (userData.total_earned_vc || 0) + reward;
@@ -2186,15 +2176,12 @@ async function executeAdSuccessReward(sessionNum) {
         // Level 1 just completed → start 3-hour cooldown
         if (userData.session_1_count >= LEVEL_LIMIT && currentLevel === 1) {
             cooldownEndTime = Date.now() + COOLDOWN_MS;
-            saveAdState();
-        } else {
-            saveAdState();
         }
     } else if (sessionNum === 2) {
         userData.session_2_count = (userData.session_2_count || 0) + 1;
         levelClicks = userData.session_2_count;
-        saveAdState();
     }
+    saveAdState();
 
     // ── 2. Animate balance ────────────────────────────────────────────
     const balEl = document.getElementById('balance-mc');
@@ -2207,69 +2194,70 @@ async function executeAdSuccessReward(sessionNum) {
             balEl.style.color = '';
         }, 400);
     }
-
     renderDashboard();
 
-    // ── 3. Fire backend sync (non-blocking) ───────────────────────────
+    // ── 3. Serverlə Sinxronizasiya ───────────────────────────
     try {
-        // Securely trigger the reward on the backend using Telegram initData
-        await fetch(`${API_BASE}/api/reward/frontend`, {
+        const resp = await fetch(`${API_BASE}/api/reward/frontend`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-Init-Data': window.Telegram.WebApp.initData
+                'X-Init-Data': window.Telegram.WebApp.initData || ""
             },
             body: JSON.stringify({
                 event_id: `adsgram_${Date.now()}_${Math.random()}`
             })
         });
+
+        const data = await resp.json();
+
+        if (resp.ok && data.ok) {
+            // Uğurlu olduqda serverin göndərdiyi yeni məlumatları qəbul et
+            if (typeof data.new_balance === 'number') {
+                userData.balance_mc = data.new_balance;
+                userData.balance_vc = data.new_balance * rate;
+            }
+            if (typeof data.videos_today === 'number') {
+                userData.videos_today = data.videos_today;
+            }
+            localStorage.setItem('cached_user_data', JSON.stringify(userData));
+            renderDashboard();
+
+            // Referal və s. yeniləmək üçün asinxron arxa planda istifadəçi məlumatını çək
+            setTimeout(() => {
+                fetchUserData().then(() => renderDashboard());
+            }, 1000);
+            
+        } else {
+            // Əgər server tərəfindən rədd edilsə, geri qaytar
+            console.warn("[Reward] Backend rejected reward:", data);
+            _revertOptimisticReward(prevBalanceMc, prevBalanceVc, prevTotalMc, prevTotalVc, prevVideosToday, prevS1, prevS2, prevCooldown);
+            
+            const errMsg = data.message || data.error || data.detail || "Server xətası: qazanc əlavə edilmədi.";
+            showToast(errMsg, "error");
+        }
+
     } catch (err) {
         console.error("[Reward] Backend trigger error:", err);
+        _revertOptimisticReward(prevBalanceMc, prevBalanceVc, prevTotalMc, prevTotalVc, prevVideosToday, prevS1, prevS2, prevCooldown);
+        showToast("İnternet bağlantısı xətası. Qazanc əlavə edilmədi.", "error");
     }
-
-    scheduleServerSync(4, 2500);
 }
 
-
-/**
- * Server ilə sinxronlaşdırma
- */
-function scheduleServerSync(maxRetries, delayMs) {
-    let attempt = 0;
-    const targetBalance = userData ? userData.balance_mc : 0;
-
-    function trySync() {
-        attempt++;
-        console.log(`[SYNC] Cəhd ${attempt}/${maxRetries} — ${delayMs * attempt}ms sonra...`);
-
-        setTimeout(async () => {
-            try {
-                const newData = await fetchUserData();
-                renderDashboard();
-
-                const currentServerBalance = newData ? newData.balance_mc : 0;
-                console.log(`[SYNC] Cəhd ${attempt} tamamlandı: server_balans=${currentServerBalance} | hedef=${targetBalance}`);
-
-                if (currentServerBalance < targetBalance && attempt < maxRetries) {
-                    trySync();
-                } else {
-                    isRewardSyncing = false;
-                    // Trigger a final fetch to apply the server data and remove the sync guard
-                    await fetchUserData();
-                    renderDashboard();
-                }
-            } catch (err) {
-                console.error(`[SYNC] Cəhd ${attempt} xətası:`, err);
-                if (attempt < maxRetries) {
-                    trySync();
-                } else {
-                    isRewardSyncing = false;
-                }
-            }
-        }, delayMs * attempt);
-    }
-
-    trySync();
+function _revertOptimisticReward(pBalMc, pBalVc, pTotMc, pTotVc, pVid, pS1, pS2, pCool) {
+    userData.balance_mc = pBalMc;
+    userData.balance_vc = pBalVc;
+    userData.total_earned_mc = pTotMc;
+    userData.total_earned_vc = pTotVc;
+    userData.videos_today = pVid;
+    userData.session_1_count = pS1;
+    userData.session_2_count = pS2;
+    cooldownEndTime = pCool;
+    levelClicks = currentLevel === 1 ? pS1 : pS2;
+    
+    saveAdState();
+    localStorage.setItem('cached_user_data', JSON.stringify(userData));
+    renderDashboard();
 }
 
 // ── Referal Linkini Kopyala ──────────────────────────────────────────
