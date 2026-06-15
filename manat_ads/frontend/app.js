@@ -113,7 +113,7 @@ let cooldownEndTime = 0;    // Unix ms timestamp; 0 = no cooldown
 
 // ── Passive Income Reminder ───────────────────────────────────────────
 let consecutiveVideoCount = 0;       // How many videos watched in a row this session
-const PASSIVE_REMINDER_THRESHOLD = 7; // Show reminder every N successful rewards
+let targetVideos = Math.floor(Math.random() * (10 - 7 + 1)) + 7; // Random target between 7 and 10
 
 
 function loadAdState() {
@@ -1662,8 +1662,9 @@ async function _watchAdImpl(sessionNum = 1) {
         showToast(t('rewardSuccess').replace('{amount}', userData.mc_per_video || 200), "success");
         // Passive reminder: increment counter and trigger popup at threshold
         consecutiveVideoCount++;
-        if (consecutiveVideoCount >= PASSIVE_REMINDER_THRESHOLD) {
+        if (consecutiveVideoCount >= targetVideos) {
             consecutiveVideoCount = 0;
+            targetVideos = Math.floor(Math.random() * (10 - 7 + 1)) + 7; // New random target
             setTimeout(() => showPassiveReminder(), 1200);
         }
     } catch (error) {
