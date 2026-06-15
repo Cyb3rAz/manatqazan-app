@@ -111,6 +111,11 @@ let currentLevel    = 1;    // 1 or 2
 let levelClicks     = 0;    // 0 to LEVEL_LIMIT
 let cooldownEndTime = 0;    // Unix ms timestamp; 0 = no cooldown
 
+// ── Passive Income Reminder ───────────────────────────────────────────
+let consecutiveVideoCount = 0;       // How many videos watched in a row this session
+const PASSIVE_REMINDER_THRESHOLD = 7; // Show reminder every N successful rewards
+
+
 function loadAdState() {
     currentLevel    = parseInt(localStorage.getItem('ad_currentLevel')    || '1', 10);
     levelClicks     = parseInt(localStorage.getItem('ad_levelClicks')     || '0', 10);
@@ -1655,6 +1660,12 @@ async function _watchAdImpl(sessionNum = 1) {
         await executeAdSuccessReward(sessionNum);
         spawnCoinBurst();
         showToast(t('rewardSuccess').replace('{amount}', userData.mc_per_video || 200), "success");
+        // Passive reminder: increment counter and trigger popup at threshold
+        consecutiveVideoCount++;
+        if (consecutiveVideoCount >= PASSIVE_REMINDER_THRESHOLD) {
+            consecutiveVideoCount = 0;
+            setTimeout(() => showPassiveReminder(), 1200);
+        }
     } catch (error) {
         console.error('[Adsgram] Ad playback tracking state failed/skipped:', error);
         
@@ -1969,6 +1980,41 @@ function showToast(message, toastType = "success") {
     toastTimer = setTimeout(() => {
         toast.classList.remove("visible");
     }, 2500);
+}
+
+// ── Passive Income Reminder Popup ─────────────────────────────────────
+function showPassiveReminder() {
+    const overlay = document.getElementById('passive-reminder-overlay');
+    if (!overlay) return;
+    overlay.style.display = 'flex';
+    const card = document.getElementById('passive-reminder-card');
+    if (card) {
+        card.style.opacity = '0';
+        card.style.transform = 'scale(0.85) translateY(24px)';
+        requestAnimationFrame(() => {
+            card.style.transition = 'opacity 0.35s ease, transform 0.35s cubic-bezier(0.34,1.56,0.64,1)';
+            card.style.opacity = '1';
+            card.style.transform = 'scale(1) translateY(0)';
+        });
+    }
+}
+
+function closePassiveReminder() {
+    const overlay = document.getElementById('passive-reminder-overlay');
+    const card = document.getElementById('passive-reminder-card');
+    if (card) {
+        card.style.transition = 'opacity 0.22s ease, transform 0.22s ease';
+        card.style.opacity = '0';
+        card.style.transform = 'scale(0.9) translateY(10px)';
+        setTimeout(() => { if (overlay) overlay.style.display = 'none'; }, 230);
+    } else if (overlay) {
+        overlay.style.display = 'none';
+    }
+}
+
+function goToPassiveStore() {
+    closePassiveReminder();
+    setTimeout(() => switchTab('store'), 300);
 }
 
 // ── Yardımçı (Format) ────────────────────────────────────────────────
