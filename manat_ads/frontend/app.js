@@ -2108,42 +2108,31 @@ function setupAdsgramTaskEvents() {
     taskEl.addEventListener("onError", hideTask);
     taskEl.addEventListener("error", hideTask);
 
-    // Watch for Adsgram injecting real content (image/link) into the shadow root
-    // If after 4 seconds the component has rendered a real task (not just skeleton),
-    // we reveal it. Otherwise keep hidden.
+    // Davamlı olaraq izləyirik ki, əgər arxada tapşırıq gələrsə avtomatik görünsün
     const observer = new MutationObserver(() => {
         const shadow = taskEl.shadowRoot;
         if (shadow) {
-            // Adsgram puts an <img> or <a> when there's a real task
-            const hasContent = shadow.querySelector('img, a[href], .task-content, [class*="task"]');
+            // Adsgram real tapşırıq yükləyəndə şəkil və ya link qoyur
+            const hasContent = shadow.querySelector('img, a[href]');
             if (hasContent) {
-                taskEl.style.display = 'block';
-                observer.disconnect();
+                taskEl.style.display = 'block'; // Tapşırıq gəldi, göstər
+            } else {
+                taskEl.style.display = 'none'; // Boşdur, gizlət
             }
         }
     });
 
-    // Start observing after the component upgrades (slight delay)
+    // Komponent yarandıqdan qısa müddət sonra izləməyə başla
     setTimeout(() => {
         if (taskEl.shadowRoot) {
             observer.observe(taskEl.shadowRoot, { childList: true, subtree: true });
-        }
-        // Fallback: if shadow root has meaningful content after 3s, show it
-        setTimeout(() => {
-            observer.disconnect();
-            const shadow = taskEl.shadowRoot;
-            if (shadow) {
-                const html = shadow.innerHTML || '';
-                // Only show if there's real content beyond skeleton placeholders
-                const hasImg = shadow.querySelector('img');
-                const hasLink = shadow.querySelector('a[href]');
-                if (hasImg || hasLink) {
-                    taskEl.style.display = 'block';
-                } else {
-                    taskEl.style.display = 'none';
-                }
+            
+            // İlk anda yoxlayırıq, bəlkə artıq yüklənib
+            const hasContent = taskEl.shadowRoot.querySelector('img, a[href]');
+            if (hasContent) {
+                taskEl.style.display = 'block';
             }
-        }, 3000);
+        }
     }, 500);
 }
 
