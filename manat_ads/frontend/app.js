@@ -2088,7 +2088,7 @@ function switchTab(tabId) {
 function triggerAdsgramTasks() {
     if (window.Adsgram) {
         try {
-            const taskBlock = window.Adsgram.initTask({ blockId: "35451" });
+            const taskBlock = window.Adsgram.init({ blockId: "35451" });
             taskBlock.show().then((result) => {
                 let calcAmount = 250;
                 if (userData && userData.vip_status) {
@@ -2099,12 +2099,14 @@ function triggerAdsgramTasks() {
             }).catch((result) => {
                 console.log("AdsGram task failed or closed", result);
                 if (result && result.error) {
-                    showToast("Task error: " + result.error, "error");
+                    showToast("Tapşırıqlar hazırda aktiv deyil.", "error");
+                } else {
+                    showToast("Tapşırıqlar hazırda aktiv deyil.", "error");
                 }
             });
         } catch (e) {
             console.error("AdsGram init error:", e);
-            showToast("Adsgram tapşırıqları aktiv deyil.", "error");
+            showToast("Tapşırıqlar hazırda aktiv deyil.", "error");
         }
     } else {
         showToast("Reklam SDK-sı yüklənməyib.", "error");
