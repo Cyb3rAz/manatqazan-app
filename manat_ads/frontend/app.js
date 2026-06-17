@@ -2104,11 +2104,15 @@ function setupAdsgramTaskEvents() {
         if (shadow) {
             // Real reklamlar çox vaxt iframe və ya img istifadə edir
             const hasIframe = shadow.querySelector('iframe');
-            const hasImg = shadow.querySelector('img');
             const hasVideo = shadow.querySelector('video');
-            const textContent = shadow.textContent.replace(/\s/g, '');
+            const hasLink = shadow.querySelector('a');
             
-            const isRealTask = hasIframe || hasImg || hasVideo || textContent.length > 5;
+            // Bütün boşluqları silib mətnin uzunluğunu ölçürük
+            const textContentNoSpaces = shadow.textContent.replace(/\s/g, '');
+            
+            // Skeletin "Loading" yazısı və ya placeholder şəkli ola bilər deyə 'img'-ni sildim.
+            // Real tapşırığın mətni adətən uzun olur (məsələn, 15 hərfdən çox).
+            const isRealTask = hasIframe || hasVideo || hasLink || textContentNoSpaces.length > 15;
             
             if (isRealTask) {
                 // Əgər tapşırığı hələ görməyibsə, nöqtəni yandır
