@@ -2099,16 +2099,16 @@ function setupAdsgramTaskEvents() {
         showToast(t('rewardSuccess').replace('{amount}', calcAmount), "success");
     });
 
-    taskEl.addEventListener("onNotFound", (event) => {
-        // Hide the button if no tasks are available
+    const hideTask = () => {
         taskEl.style.display = 'none';
-        console.log("Adsgram Task not found (no fill). Element hidden.");
-    });
+        console.log("Adsgram Task hidden due to lack of fill or error.");
+    };
 
-    taskEl.addEventListener("onError", (event) => {
-        console.error("Adsgram Task Error:", event);
-        showToast("Tapşırıq zamanı xəta baş verdi.", "error");
-    });
+    taskEl.addEventListener("onNotFound", hideTask);
+    taskEl.addEventListener("notFound", hideTask);
+    taskEl.addEventListener("notfound", hideTask);
+    taskEl.addEventListener("onError", hideTask);
+    taskEl.addEventListener("error", hideTask);
 }
 
 // Setup the events
