@@ -2092,8 +2092,7 @@ function setupAdsgramTaskEvents() {
     // Reward handler
     taskEl.addEventListener("reward", (event) => {
         console.log("Adsgram Task Reward event:", event);
-        let calcAmount = 150;
-        showToast(t('rewardSuccess').replace('{amount}', calcAmount), "success");
+        showToast("Təsdiq edildi! İndi 'Al' düyməsinə basaraq xalınızı götürün.", "info");
     });
 
     let taskSeen = false;
@@ -2148,6 +2147,87 @@ function setupAdsgramTaskEvents() {
             if (dot) dot.style.display = "none";
             taskSeen = true;
         });
+    }
+}
+
+let adsgramTaskAlreadyClaimed = false;
+async function claimAdsgramTask() {
+    if (adsgramTaskAlreadyClaimed) {
+        showToast("Siz artıq bu tapşırığı tamamlamısınız!", "error");
+        return;
+    }
+    
+    if (!tg || !tg.initData) {
+        showToast("Təhlükəsizlik xətası: Telegram mühiti tapılmadı", "error");
+        return;
+    }
+
+    const claimBtn = document.querySelector('#adsgram-task-block [slot="claim"]');
+    if (claimBtn) {
+        claimBtn.style.pointerEvents = 'none';
+        claimBtn.style.opacity = '0.7';
+    }
+
+    try {
+        const resp = await fetch(`${API_BASE}/api/reward/frontend`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Init-Data': tg.initData || ""
+            },
+            body: JSON.stringify({
+                event_id: `adsgram_task_${Date.now()}_${Math.random()}`
+            })
+        });
+
+        const data = await resp.json();
+
+        if (resp.ok && data.ok) {
+            adsgramTaskAlreadyClaimed = true;
+            let calcAmount = 150; // You can also read this from the backend or keep it fixed
+            showToast(t('rewardSuccess').replace('{amount}', calcAmount), "success");
+            spawnCoinBurst();
+
+            // Update local balance
+            if (userData) {
+                if (typeof data.new_balance === 'number') {
+                    userData.balance_mc = data.new_balance;
+                    if (data.new_balance_vc !== undefined) {
+                        userData.balance_vc = data.new_balance_vc;
+                    } else {
+                        // Fallback rate if backend didn't return new_balance_vc (though we just fixed this)
+                        const rate = userData.mc_to_azn_rate || 140000;
+                        userData.balance_vc = data.new_balance * rate;
+                    }
+                }
+                if (typeof data.videos_today === 'number') {
+                    userData.videos_today = data.videos_today;
+                }
+                renderDashboard();
+            }
+            
+            // Mark task as done visually
+            const taskEl = document.getElementById("adsgram-task-block");
+            if (taskEl) {
+                // To force Adsgram's web component to switch to "done" state,
+                // we can just hide it or simulate success, but since it's a closed component
+                // we'll just leave it or hide the claim button
+                if (claimBtn) claimBtn.style.display = 'none';
+            }
+        } else {
+            showToast(data.message || "Xəta baş verdi. Yenidən cəhd edin.", "error");
+            if (claimBtn) {
+                claimBtn.style.pointerEvents = 'auto';
+                claimBtn.style.opacity = '1';
+            }
+        }
+    } catch (err) {
+        console.error("Adsgram task claim error:", err);
+        showToast("Sistem xətası.", "error");
+        if (claimBtn) {
+            claimBtn.style.pointerEvents = 'auto';
+            claimBtn.style.opacity = '1';
+        }
     }
 }
 
