@@ -2222,7 +2222,8 @@
                     <span class="nav-indicator"></span>
                     <span class="nav-label" data-i18n="nav_home">Əsas</span>
                 </button>
-                <button class="nav-tab" id="nav-tasks" onclick="switchTab('tasks')">
+                <button class="nav-tab" id="nav-tasks" onclick="switchTab('tasks')" style="position: relative;">
+                    <div id="tasks-notification-dot" style="display: none; position: absolute; top: 12px; right: 28px; width: 10px; height: 10px; background-color: #ef4444; border-radius: 50%; box-shadow: 0 0 8px rgba(239, 68, 68, 0.8); border: 2px solid #0a1a22; z-index: 10; animation: pulse 2s infinite;"></div>
                     <svg class="nav-icon" viewBox="0 0 24 24">
                         <circle cx="12" cy="12" r="10"></circle>
                         <circle cx="12" cy="12" r="6"></circle>
@@ -2393,7 +2394,7 @@
         </div>
     </div>
 
-      <script src="/static/app.js?v=6.16.9"></script>
+      <script src="/static/app.js?v=6.16.10"></script>
 </body>
 </html>
 <!-- trigger vercel build v23 - cache bust -->
