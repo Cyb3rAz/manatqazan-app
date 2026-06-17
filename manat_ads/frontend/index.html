@@ -2747,7 +2747,7 @@
                 <path fill-rule="evenodd" d="M12 1.5a5.25 5.25 0 0 0-5.25 5.25v3a3 3 0 0 0-3 3v6.75a3 3 0 0 0 3 3h10.5a3 3 0 0 0 3-3v-6.75a3 3 0 0 0-3-3v-3c0-2.9-2.35-5.25-5.25-5.25Zm3.25 8.25v-3a3.25 3.25 0 1 0-6.5 0v3h6.5Zm-4.5 5.5a1.25 1.25 0 1 1 2.5 0v2.25a1.25 1.25 0 1 1-2.5 0v-2.25Z" clip-rule="evenodd" />
             </svg>
         </div>
-        <span class="fab-badge">50 Qəpik qazan</span>
+        <span class="fab-badge" data-i18n="ch_fab_badge">50 Qəpik qazan</span>
     </div>
 
     <!-- ═══════════════════════════════════════════════════════════
@@ -2761,8 +2761,8 @@
             <!-- Header -->
             <div class="ch-header">
                 <span class="ch-header-icon">🔐</span>
-                <div class="ch-title">Şifrə Ovçusu</div>
-                <div class="ch-subtitle">Gizli 5 rəqəmli şifrəni tap, <strong style="color:#a78bfa">50 Qəpik</strong> qazan!</div>
+                <div class="ch-title" data-i18n="ch_title">Şifrə Ovçusu</div>
+                <div class="ch-subtitle" id="ch-subtitle" data-i18n="ch_subtitle">Gizli 5 rəqəmli şifrəni tap, <strong style="color:#a78bfa">50 Qəpik</strong> qazan!</div>
             </div>
 
             <!-- Attempts Dots -->
@@ -2773,7 +2773,7 @@
             <!-- Solved Banner (hidden until solved) -->
             <div class="ch-solved-banner" id="ch-solved-banner">
                 <span class="ch-solved-emoji">🏆</span>
-                <div class="ch-solved-text">Şifrəni tapdınız! Təbriklər!</div>
+                <div class="ch-solved-text" data-i18n="ch_solved">Şifrəni tapdınız! Təbriklər!</div>
             </div>
 
             <!-- Input + Submit -->
@@ -2793,19 +2793,19 @@
                 </div>
 
                 <!-- Status line -->
-                <div class="ch-status" id="ch-status">5 cəhdiniz var. Uğurlar! 🎯</div>
+                <div class="ch-status" id="ch-status" data-i18n="ch_status_start">5 cəhdiniz var. Uğurlar! 🎯</div>
 
                 <!-- Unlock buttons (shown only when attempts = 0) -->
                 <div class="ch-unlock-section" id="ch-unlock-section">
                     <button class="ch-unlock-btn ads" id="ch-watch-ad-btn" onclick="codeHuntWatchAd()">
                         <span style="font-size:20px">📺</span>
-                        <span id="ch-ad-label">12 reklam izlə</span>
-                        <span style="opacity:0.75;font-weight:500" id="ch-ad-sub">+5 cəhd</span>
+                        <span id="ch-ad-label" data-i18n="ch_ad_label">12 reklam izlə</span>
+                        <span style="opacity:0.75;font-weight:500" id="ch-ad-sub" data-i18n="ch_ad_sub">+5 cəhd</span>
                     </button>
                     <button class="ch-unlock-btn refs" onclick="codeHuntShareRef()">
                         <span style="font-size:20px">👥</span>
-                        <span id="ch-ref-label">5 referal gətir</span>
-                        <span style="opacity:0.75;font-weight:500" id="ch-ref-sub">+5 cəhd</span>
+                        <span id="ch-ref-label" data-i18n="ch_ref_label">5 referal gətir</span>
+                        <span style="opacity:0.75;font-weight:500" id="ch-ref-sub" data-i18n="ch_ref_sub">+5 cəhd</span>
                     </button>
                 </div>
             </div>

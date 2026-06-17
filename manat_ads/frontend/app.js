@@ -2657,17 +2657,17 @@ function _chRender() {
         const refLabel = document.getElementById('ch-ref-label');
         const refSub   = document.getElementById('ch-ref-sub');
 
-        if (adLabel)  adLabel.textContent  = `${adsLeft} reklam qalıb`;
-        if (adSub)    adSub.textContent    = `${_ch.adsWatched}/${_ch.adsNeeded} izləndi`;
-        if (refLabel) refLabel.textContent = `${refsLeft} referal gətir`;
-        if (refSub)   refSub.textContent   = `+5 cəhd`;
+        if (adLabel)  adLabel.textContent  = t('ch_ad_label').replace('{count}', adsLeft);
+        if (adSub)    adSub.textContent    = t('ch_ad_sub');
+        if (refLabel) refLabel.textContent = t('ch_ref_label').replace('{count}', refsLeft);
+        if (refSub)   refSub.textContent   = t('ch_ref_sub');
 
-        _chSetStatus(`⚠️ Cəhdiniz bitdi! Kilidi aç:`, 'warning');
+        _chSetStatus(t('ch_status_no_attempts'), 'warning');
     } else {
         if (unlockSection) unlockSection.classList.remove('visible');
         if (submitBtn)     submitBtn.disabled = false;
         if (inp)           inp.disabled = false;
-        _chSetStatus(`🎯 ${_ch.attempts} cəhdiniz qalıb. Uğurlar!`, '');
+        _chSetStatus(t('ch_status_start').replace('5', _ch.attempts), '');
     }
 }
 
@@ -2706,7 +2706,7 @@ function _chShakeInput() {
 async function submitCodeHunt() {
     if (_ch.submitting) return;
     if (!window._currentUserId) {
-        _chSetStatus('⚠️ İstifadəçi müəyyən edilmədi.', 'error');
+        _chSetStatus(t('ch_err_user'), 'error');
         return;
     }
 
@@ -2715,7 +2715,7 @@ async function submitCodeHunt() {
     const code = inp.value.trim();
 
     if (!code || code.length !== 5 || !/^\d{5}$/.test(code)) {
-        _chSetStatus('⚠️ Tam 5 rəqəmli kod daxil edin.', 'error');
+        _chSetStatus(t('ch_err_invalid'), 'error');
         _chShakeInput();
         return;
     }
@@ -2748,7 +2748,7 @@ async function submitCodeHunt() {
             // ✅ Correct!
             _ch.solved = true;
             _chRender();
-            _chSetStatus(data.message || '🎉 Təbriklər!', 'success');
+            _chSetStatus(data.message || t('ch_success'), 'success');
 
             // Fire confetti 🎊
             if (window.confetti) {
@@ -2765,13 +2765,13 @@ async function submitCodeHunt() {
             _ch.attempts = typeof data.remaining_attempts === 'number' ? data.remaining_attempts : Math.max(0, _ch.attempts - 1);
             _chShakeInput();
             _chRender();
-            _chSetStatus(data.message || '❌ Yanlış şifrə!', 'error');
+            _chSetStatus(data.message || t('ch_err_wrong'), 'error');
             inp.value = '';
             inp.focus();
         }
     } catch (err) {
         console.error('[CODE-HUNT] Submit error:', err);
-        _chSetStatus('❌ Şəbəkə xətası. Yenidən cəhd edin.', 'error');
+        _chSetStatus(t('ch_err_network'), 'error');
     } finally {
         _ch.submitting = false;
         if (btn && _ch.attempts > 0 && !_ch.solved) btn.disabled = false;
@@ -2787,7 +2787,7 @@ async function codeHuntWatchAd() {
 
     // Use existing Adsgram controller
     if (!window.AdController) {
-        _chSetStatus('📺 Reklam SDK hazır deyil, yenidən cəhd edin.', 'warning');
+        _chSetStatus(t('ch_err_ads_sdk'), 'warning');
         if (adBtn) adBtn.disabled = false;
         return;
     }
@@ -2806,14 +2806,15 @@ async function codeHuntWatchAd() {
         _ch.adsWatched = data.ads_watched ?? _ch.adsWatched;
         if (data.refilled) {
             _ch.attempts = 5;
-            _chSetStatus(data.message || '🎉 5 yeni cəhd qazandınız!', 'success');
+            _chSetStatus(data.message || t('ch_success_refill'), 'success');
         } else {
-            _chSetStatus(data.message || `📺 ${_ch.adsWatched}/${_ch.adsNeeded} reklam izlənildi.`, '');
+            let progressMsg = t('ch_ads_progress').replace('{watched}', _ch.adsWatched).replace('{needed}', _ch.adsNeeded);
+            _chSetStatus(data.message || progressMsg, '');
         }
         _chRender();
     } catch (adErr) {
         console.warn('[CODE-HUNT-AD] Ad dismissed or error:', adErr);
-        _chSetStatus('📺 Reklam ləğv edildi.', 'warning');
+        _chSetStatus(t('ch_err_ad_cancel'), 'warning');
     } finally {
         if (adBtn) adBtn.disabled = false;
     }
@@ -2835,5 +2836,5 @@ function codeHuntShareRef() {
         window.open(tgShareUrl, '_blank');
     }
 
-    _chSetStatus('👥 Link göndərildi! Yeni referal qoşulduqda sayınız artacaq.', 'success');
+    _chSetStatus(t('ch_success_ref_link'), 'success');
 }

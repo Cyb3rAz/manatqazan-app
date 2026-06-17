@@ -113,5 +113,25 @@
     "🚀 Her 24 saatte +140,000 VC otomatik",
     "💰 7 gün içinde toplam 7 AZN karşılığı pasif kazanç",
     "💤 Hiçbir düğmeye basmadan rahat kazanç"
-  ]
+  ],
+  "ch_fab_badge": "50 Kuruş kazan",
+  "ch_title": "Şifre Avcısı",
+  "ch_subtitle": "Gizli 5 rakamlı şifreyi bul, <strong style=\"color:#a78bfa\">50 Kuruş</strong> kazan!",
+  "ch_status_start": "5 hakkınız var. Bol şans! 🎯",
+  "ch_status_no_attempts": "⚠️ Hakkınız bitti! Kilidi aç:",
+  "ch_ad_label": "12 reklam izle",
+  "ch_ad_sub": "+5 hak",
+  "ch_ref_label": "5 referans getir",
+  "ch_ref_sub": "+5 hak",
+  "ch_solved": "Şifreyi buldunuz! Tebrikler!",
+  "ch_err_user": "⚠️ Kullanıcı belirlenemedi.",
+  "ch_err_invalid": "⚠️ Tam 5 rakamlı kod girin.",
+  "ch_success": "🎉 Tebrikler!",
+  "ch_err_wrong": "❌ Yanlış şifre!",
+  "ch_err_network": "❌ Ağ hatası. Tekrar deneyin.",
+  "ch_err_ads_sdk": "📺 Reklam SDK hazır değil, tekrar deneyin.",
+  "ch_success_refill": "🎉 5 yeni hak kazandınız!",
+  "ch_ads_progress": "📺 {watched}/{needed} reklam izlendi.",
+  "ch_err_ad_cancel": "📺 Reklam iptal edildi.",
+  "ch_success_ref_link": "👥 Link gönderildi! Yeni referans katıldığında sayınız artacak."
 }

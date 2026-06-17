@@ -113,5 +113,25 @@
     "🚀 Automatically +140,000 VC every 24 hours",
     "💰 Total 7 AZN equivalent passive earnings in 7 days",
     "💤 Easy earnings without pressing any buttons"
-  ]
+  ],
+  "ch_fab_badge": "Win 50 Cents",
+  "ch_title": "Code Hunt",
+  "ch_subtitle": "Find the secret 5-digit code, win <strong style=\"color:#a78bfa\">50 Cents</strong>!",
+  "ch_status_start": "You have 5 attempts. Good luck! 🎯",
+  "ch_status_no_attempts": "⚠️ Out of attempts! Unlock:",
+  "ch_ad_label": "Watch 12 ads",
+  "ch_ad_sub": "+5 attempts",
+  "ch_ref_label": "Bring 5 referrals",
+  "ch_ref_sub": "+5 attempts",
+  "ch_solved": "You cracked the code! Congratulations!",
+  "ch_err_user": "⚠️ User not identified.",
+  "ch_err_invalid": "⚠️ Enter exactly a 5-digit code.",
+  "ch_success": "🎉 Congratulations!",
+  "ch_err_wrong": "❌ Wrong code!",
+  "ch_err_network": "❌ Network error. Try again.",
+  "ch_err_ads_sdk": "📺 Ad SDK not ready, try again.",
+  "ch_success_refill": "🎉 You earned 5 new attempts!",
+  "ch_ads_progress": "📺 {watched}/{needed} ads watched.",
+  "ch_err_ad_cancel": "📺 Ad dismissed.",
+  "ch_success_ref_link": "👥 Link sent! Your count will increase when a new referral joins."
 }

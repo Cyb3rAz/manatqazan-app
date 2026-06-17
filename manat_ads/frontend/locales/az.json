@@ -113,5 +113,25 @@
     "🚀 Hər 24 saatda +140,000 VC avtomatik",
     "💰 7 gün ərzində cəmi 7 AZN passiv qazanc",
     "💤 Heç bir düyməyə basmadan rahat qazanc"
-  ]
+  ],
+  "ch_fab_badge": "50 Qəpik qazan",
+  "ch_title": "Şifrə Ovçusu",
+  "ch_subtitle": "Gizli 5 rəqəmli şifrəni tap, <strong style=\"color:#a78bfa\">50 Qəpik</strong> qazan!",
+  "ch_status_start": "5 cəhdiniz var. Uğurlar! 🎯",
+  "ch_status_no_attempts": "⚠️ Cəhdiniz bitdi! Kilidi aç:",
+  "ch_ad_label": "12 reklam izlə",
+  "ch_ad_sub": "+5 cəhd",
+  "ch_ref_label": "5 referal gətir",
+  "ch_ref_sub": "+5 cəhd",
+  "ch_solved": "Şifrəni tapdınız! Təbriklər!",
+  "ch_err_user": "⚠️ İstifadəçi müəyyən edilmədi.",
+  "ch_err_invalid": "⚠️ Tam 5 rəqəmli kod daxil edin.",
+  "ch_success": "🎉 Təbriklər!",
+  "ch_err_wrong": "❌ Yanlış şifrə!",
+  "ch_err_network": "❌ Şəbəkə xətası. Yenidən cəhd edin.",
+  "ch_err_ads_sdk": "📺 Reklam SDK hazır deyil, yenidən cəhd edin.",
+  "ch_success_refill": "🎉 5 yeni cəhd qazandınız!",
+  "ch_ads_progress": "📺 {watched}/{needed} reklam izlənildi.",
+  "ch_err_ad_cancel": "📺 Reklam ləğv edildi.",
+  "ch_success_ref_link": "👥 Link göndərildi! Yeni referal qoşulduqda sayınız artacaq."
 }
