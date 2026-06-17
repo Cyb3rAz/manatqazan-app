@@ -2089,6 +2089,7 @@ function setupAdsgramTaskEvents() {
     const taskEl = document.getElementById("adsgram-task-block");
     if (!taskEl) return;
 
+    // Reward handler
     taskEl.addEventListener("reward", (event) => {
         console.log("Adsgram Task Reward event:", event);
         let calcAmount = 250;
@@ -2099,16 +2100,51 @@ function setupAdsgramTaskEvents() {
         showToast(t('rewardSuccess').replace('{amount}', calcAmount), "success");
     });
 
-    const hideTask = () => {
-        taskEl.style.display = 'none';
-        console.log("Adsgram Task hidden due to lack of fill or error.");
-    };
-
+    // Hide on any error/not-found event
+    const hideTask = () => { taskEl.style.display = 'none'; };
     taskEl.addEventListener("onNotFound", hideTask);
     taskEl.addEventListener("notFound", hideTask);
     taskEl.addEventListener("notfound", hideTask);
     taskEl.addEventListener("onError", hideTask);
     taskEl.addEventListener("error", hideTask);
+
+    // Watch for Adsgram injecting real content (image/link) into the shadow root
+    // If after 4 seconds the component has rendered a real task (not just skeleton),
+    // we reveal it. Otherwise keep hidden.
+    const observer = new MutationObserver(() => {
+        const shadow = taskEl.shadowRoot;
+        if (shadow) {
+            // Adsgram puts an <img> or <a> when there's a real task
+            const hasContent = shadow.querySelector('img, a[href], .task-content, [class*="task"]');
+            if (hasContent) {
+                taskEl.style.display = 'block';
+                observer.disconnect();
+            }
+        }
+    });
+
+    // Start observing after the component upgrades (slight delay)
+    setTimeout(() => {
+        if (taskEl.shadowRoot) {
+            observer.observe(taskEl.shadowRoot, { childList: true, subtree: true });
+        }
+        // Fallback: if shadow root has meaningful content after 3s, show it
+        setTimeout(() => {
+            observer.disconnect();
+            const shadow = taskEl.shadowRoot;
+            if (shadow) {
+                const html = shadow.innerHTML || '';
+                // Only show if there's real content beyond skeleton placeholders
+                const hasImg = shadow.querySelector('img');
+                const hasLink = shadow.querySelector('a[href]');
+                if (hasImg || hasLink) {
+                    taskEl.style.display = 'block';
+                } else {
+                    taskEl.style.display = 'none';
+                }
+            }
+        }, 3000);
+    }, 500);
 }
 
 // Setup the events
