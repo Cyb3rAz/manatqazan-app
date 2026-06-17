@@ -2085,36 +2085,35 @@ function switchTab(tabId) {
     }
 }
 
-function triggerAdsgramTasks() {
-    if (window.Adsgram) {
-        try {
-            const taskBlock = window.Adsgram.initTask({ blockId: "task-35451" });
-            taskBlock.show().then((result) => {
-                let calcAmount = 250;
-                if (userData && userData.vip_status) {
-                    if (userData.vip_status === "pro") calcAmount = 310;
-                    else if (userData.vip_status === "elite") calcAmount = 400;
-                }
-                showToast(t('rewardSuccess').replace('{amount}', calcAmount), "success");
-            }).catch((result) => {
-                console.log("AdsGram task failed or closed", result);
-                let errorMsg = "Tapşırıqlar aktiv deyil.";
-                if (result) {
-                    if (typeof result === 'string') errorMsg = result;
-                    else if (result.description) errorMsg = result.description;
-                    else if (result.error) errorMsg = result.error;
-                    else errorMsg = JSON.stringify(result);
-                }
-                showToast("Adsgram Cavabı: " + errorMsg, "error");
-            });
-        } catch (e) {
-            console.error("AdsGram init error:", e);
-            showToast("Tapşırıqlar hazırda aktiv deyil.", "error");
+function setupAdsgramTaskEvents() {
+    const taskEl = document.getElementById("adsgram-task-block");
+    if (!taskEl) return;
+
+    taskEl.addEventListener("reward", (event) => {
+        console.log("Adsgram Task Reward event:", event);
+        let calcAmount = 250;
+        if (userData && userData.vip_status) {
+            if (userData.vip_status === "pro") calcAmount = 310;
+            else if (userData.vip_status === "elite") calcAmount = 400;
         }
-    } else {
-        showToast("Reklam SDK-sı yüklənməyib.", "error");
-    }
+        showToast(t('rewardSuccess').replace('{amount}', calcAmount), "success");
+    });
+
+    taskEl.addEventListener("onNotFound", (event) => {
+        // Hide the button if no tasks are available
+        taskEl.style.display = 'none';
+        console.log("Adsgram Task not found (no fill). Element hidden.");
+    });
+
+    taskEl.addEventListener("onError", (event) => {
+        console.error("Adsgram Task Error:", event);
+        showToast("Tapşırıq zamanı xəta baş verdi.", "error");
+    });
 }
+
+// Setup the events
+setupAdsgramTaskEvents();
+window.addEventListener('load', setupAdsgramTaskEvents);
 
 // ── Leaderboard Logic ────────────────────────────────────────────────
 async function fetchLeaderboard() {
