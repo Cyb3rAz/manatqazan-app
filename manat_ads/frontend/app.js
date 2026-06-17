@@ -1835,7 +1835,6 @@ async function executeAdSuccessReward(sessionNum) {
             balEl.style.color = '';
         }, 400);
     }
-    }
     renderDashboard();
 
     // ── 2.5 Notify Code Hunt backend for refill ───────────
