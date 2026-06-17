@@ -2088,7 +2088,7 @@ function switchTab(tabId) {
 function triggerAdsgramTasks() {
     if (window.Adsgram) {
         try {
-            const taskBlock = window.Adsgram.init({ blockId: "task-35451" });
+            const taskBlock = window.Adsgram.initTask({ blockId: "task-35451" });
             taskBlock.show().then((result) => {
                 let calcAmount = 250;
                 if (userData && userData.vip_status) {
