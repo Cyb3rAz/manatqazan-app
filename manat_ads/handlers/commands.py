@@ -1921,7 +1921,7 @@ async def cmd_wake_preview(message: types.Message) -> None:
     )
 
 @router.message(Command("sethunt"), IsAdminFilter())
-async def cmd_sethunt(message: types.Message, session: AsyncSession) -> None:
+async def cmd_sethunt(message: types.Message) -> None:
     """Admin command to update Code Hunt secret and reward."""
     parts = message.text.split()
     if len(parts) != 3:
@@ -1946,27 +1946,29 @@ async def cmd_sethunt(message: types.Message, session: AsyncSession) -> None:
     from models import AppSetting
     from sqlalchemy import select
 
-    # Update secret
-    secret_stmt = select(AppSetting).where(AppSetting.key == "CODE_HUNT_SECRET")
-    secret_res = await session.execute(secret_stmt)
-    secret_setting = secret_res.scalar_one_or_none()
-    if not secret_setting:
-        secret_setting = AppSetting(key="CODE_HUNT_SECRET", value=new_secret)
-        session.add(secret_setting)
-    else:
-        secret_setting.value = new_secret
+    async with async_session() as session:
+        # Update secret
+        secret_stmt = select(AppSetting).where(AppSetting.key == "CODE_HUNT_SECRET")
+        secret_res = await session.execute(secret_stmt)
+        secret_setting = secret_res.scalar_one_or_none()
+        if not secret_setting:
+            secret_setting = AppSetting(key="CODE_HUNT_SECRET", value=new_secret)
+            session.add(secret_setting)
+        else:
+            secret_setting.value = new_secret
 
-    # Update reward
-    reward_stmt = select(AppSetting).where(AppSetting.key == "CODE_HUNT_REWARD_AZN")
-    reward_res = await session.execute(reward_stmt)
-    reward_setting = reward_res.scalar_one_or_none()
-    if not reward_setting:
-        reward_setting = AppSetting(key="CODE_HUNT_REWARD_AZN", value=str(new_reward))
-        session.add(reward_setting)
-    else:
-        reward_setting.value = str(new_reward)
+        # Update reward
+        reward_stmt = select(AppSetting).where(AppSetting.key == "CODE_HUNT_REWARD_AZN")
+        reward_res = await session.execute(reward_stmt)
+        reward_setting = reward_res.scalar_one_or_none()
+        if not reward_setting:
+            reward_setting = AppSetting(key="CODE_HUNT_REWARD_AZN", value=str(new_reward))
+            session.add(reward_setting)
+        else:
+            reward_setting.value = str(new_reward)
 
-    await session.commit()
+        await session.commit()
+
     await message.answer(
         f"✅ <b>Şifrə Ovçusu yeniləndi!</b>\n\n"
         f"🔐 Yeni şifrə: <b>{new_secret}</b>\n"
