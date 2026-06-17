@@ -2092,11 +2092,7 @@ function setupAdsgramTaskEvents() {
     // Reward handler
     taskEl.addEventListener("reward", (event) => {
         console.log("Adsgram Task Reward event:", event);
-        let calcAmount = 250;
-        if (userData && userData.vip_status) {
-            if (userData.vip_status === "pro") calcAmount = 310;
-            else if (userData.vip_status === "elite") calcAmount = 400;
-        }
+        let calcAmount = 150;
         showToast(t('rewardSuccess').replace('{amount}', calcAmount), "success");
     });
 
