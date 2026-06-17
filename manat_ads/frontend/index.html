@@ -2105,14 +2105,16 @@
         }
         .ch-code-input {
             flex: 1;
+            min-width: 0;
+            width: 100%;
             background: rgba(0, 0, 0, 0.25);
             border: 1px solid rgba(139,92,246,0.4);
             border-radius: 16px;
-            padding: 16px;
+            padding: 14px 12px;
             color: #fff;
-            font-size: 26px;
+            font-size: 22px;
             font-weight: 800;
-            letter-spacing: 12px;
+            letter-spacing: 6px;
             text-align: center;
             outline: none;
             font-family: 'Inter', monospace;
@@ -2152,9 +2154,9 @@
             background: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%);
             border: 1px solid rgba(168, 85, 247, 0.4);
             border-radius: 16px;
-            padding: 0 24px;
+            padding: 0 18px;
             color: #fff;
-            font-size: 20px;
+            font-size: 18px;
             font-weight: 800;
             cursor: pointer;
             transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
@@ -2163,6 +2165,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            flex-shrink: 0;
         }
         .ch-submit-btn:hover {
             box-shadow: 0 6px 24px rgba(124, 58, 237, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.3);
