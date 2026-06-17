@@ -2606,9 +2606,9 @@ function _chOverlayClick(e) {
 
 /** Fetch latest code-hunt state from user API */
 async function _chSyncState() {
-    if (!window._currentUserId) return;
+    if (!currentUser) return;
     try {
-        const resp = await fetch(`${API_BASE}/api/user/${window._currentUserId}`);
+        const resp = await fetch(`${API_BASE}/api/user/${currentUser.id}`);
         if (!resp.ok) return;
         const data = await resp.json();
 
@@ -2705,7 +2705,7 @@ function _chShakeInput() {
 /** Submit the code guess */
 async function submitCodeHunt() {
     if (_ch.submitting) return;
-    if (!window._currentUserId) {
+    if (!currentUser) {
         _chSetStatus(t('ch_err_user'), 'error');
         return;
     }
@@ -2728,7 +2728,7 @@ async function submitCodeHunt() {
         const resp = await fetch(`${API_BASE}/api/code-hunt/check`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ telegram_id: parseInt(window._currentUserId), code }),
+            body: JSON.stringify({ telegram_id: parseInt(currentUser.id), code }),
         });
         const data = await resp.json();
 
@@ -2780,7 +2780,7 @@ async function submitCodeHunt() {
 
 /** Watch an ad to unlock more attempts */
 async function codeHuntWatchAd() {
-    if (!window._currentUserId) return;
+    if (!currentUser) return;
 
     const adBtn = document.getElementById('ch-watch-ad-btn');
     if (adBtn) adBtn.disabled = true;
@@ -2799,7 +2799,7 @@ async function codeHuntWatchAd() {
         const resp = await fetch(`${API_BASE}/api/code-hunt/ad-watched`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ telegram_id: parseInt(window._currentUserId) }),
+            body: JSON.stringify({ telegram_id: parseInt(currentUser.id) }),
         });
         const data = await resp.json();
 
