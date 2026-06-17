@@ -2202,6 +2202,9 @@ async function fetchLeaderboard() {
             } else if (user.vip_status === "pro") {
                 vipBadge = `<span class="vip-badge pro">PRO</span>`;
             }
+            if (user.had_passive_vip) {
+                vipBadge += ` <span class="vip-badge">ULTRA BOOST</span>`;
+            }
 
             row.innerHTML = `
                 <span class="rank">${rankDisplay}</span>

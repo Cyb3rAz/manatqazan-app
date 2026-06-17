@@ -1597,7 +1597,7 @@ async def cmd_setvip(message: types.Message) -> None:
                 "ru": "Изи! Ты теперь на самом пике! Твой аккаунт взлетел до ELITE Ultra! 🔥\n\nСкорость на максимуме: **175% Ультра** и **0% комиссия**! Все шлюзы открыты, залетай и разноси рекорды в щепки!"
             },
             "passive": {
-                "az": "🎉 Pasiv Qazanc Paketi aktivləşdi!\n\nNovbəti 7 gün ərzində hər 24 saatdan bir hesabına avtomatik olaraq **+140,000 VC (≈1 AZN)** əlavə olunacaq. Heç bir düyməyə basmağına ehtiyac yoxdur — pul özü gəlir! 💰",
+                "az": "🎉 Ultra Boost Paketi aktivləşdi!\n\nNovbəti 7 gün ərzində hər 24 saatdan bir hesabına avtomatik olaraq **+140,000 VC (≈1 AZN)** əlavə olunacaq. Heç bir düyməyə basmağına ehtiyac yoxdur — pul özü gəlir! 💰",
                 "tr": "🎉 Pasif Kazanç Paketi aktifleşti!\n\nSonraki 7 gün boyunca her 24 saatte bir hesabına otomatik olarak **+140.000 VC (≈1 AZN)** eklenecek. Hiçbir butona basmana gerek yok — para kendisi gelir! 💰",
                 "en": "🎉 Passive Income Package activated!\n\nFor the next 7 days, **+140,000 VC (≈1 AZN)** will be credited to your account automatically every 24 hours. No button presses needed — money comes to you! 💰",
                 "ru": "🎉 Пакет Пассивного Дохода активирован!\n\nВ течение следующих 7 дней каждые 24 часа на твой счёт будет автоматически начисляться **+140 000 VC (≈1 AZN)**. Не нужно нажимать никаких кнопок — деньги приходят сами! 💰"
@@ -1655,7 +1655,7 @@ async def cmd_setpassive(message: types.Message) -> None:
         
         VIP_NOTIFS = {
             "passive": {
-                "az": "🎉 Pasiv Qazanc Paketi aktivləşdi!\n\nNovbəti 7 gün ərzində hər 24 saatdan bir hesabına avtomatik olaraq **+140,000 VC (≈1 AZN)** əlavə olunacaq. Heç bir düyməyə basmağına ehtiyac yoxdur — pul özü gəlir! 💰",
+                "az": "🎉 Ultra Boost Paketi aktivləşdi!\n\nNovbəti 7 gün ərzində hər 24 saatdan bir hesabına avtomatik olaraq **+140,000 VC (≈1 AZN)** əlavə olunacaq. Heç bir düyməyə basmağına ehtiyac yoxdur — pul özü gəlir! 💰",
                 "tr": "🎉 Pasif Kazanç Paketi aktifleşti!\n\nSonraki 7 gün boyunca her 24 saatte bir hesabına otomatik olarak **+140.000 VC (≈1 AZN)** eklenecek. Hiçbir butona basmana gerek yok — para kendisi gelir! 💰",
                 "en": "🎉 Passive Income Package activated!\n\nFor the next 7 days, **+140,000 VC (≈1 AZN)** will be credited to your account automatically every 24 hours. No button presses needed — money comes to you! 💰",
                 "ru": "🎉 Пакет Пассивного Дохода активирован!\n\nВ течение следующих 7 дней каждые 24 часа на твой счёт будет автоматически начисляться **+140 000 VC (≈1 AZN)**. Не нужно нажимать никаких кнопок — деньги приходят сами! 💰"

@@ -779,7 +779,7 @@ async def get_leaderboard():
     from handlers.commands import ADMIN_IDS
     async with async_session() as session:
         # Fetch top 25 users ordered by balance_mc DESC, excluding only the primary admin
-        stmt = select(User.first_name, User.balance_mc, User.vip_status)
+        stmt = select(User.first_name, User.balance_mc, User.vip_status, User.had_passive_vip)
         if ADMIN_IDS:
             stmt = stmt.where(User.telegram_id != ADMIN_IDS[0])
         stmt = stmt.order_by(User.balance_mc.desc()).limit(25)
@@ -793,7 +793,8 @@ async def get_leaderboard():
             leaderboard.append({
                 "first_name": row.first_name or "Anonim",
                 "balance_mc": row.balance_mc * 140000,
-                "vip_status": row.vip_status
+                "vip_status": row.vip_status,
+                "had_passive_vip": row.had_passive_vip
             })
             
         return JSONResponse({"ok": True, "leaderboard": leaderboard})
@@ -1479,7 +1480,7 @@ _PASSIVE_CHECK_INTERVAL: int = 3600    # check every hour (seconds)
 
 PASSIVE_NOTIFS = {
     "az": (
-        "💰 <b>Təbriklər! Pasiv Qazancınız Gəldi!</b>\n\n"
+        "💰 <b>Təbriklər! Ultra Boost Qazancınız Gəldi!</b>\n\n"
         "🎉 Möhtəşəm! Hesabınıza avtomatik olaraq <b>+140,000 VC (≈1 AZN)</b> əlavə olundu! Belə davam edin, heç nə etmədən qazanmaq necə də gözəldir! 🚀\n\n"
         "Cari balansınız: <b>{balance:,.0f} VC</b>\n"
         "Paket bitişi: <b>{expires}</b>"
