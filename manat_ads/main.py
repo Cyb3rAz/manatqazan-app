@@ -107,18 +107,18 @@ def _get_vip_params(vip_status: str, now: datetime) -> tuple[int, int, int]:
     Return (session_limit, daily_limit, mc_reward) for a given VIP tier.
 
     Tiers (MC_TO_AZN_RATE=140,000 | Withdrawal threshold=700,000 MC = 5 AZN):
-      free    -> session=25, daily=50, reward=150 MC
-      pro     -> session=22, daily=45, reward=150 MC
-      elite   -> session=20, daily=40, reward=150 MC
+      free    -> session=25, daily=50, reward=240 MC  (50×240=12,000 MC/day)
+      pro     -> session=22, daily=45, reward=311 MC  (45×311=13,995 MC/day)
+      elite   -> session=20, daily=40, reward=420 MC  (40×420=16,800 MC/day)
       passive -> same as free (video rewards unchanged; passive income is separate)
     """
     tier = (vip_status or "free").lower().strip()
     if tier == "pro":
-        return (22, 45, 150)
+        return (22, 45, 311)
     if tier == "elite":
-        return (20, 40, 150)
+        return (20, 40, 420)
     # passive intentionally falls through to free params
-    return (25, 50, 150)  # free / passive / fallback
+    return (25, 50, 240)  # free / passive / fallback
 
 if not commands_router.parent_router:
     dp.include_router(commands_router)
