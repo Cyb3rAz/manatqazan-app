@@ -2096,32 +2096,26 @@ function setupAdsgramTaskEvents() {
         showToast(t('rewardSuccess').replace('{amount}', calcAmount), "success");
     });
 
-    // Qırmızı nöqtə (Smart Observer)
-    const observer = new MutationObserver(() => {
+    // Qırmızı nöqtə (Smart Observer via Interval)
+    setInterval(() => {
         const shadow = taskEl.shadowRoot;
         if (shadow) {
-            // Real tapşırığın mütləq mətni olur (Məs: We pay Stars for clicks)
-            // Skelet isə boş div-lərdir, mətni olmur.
             const textContent = shadow.textContent.replace(/\s/g, '');
             const hasImg = shadow.querySelector('img');
             
-            // Əgər həqiqi mətn varsa (məsələn 10 hərfdən çox) və ya şəkil varsa
             if (textContent.length > 10 || hasImg) {
                 const dot = document.getElementById("tasks-notification-dot");
-                // Əgər istifadəçi artıq o tabda deyilsə nöqtəni yandır
                 const navTasks = document.getElementById("nav-tasks");
+                
                 if (dot && navTasks && !navTasks.classList.contains("active")) {
-                    dot.style.display = "block";
+                    // Yalnız o zaman yandır ki, hazırda Tapşırıqlar tabında deyilik
+                    if (dot.style.display !== "block") {
+                        dot.style.display = "block";
+                    }
                 }
             }
         }
-    });
-
-    setTimeout(() => {
-        if (taskEl.shadowRoot) {
-            observer.observe(taskEl.shadowRoot, { childList: true, subtree: true, characterData: true });
-        }
-    }, 1000);
+    }, 2000);
 }
 
 // Setup the events
