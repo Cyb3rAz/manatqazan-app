@@ -1474,8 +1474,35 @@ async def _midnight_broadcast_scheduler() -> None:
 
 
 # ── Passive Income Worker ───────────────────────────────────────────────
-_PASSIVE_DAILY_VC: float = 140_000.0   # 1 AZN worth of VC per day
+_PASSIVE_DAILY_AZN: float = 1.0   # 1 AZN worth of VC per day
 _PASSIVE_CHECK_INTERVAL: int = 3600    # check every hour (seconds)
+
+PASSIVE_NOTIFS = {
+    "az": (
+        "💰 <b>Təbriklər! Pasiv Qazancınız Gəldi!</b>\n\n"
+        "🎉 Möhtəşəm! Hesabınıza avtomatik olaraq <b>+140,000 VC (≈1 AZN)</b> əlavə olundu! Belə davam edin, heç nə etmədən qazanmaq necə də gözəldir! 🚀\n\n"
+        "Cari balansınız: <b>{balance:,.0f} VC</b>\n"
+        "Paket bitişi: <b>{expires}</b>"
+    ),
+    "tr": (
+        "💰 <b>Tebrikler! Pasif Kazancınız Geldi!</b>\n\n"
+        "🎉 Harika! Hesabınıza otomatik olarak <b>+140.000 VC (≈1 AZN)</b> eklendi! Böyle devam edin, hiçbir şey yapmadan kazanmak ne kadar güzel! 🚀\n\n"
+        "Mevcut bakiyeniz: <b>{balance:,.0f} VC</b>\n"
+        "Paket bitişi: <b>{expires}</b>"
+    ),
+    "en": (
+        "💰 <b>Congratulations! Your Passive Income is Here!</b>\n\n"
+        "🎉 Awesome! <b>+140,000 VC (≈1 AZN)</b> has been automatically added to your account! Keep it up, earning without doing anything is amazing! 🚀\n\n"
+        "Current balance: <b>{balance:,.0f} VC</b>\n"
+        "Package expires: <b>{expires}</b>"
+    ),
+    "ru": (
+        "💰 <b>Поздравляем! Ваш Пассивный Доход Пришел!</b>\n\n"
+        "🎉 Супер! На ваш счет автоматически зачислено <b>+140 000 VC (≈1 AZN)</b>! Так держать, зарабатывать ничего не делая — это прекрасно! 🚀\n\n"
+        "Текущий баланс: <b>{balance:,.0f} VC</b>\n"
+        "Окончание пакета: <b>{expires}</b>"
+    )
+}
 
 async def _passive_income_worker() -> None:
     """
@@ -1510,11 +1537,11 @@ async def _passive_income_worker() -> None:
                     logger.info("[PASSIVE] No eligible users for passive payout this cycle.")
                     continue
 
-                logger.info("[PASSIVE] Crediting %d user(s) with %.0f VC each.", len(users), _PASSIVE_DAILY_VC)
+                logger.info("[PASSIVE] Crediting %d user(s) with %.0f AZN each.", len(users), _PASSIVE_DAILY_AZN)
                 credited = 0
                 for user in users:
-                    user.balance_mc += _PASSIVE_DAILY_VC
-                    user.total_earned_mc += _PASSIVE_DAILY_VC
+                    user.balance_mc += _PASSIVE_DAILY_AZN
+                    user.total_earned_mc += _PASSIVE_DAILY_AZN
                     user.passive_last_paid_at = now
                     credited += 1
 
@@ -1524,14 +1551,15 @@ async def _passive_income_worker() -> None:
             # Notify credited users via Telegram (best-effort, non-blocking)
             for user in users:
                 try:
+                    user_lang = user.language if getattr(user, 'language', None) in ['az', 'tr', 'en', 'ru'] else 'en'
+                    expires_str = user.vip_expires_at.strftime('%d.%m.%Y') if user.vip_expires_at else '—'
+                    notif_text = PASSIVE_NOTIFS[user_lang].format(
+                        balance=user.balance_mc * 140000,
+                        expires=expires_str
+                    )
                     await bot.send_message(
                         chat_id=user.telegram_id,
-                        text=(
-                            f"💰 <b>Pasiv Qazancınız Gəldi!</b>\n\n"
-                            f"Hesabınıza avtomatik olaraq <b>+140,000 VC (≈1 AZN)</b> əlavə olundu. 🎉\n\n"
-                            f"Cari balansınız: <b>{user.balance_mc:,.0f} VC</b>\n"
-                            f"Paket bitişi: <b>{user.vip_expires_at.strftime('%d.%m.%Y') if user.vip_expires_at else '—'}</b>"
-                        ),
+                        text=notif_text,
                         parse_mode="HTML",
                     )
                     await asyncio.sleep(0.05)

@@ -1260,6 +1260,7 @@ ADMIN_HELP_TEXT = (
     "• /unban [ID] — Ban olunmuş şəxsin blokunu qaldırır.\n"
     "• /broadcast [Mesaj] — Bazardakı BÜTÜN istifadəçilərə kütləvi bildiriş göndərir.\n"
     "• /setvip [ID] [pro/elite] — 7 Günlük VIP təyin edər.\n"
+    "• /setpassive [ID] — 7 Günlük Passiv Qazanc təyin edər.\n"
     "• /find [Ad/Username/ID] — İstifadəçiləri axtarır.\n"
     "• /maintenance [on/off] — Texniki işlər rejimini tənzimləyir.\n\n"
     "💤 <b>Passiv İstifadəçi (Wake-Up) Əmrləri:</b>\n"
@@ -1613,6 +1614,63 @@ async def cmd_setvip(message: types.Message) -> None:
             f"✅ <b>VIP Uğurla Təyin Edildi!</b>\n"
             f"İstifadəçi: <code>{tg_id}</code>\n"
             f"Status: <b>{status.upper()}</b>\n"
+            f"Müddət: 7 Gün"
+        )
+
+
+@router.message(Command("setpassive"))
+async def cmd_setpassive(message: types.Message) -> None:
+    if not message.from_user or message.from_user.id != 1970477419:
+        return
+        
+    parts = message.text.split()
+    if len(parts) < 2:
+        await message.answer("⚠️ Format: <code>/setpassive &lt;telegram_id&gt;</code>", parse_mode="HTML")
+        return
+        
+    target = parts[1].strip()
+    status = 'passive'
+    
+    if not target.isdigit():
+        await message.answer("⚠️ Telegram ID rəqəm olmalıdır.")
+        return
+        
+    tg_id = int(target)
+    
+    async with async_session() as session:
+        stmt = select(User).where(User.telegram_id == tg_id)
+        res = await session.execute(stmt)
+        user = res.scalar_one_or_none()
+        
+        if not user:
+            await message.answer("❌ İstifadəçi tapılmadı!")
+            return
+            
+        user.vip_status = status
+        user.vip_expires_at = datetime.now(timezone.utc) + timedelta(days=7)
+        user_lang = user.language if user.language in ['az', 'tr', 'en', 'ru'] else 'en'
+        user.had_passive_vip = True
+        user.passive_last_paid_at = None
+        await session.commit()
+        
+        VIP_NOTIFS = {
+            "passive": {
+                "az": "🎉 Pasiv Qazanc Paketi aktivləşdi!\n\nNovbəti 7 gün ərzində hər 24 saatdan bir hesabına avtomatik olaraq **+140,000 VC (≈1 AZN)** əlavə olunacaq. Heç bir düyməyə basmağına ehtiyac yoxdur — pul özü gəlir! 💰",
+                "tr": "🎉 Pasif Kazanç Paketi aktifleşti!\n\nSonraki 7 gün boyunca her 24 saatte bir hesabına otomatik olarak **+140.000 VC (≈1 AZN)** eklenecek. Hiçbir butona basmana gerek yok — para kendisi gelir! 💰",
+                "en": "🎉 Passive Income Package activated!\n\nFor the next 7 days, **+140,000 VC (≈1 AZN)** will be credited to your account automatically every 24 hours. No button presses needed — money comes to you! 💰",
+                "ru": "🎉 Пакет Пассивного Дохода активирован!\n\nВ течение следующих 7 дней каждые 24 часа на твой счёт будет автоматически начисляться **+140 000 VC (≈1 AZN)**. Не нужно нажимать никаких кнопок — деньги приходят сами! 💰"
+            }
+        }
+        
+        try:
+            notif_text = VIP_NOTIFS[status][user_lang]
+            await message.bot.send_message(chat_id=tg_id, text=notif_text, parse_mode="Markdown")
+        except Exception as e:
+            logger.error("Failed to notify user %s of VIP upgrade: %s", tg_id, e)
+        
+        await message.answer(
+            f"✅ <b>Passiv Qazanc Uğurla Təyin Edildi!</b>\n"
+            f"İstifadəçi: <code>{tg_id}</code>\n"
             f"Müddət: 7 Gün"
         )
 
