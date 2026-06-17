@@ -2112,12 +2112,22 @@ function setupAdsgramTaskEvents() {
     const observer = new MutationObserver(() => {
         const shadow = taskEl.shadowRoot;
         if (shadow) {
-            // Adsgram real tapşırıq yükləyəndə şəkil və ya link qoyur
-            const hasContent = shadow.querySelector('img, a[href]');
-            if (hasContent) {
-                taskEl.style.display = 'block'; // Tapşırıq gəldi, göstər
+            // Adsgram real tapşırıq yükləyəndə adətən şəkil, ikon(svg) və ya mətn qoyur.
+            // Skelet isə boş div-lərdən ibarət olur və çox vaxt 'skeleton' class-ı daşıyır.
+            const hasMedia = shadow.querySelector('img, svg, iframe, a');
+            const textContent = shadow.textContent.replace(/\s/g, '');
+            
+            // Əgər içində mətn (kanal adı və s.) və ya media varsa, deməli realdır
+            if (hasMedia || textContent.length > 2) {
+                taskEl.style.height = 'auto';
+                taskEl.style.overflow = 'visible';
+                taskEl.style.opacity = '1';
+                taskEl.style.margin = '15px 0';
             } else {
-                taskEl.style.display = 'none'; // Boşdur, gizlət
+                taskEl.style.height = '0';
+                taskEl.style.overflow = 'hidden';
+                taskEl.style.opacity = '0';
+                taskEl.style.margin = '0';
             }
         }
     });
@@ -2125,12 +2135,16 @@ function setupAdsgramTaskEvents() {
     // Komponent yarandıqdan qısa müddət sonra izləməyə başla
     setTimeout(() => {
         if (taskEl.shadowRoot) {
-            observer.observe(taskEl.shadowRoot, { childList: true, subtree: true });
+            observer.observe(taskEl.shadowRoot, { childList: true, subtree: true, characterData: true });
             
             // İlk anda yoxlayırıq, bəlkə artıq yüklənib
-            const hasContent = taskEl.shadowRoot.querySelector('img, a[href]');
-            if (hasContent) {
-                taskEl.style.display = 'block';
+            const hasMedia = taskEl.shadowRoot.querySelector('img, svg, iframe, a');
+            const textContent = taskEl.shadowRoot.textContent.replace(/\s/g, '');
+            if (hasMedia || textContent.length > 2) {
+                taskEl.style.height = 'auto';
+                taskEl.style.overflow = 'visible';
+                taskEl.style.opacity = '1';
+                taskEl.style.margin = '15px 0';
             }
         }
     }, 500);
