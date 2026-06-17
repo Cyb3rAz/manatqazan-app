@@ -1835,7 +1835,21 @@ async function executeAdSuccessReward(sessionNum) {
             balEl.style.color = '';
         }, 400);
     }
+    }
     renderDashboard();
+
+    // ── 2.5 Notify Code Hunt backend for refill ───────────
+    try {
+        fetch(`${API_BASE}/api/code-hunt/ad-watched`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ telegram_id: parseInt(currentUser.id) })
+        }).then(r => r.json()).then(data => {
+            if (data && data.refilled) {
+                setTimeout(() => showToast(data.message || "🎁 Şifrə Ovçusu cəhdləriniz yeniləndi!", "success"), 1000);
+            }
+        }).catch(e => console.log('CH tracking err:', e));
+    } catch (e) {}
 
     // ── 3. Serverlə Sinxronizasiya ───────────────────────────
     try {
@@ -2779,45 +2793,12 @@ async function submitCodeHunt() {
 }
 
 /** Watch an ad to unlock more attempts */
-async function codeHuntWatchAd() {
-    if (!currentUser) return;
-
-    const adBtn = document.getElementById('ch-watch-ad-btn');
-    if (adBtn) adBtn.disabled = true;
-
-    // Use existing Adsgram controller
-    if (!window.AdController) {
-        _chSetStatus(t('ch_err_ads_sdk'), 'warning');
-        if (adBtn) adBtn.disabled = false;
-        return;
-    }
-
-    try {
-        await window.AdController.show();
-
-        // Notify backend
-        const resp = await fetch(`${API_BASE}/api/code-hunt/ad-watched`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ telegram_id: parseInt(currentUser.id) }),
-        });
-        const data = await resp.json();
-
-        _ch.adsWatched = data.ads_watched ?? _ch.adsWatched;
-        if (data.refilled) {
-            _ch.attempts = 5;
-            _chSetStatus(data.message || t('ch_success_refill'), 'success');
-        } else {
-            let progressMsg = t('ch_ads_progress').replace('{watched}', _ch.adsWatched).replace('{needed}', _ch.adsNeeded);
-            _chSetStatus(data.message || progressMsg, '');
-        }
-        _chRender();
-    } catch (adErr) {
-        console.warn('[CODE-HUNT-AD] Ad dismissed or error:', adErr);
-        _chSetStatus(t('ch_err_ad_cancel'), 'warning');
-    } finally {
-        if (adBtn) adBtn.disabled = false;
-    }
+function codeHuntWatchAd() {
+    closeCodeHuntModal();
+    switchTab('earn-tab');
+    setTimeout(() => {
+        showToast("Şifrə Ovçusu cəhdlərini yeniləmək üçün reklam izləyin!", "info");
+    }, 300);
 }
 
 /** Open referral share link so user can bring friends */
