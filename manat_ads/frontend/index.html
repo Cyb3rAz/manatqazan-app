@@ -1926,10 +1926,10 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 4px;
+            gap: 6px;
             cursor: pointer;
-            animation: fabFloat 3s ease-in-out infinite;
-            filter: drop-shadow(0 0 14px rgba(139, 92, 246, 0.55));
+            animation: fabFloat 4s ease-in-out infinite;
+            filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.3));
         }
 
         @keyframes fabFloat {
@@ -1938,45 +1938,42 @@
         }
 
         .fab-icon-wrapper {
-            width: 58px;
-            height: 58px;
+            width: 54px;
+            height: 54px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #7c3aed 0%, #a855f7 50%, #06b6d4 100%);
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            border: 1.5px solid rgba(6, 182, 212, 0.4);
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow:
-                0 0 0 3px rgba(139, 92, 246, 0.25),
-                0 6px 24px rgba(139, 92, 246, 0.45),
-                inset 0 1px 0 rgba(255,255,255,0.15);
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s;
         }
 
         .floating-hunt-btn:hover .fab-icon-wrapper,
         .floating-hunt-btn:active .fab-icon-wrapper {
-            transform: scale(1.08);
-            box-shadow:
-                0 0 0 4px rgba(139, 92, 246, 0.40),
-                0 8px 28px rgba(139, 92, 246, 0.60),
-                inset 0 1px 0 rgba(255,255,255,0.20);
+            transform: scale(1.05);
+            border-color: rgba(6, 182, 212, 0.8);
+            box-shadow: 0 6px 16px rgba(6, 182, 212, 0.2);
         }
 
         .hunt-svg {
-            width: 30px;
-            height: 30px;
+            width: 28px;
+            height: 28px;
         }
 
         .fab-badge {
-            font-size: 10px;
-            font-weight: 700;
-            color: #fff;
-            background: linear-gradient(90deg, #7c3aed, #06b6d4);
-            padding: 2px 8px;
-            border-radius: 99px;
+            font-size: 11px;
+            font-weight: 600;
+            color: #e2e8f0;
+            background: rgba(15, 23, 42, 0.85);
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 3px 10px;
+            border-radius: 12px;
             letter-spacing: 0.3px;
             white-space: nowrap;
-            box-shadow: 0 2px 8px rgba(124, 58, 237, 0.4);
-            animation: badgePulse 2s ease-in-out infinite;
+            backdrop-filter: blur(4px);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.4);
         }
 
         @keyframes badgePulse {
@@ -2713,16 +2710,16 @@
     ═══════════════════════════════════════════════════════════ -->
     <div id="code-hunt-fab" class="floating-hunt-btn" onclick="openCodeHuntModal()">
         <div class="fab-icon-wrapper">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#fff"
-                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="hunt-svg">
-                <path d="M21 2s-5.7 4.3-5.5 6c.2 1.7 1.3 2.8 3 3 1.7.2 6-5.5 6-5.5V2z"/>
-                <path d="M19 10l-4-4"/>
-                <rect x="2" y="12" width="14" height="10" rx="2"/>
-                <path d="M6 12v-2a3 3 0 0 1 6 0v2"/>
-                <circle cx="9" cy="17" r="1"/>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#06b6d4" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="hunt-svg">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                <circle cx="12" cy="12" r="4"></circle>
+                <path d="M12 8v-1"></path>
+                <path d="M12 17v-1"></path>
+                <path d="M16 12h1"></path>
+                <path d="M7 12h1"></path>
             </svg>
         </div>
-        <span class="fab-badge">🎁 50 Qəpik</span>
+        <span class="fab-badge">50 Qəpik qazan</span>
     </div>
 
     <!-- ═══════════════════════════════════════════════════════════
