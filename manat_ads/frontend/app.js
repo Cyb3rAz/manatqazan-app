@@ -2802,19 +2802,9 @@ function codeHuntWatchAd() {
 
 /** Open referral share link so user can bring friends */
 function codeHuntShareRef() {
-    if (!window._currentUserId) return;
-    const botUsername = (globalConfig && globalConfig.bot_username) ? globalConfig.bot_username : 'VibeCashBot';
-    const refLink = `https://t.me/${botUsername}?start=${window._currentUserId}`;
-    const shareText = encodeURIComponent(
-        '🎁 VibeCash-da 50 Qəpik qazanmaq üçün mənimlə qoşul! Gizli şifrəni tapan qazanır! 🔐'
-    );
-    const tgShareUrl = `https://t.me/share/url?url=${encodeURIComponent(refLink)}&text=${shareText}`;
-
-    if (window.Telegram && window.Telegram.WebApp) {
-        window.Telegram.WebApp.openTelegramLink(tgShareUrl);
-    } else {
-        window.open(tgShareUrl, '_blank');
-    }
-
-    _chSetStatus(t('ch_success_ref_link'), 'success');
+    closeCodeHuntModal();
+    switchTab('friends-tab');
+    setTimeout(() => {
+        showToast("Şifrə Ovçusu cəhdlərini yeniləmək üçün dostlarınızı dəvət edin!", "info");
+    }, 300);
 }
