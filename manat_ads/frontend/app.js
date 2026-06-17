@@ -2100,15 +2100,19 @@ function setupAdsgramTaskEvents() {
     setInterval(() => {
         const shadow = taskEl.shadowRoot;
         if (shadow) {
-            const textContent = shadow.textContent.replace(/\s/g, '');
+            // Real reklamlar çox vaxt iframe və ya img istifadə edir
+            const hasIframe = shadow.querySelector('iframe');
             const hasImg = shadow.querySelector('img');
+            const hasVideo = shadow.querySelector('video');
+            const textContent = shadow.textContent.replace(/\s/g, '');
             
-            if (textContent.length > 10 || hasImg) {
+            // Əgər iframe, şəkil, video varsa və ya içindəki daxili mətn 5 hərfdən uzundursa
+            // (Skelet adətən sadəcə rəngli div-lərdən ibarət olur və mətni olmur)
+            if (hasIframe || hasImg || hasVideo || textContent.length > 5) {
                 const dot = document.getElementById("tasks-notification-dot");
                 const navTasks = document.getElementById("nav-tasks");
                 
                 if (dot && navTasks && !navTasks.classList.contains("active")) {
-                    // Yalnız o zaman yandır ki, hazırda Tapşırıqlar tabında deyilik
                     if (dot.style.display !== "block") {
                         dot.style.display = "block";
                     }
