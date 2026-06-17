@@ -1353,17 +1353,10 @@ async def code_hunt_check(req: CodeHuntCheckRequest) -> JSONResponse:
         # ── 2. Limit bitibsə ──
         attempts = getattr(user, 'code_hunt_attempts', CODE_HUNT_MAX_ATTEMPTS)
         if attempts <= 0:
-            ads_left = CODE_HUNT_ADS_NEEDED - getattr(user, 'code_hunt_ads_watched', 0)
-            refs_left = CODE_HUNT_REFS_NEEDED - getattr(user, 'code_hunt_refs_brought', 0)
             return JSONResponse({
                 "ok": False,
                 "no_attempts": True,
-                "message": (
-                    f"⚠️ Cəhdiniz bitdi! Yenidən {CODE_HUNT_MAX_ATTEMPTS} cəhd qazanmaq üçün "
-                    f"ya {ads_left} video reklama baxın, ya da {refs_left} yeni adam gətirin."
-                ),
-                "ads_left": ads_left,
-                "refs_left": refs_left,
+                "message": "⚠️ Cəhdiniz bitdi! Yeni cəhd qazanmaq üçün reklam izləyin və ya dost dəvət edin."
             })
 
         # ── 3. Şifrəni yoxla ──
@@ -1431,11 +1424,11 @@ class CodeHuntAdWatchedRequest(BaseModel):
     telegram_id: int
 
 
-@app.post("/api/code-hunt/ad-watched", summary="Record a Code Hunt ad view and refill attempts if threshold reached")
+@app.post("/api/code-hunt/ad-watched", summary="Record a Code Hunt ad view and add 1 attempt")
 async def code_hunt_ad_watched(req: CodeHuntAdWatchedRequest) -> JSONResponse:
     """
     Adsgram reklamı izləndikdə çağırılır.
-    12-yə çatanda code_hunt_attempts yenidən 5 olur.
+    Hər reklam izlənişində 1 cəhd (max 5) verilir.
     """
     async with async_session() as session:
         stmt = select(User).where(User.telegram_id == req.telegram_id).with_for_update()
@@ -1445,31 +1438,24 @@ async def code_hunt_ad_watched(req: CodeHuntAdWatchedRequest) -> JSONResponse:
         if not user:
             raise HTTPException(status_code=404, detail="İstifadəçi tapılmadı.")
 
-        ads_watched = getattr(user, 'code_hunt_ads_watched', 0) + 1
         refilled = False
-        if ads_watched >= CODE_HUNT_ADS_NEEDED:
-            user.code_hunt_ads_watched = 0
-            user.code_hunt_attempts = CODE_HUNT_MAX_ATTEMPTS
+        current_attempts = getattr(user, 'code_hunt_attempts', CODE_HUNT_MAX_ATTEMPTS)
+        if current_attempts < CODE_HUNT_MAX_ATTEMPTS:
+            user.code_hunt_attempts = current_attempts + 1
             refilled = True
-        else:
-            user.code_hunt_ads_watched = ads_watched
 
         session.add(user)
         await session.commit()
 
         logger.info(
-            "[CODE-HUNT-AD] User %s watched ad. ads_watched=%d, refilled=%s",
-            req.telegram_id, ads_watched, refilled
+            "[CODE-HUNT-AD] User %s watched ad. New attempts=%d, refilled=%s",
+            req.telegram_id, user.code_hunt_attempts, refilled
         )
         return JSONResponse({
             "ok": True,
-            "ads_watched": 0 if refilled else ads_watched,
             "attempts": user.code_hunt_attempts,
             "refilled": refilled,
-            "message": (
-                f"🎉 {CODE_HUNT_MAX_ATTEMPTS} yeni cəhd qazandınız!" if refilled
-                else f"📺 {ads_watched}/{CODE_HUNT_ADS_NEEDED} reklam izlənildi."
-            ),
+            "message": "🎁 1 yeni cəhd qazandınız!" if refilled else "⚠️ Cəhdləriniz artıq tamdır."
         })
 
 

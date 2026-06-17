@@ -650,13 +650,10 @@ async def cmd_start_with_referral(message: types.Message) -> None:
                 if referrer:
                     referrer.referral_count += 1
                     # ── Code Hunt: Referal sayğacını artır ──
-                    _refs_brought = getattr(referrer, 'code_hunt_refs_brought', 0) + 1
-                    if _refs_brought >= 5:  # CODE_HUNT_REFS_NEEDED
-                        referrer.code_hunt_refs_brought = 0
-                        referrer.code_hunt_attempts = 5  # CODE_HUNT_MAX_ATTEMPTS
-                        logger.info("[CODE-HUNT-REF] User %s unlocked 5 new attempts via referrals.", referrer.telegram_id)
-                    else:
-                        referrer.code_hunt_refs_brought = _refs_brought
+                    current_attempts = getattr(referrer, 'code_hunt_attempts', 5) # Default 5
+                    if current_attempts < 5:
+                        referrer.code_hunt_attempts = current_attempts + 1
+                        logger.info("[CODE-HUNT-REF] User %s gained 1 attempt via referral.", referrer.telegram_id)
                     session.add(referrer)
                     ref_uname = f"@{referrer.username}" if referrer.username else "Namelum"
                     referrer_text = f"{ref_uname} (ID: {referrer.telegram_id})"
