@@ -743,6 +743,7 @@ async def _credit_user(user_id_val: int | str, event_id: str, source: str = "unk
             "source": source,
             "reward": final_reward,
             "new_balance": final_new_balance,
+            "new_balance_vc": int(final_new_balance * 140000),
             "videos_today": final_videos_today,
             "daily_limit": daily_limit,
         })
@@ -1276,7 +1277,12 @@ async def verify_task(req: VerifyTaskRequest) -> JSONResponse:
             logger.exception("[TASK-VERIFY] DB commit failed for user %s task %s: %s", telegram_id, req.task_id, db_err)
             return JSONResponse({"ok": False, "message": "Verilənlər bazası xətası. Yenidən cəhd edin."}, status_code=500)
 
-        return JSONResponse({"ok": True, "reward": task.reward_amount, "new_balance": new_balance})
+        return JSONResponse({
+            "ok": True, 
+            "reward": task.reward_amount, 
+            "new_balance": new_balance,
+            "new_balance_vc": int(new_balance * 140000)
+        })
 
 
 # ── Async Cooldown Notification Worker ────────────────────────────────
