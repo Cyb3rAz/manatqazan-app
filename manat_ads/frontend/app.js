@@ -2100,8 +2100,15 @@ function setupAdsgramTaskEvents() {
         showToast(t('rewardSuccess').replace('{amount}', calcAmount), "success");
     });
 
-    // Hide on any error/not-found event
-    const hideTask = () => { taskEl.style.display = 'none'; };
+    // Adsgram tapşırıq olmadığını bildirəndə gizlət,
+    // amma display:none yox, visibility:hidden — Adsgram hələ də arxa planda işləməyə davam edir
+    const hideTask = () => { 
+        taskEl.style.visibility = 'hidden'; 
+        taskEl.style.pointerEvents = 'none';
+        taskEl.style.height = '0';
+        taskEl.style.margin = '0';
+        taskEl.style.overflow = 'hidden';
+    };
     taskEl.addEventListener("onNotFound", hideTask);
     taskEl.addEventListener("notFound", hideTask);
     taskEl.addEventListener("notfound", hideTask);
