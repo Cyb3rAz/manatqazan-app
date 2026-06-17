@@ -2061,9 +2061,9 @@ function switchTab(tabId) {
         fetchTasks();
         
         // Auto-trigger AdsGram Task Wall on tab switch
-        if (window.Adsgram && globalConfig && globalConfig.adsgram_block_id) {
+        if (window.Adsgram) {
             try {
-                const taskBlock = window.Adsgram.initTask({ blockId: globalConfig.adsgram_block_id.toString() });
+                const taskBlock = window.Adsgram.initTask({ blockId: "35451" });
                 taskBlock.show().then((result) => {
                     let calcAmount = 250;
                     if (userData && userData.vip_status) {
