@@ -2102,17 +2102,23 @@ function setupAdsgramTaskEvents() {
     setInterval(() => {
         const shadow = taskEl.shadowRoot;
         if (shadow) {
-            // Real reklamlar çox vaxt iframe və ya img istifadə edir
-            const hasIframe = shadow.querySelector('iframe');
-            const hasVideo = shadow.querySelector('video');
-            const hasLink = shadow.querySelector('a');
+            // Dərin axtarış funksiyası: Bütün daxili Shadow DOM-ları gəzir və mətnləri yığır.
+            function getDeepText(root) {
+                let text = root.textContent || "";
+                const elements = root.querySelectorAll('*');
+                elements.forEach(el => {
+                    if (el.shadowRoot) {
+                        text += getDeepText(el.shadowRoot);
+                    }
+                });
+                return text;
+            }
+
+            const deepText = getDeepText(shadow);
+            const textContentNoSpaces = deepText.replace(/\s/g, '');
             
-            // Bütün boşluqları silib mətnin uzunluğunu ölçürük
-            const textContentNoSpaces = shadow.textContent.replace(/\s/g, '');
-            
-            // Skeletin "Loading" yazısı və ya placeholder şəkli ola bilər deyə 'img'-ni sildim.
-            // Real tapşırığın mətni adətən uzun olur (məsələn, 15 hərfdən çox).
-            const isRealTask = hasIframe || hasVideo || hasLink || textContentNoSpaces.length > 15;
+            // Skeletin mətni olmur (0 hərf). Real tapşırığın isə adı və izahı olur (15+ hərf).
+            const isRealTask = textContentNoSpaces.length > 15;
             
             if (isRealTask) {
                 // Əgər tapşırığı hələ görməyibsə, nöqtəni yandır
