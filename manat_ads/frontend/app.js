@@ -2098,11 +2098,14 @@ function triggerAdsgramTasks() {
                 showToast(t('rewardSuccess').replace('{amount}', calcAmount), "success");
             }).catch((result) => {
                 console.log("AdsGram task failed or closed", result);
-                if (result && result.error) {
-                    showToast("Tapşırıqlar hazırda aktiv deyil.", "error");
-                } else {
-                    showToast("Tapşırıqlar hazırda aktiv deyil.", "error");
+                let errorMsg = "Tapşırıqlar aktiv deyil.";
+                if (result) {
+                    if (typeof result === 'string') errorMsg = result;
+                    else if (result.description) errorMsg = result.description;
+                    else if (result.error) errorMsg = result.error;
+                    else errorMsg = JSON.stringify(result);
                 }
+                showToast("Adsgram Cavabı: " + errorMsg, "error");
             });
         } catch (e) {
             console.error("AdsGram init error:", e);
