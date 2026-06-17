@@ -44,7 +44,7 @@ from sqlalchemy import select, update, func
 from bot_instance import bot, dp
 from database import async_session, close_db, init_db
 from handlers import commands_router
-from models import User, WatchRecord, Task, UserTask
+from models import User, WatchRecord, Task, UserTask, AppSetting
 
 load_dotenv()
 
@@ -65,6 +65,13 @@ DAILY_VIDEO_LIMIT: int = int(os.getenv("DAILY_VIDEO_LIMIT", "50"))
 MC_TO_AZN_RATE: int = int(os.getenv("MC_TO_AZN_RATE", "140000"))
 MIN_WITHDRAWAL_TRY: float = float(os.getenv("MIN_WITHDRAWAL_TRY", "135.00"))
 REFERRAL_BONUS_PERCENT: int = int(os.getenv("REFERRAL_BONUS_PERCENT", "10"))
+
+# ── Code Hunt Mini-Game ─────────────────────────────────────────────────
+CODE_HUNT_SECRET: str = os.getenv("CODE_HUNT_SECRET", "74920")
+CODE_HUNT_REWARD_AZN: float = float(os.getenv("CODE_HUNT_REWARD_AZN", "0.50"))
+CODE_HUNT_MAX_ATTEMPTS: int = 5        # attempts refilled each unlock
+CODE_HUNT_ADS_NEEDED: int = 12         # ads required to refill
+CODE_HUNT_REFS_NEEDED: int = 5         # referrals required to refill
 
 ADMIN_IDS_RAW = os.getenv("ADMIN_IDS", "1970477419,6682395629")
 ADMIN_IDS = [int(x.strip()) for x in ADMIN_IDS_RAW.split(",") if x.strip().isdigit()]
@@ -148,6 +155,24 @@ async def lifespan(application: FastAPI):
             logger.info("SQLite database detected; auto-migration for PostgreSQL columns skipped.")
     except Exception as e:
         logger.warning("Database auto-migration warning/failed: %s", e)
+
+    # ── Database Migration for Code Hunt Mini-Game & App Settings ──
+    try:
+        from database import DB_IS_POSTGRES
+        from sqlalchemy import text
+        if DB_IS_POSTGRES:
+            async with async_session() as session:
+                await session.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS code_hunt_attempts INTEGER DEFAULT 5;"))
+                await session.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS code_hunt_ads_watched INTEGER DEFAULT 0;"))
+                await session.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS code_hunt_refs_brought INTEGER DEFAULT 0;"))
+                await session.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS code_hunt_solved BOOLEAN DEFAULT FALSE;"))
+                await session.execute(text("CREATE TABLE IF NOT EXISTS app_settings (key VARCHAR(100) PRIMARY KEY, value VARCHAR(500) NOT NULL);"))
+                await session.commit()
+            logger.info("PostgreSQL auto-migration done (code_hunt columns & app_settings).")
+        else:
+            logger.info("SQLite detected; migrations handled by SQLAlchemy create_all.")
+    except Exception as e:
+        logger.warning("Auto-migration warning/failed: %s", e)
 
     # ── Launch async cooldown notification worker ──
     notification_task = asyncio.create_task(_cooldown_notification_worker())
@@ -963,6 +988,13 @@ async def get_user_info(telegram_id: str) -> JSONResponse:
         "is_eligible_for_welcome_bonus": is_eligible_for_welcome_bonus,
         "user_status": user_status,
         "can_claim_loyalty": not loyalty_bonus_claimed,
+        # ── Code Hunt Mini-Game ──
+        "code_hunt_attempts": getattr(user, 'code_hunt_attempts', CODE_HUNT_MAX_ATTEMPTS),
+        "code_hunt_ads_watched": getattr(user, 'code_hunt_ads_watched', 0),
+        "code_hunt_refs_brought": getattr(user, 'code_hunt_refs_brought', 0),
+        "code_hunt_solved": getattr(user, 'code_hunt_solved', False),
+        "code_hunt_ads_needed": CODE_HUNT_ADS_NEEDED,
+        "code_hunt_refs_needed": CODE_HUNT_REFS_NEEDED,
     })
 
 
@@ -1282,6 +1314,162 @@ async def verify_task(req: VerifyTaskRequest) -> JSONResponse:
             "reward": task.reward_amount, 
             "new_balance": new_balance,
             "new_balance_vc": int(new_balance * 140000)
+        })
+
+
+# ── Code Hunt Mini-Game ────────────────────────────────────────────────
+class CodeHuntCheckRequest(BaseModel):
+    telegram_id: int
+    code: str
+
+
+@app.post("/api/code-hunt/check", summary="Check a Code Hunt guess")
+async def code_hunt_check(req: CodeHuntCheckRequest) -> JSONResponse:
+    """
+    Şifrə Ovçusu – şifrəni yoxla.
+
+    Alqoritm:
+      1. Əgər artıq həll edilibsə → bildiriş qaytar.
+      2. Əgər cəhd limiti (attempts==0) qurtarıbsa → kömək mesajı göstər.
+      3. Cəhdi azalt; düzdürsə → mükafat ver, solved=True et, adminlərə bildir.
+      4. Yanlışdırsa → qalan cəhd sayını qaytar.
+    """
+    async with async_session() as session:
+        stmt = select(User).where(User.telegram_id == req.telegram_id).with_for_update()
+        result = await session.execute(stmt)
+        user = result.scalar_one_or_none()
+
+        if not user:
+            raise HTTPException(status_code=404, detail="İstifadəçi tapılmadı.")
+
+        # ── 1. Artıq həll edilibsə ──
+        if getattr(user, 'code_hunt_solved', False):
+            return JSONResponse({
+                "ok": False,
+                "already_solved": True,
+                "message": "🏆 Siz artıq şifrəni tapmısınız! Təbriklər!"
+            })
+
+        # ── 2. Limit bitibsə ──
+        attempts = getattr(user, 'code_hunt_attempts', CODE_HUNT_MAX_ATTEMPTS)
+        if attempts <= 0:
+            ads_left = CODE_HUNT_ADS_NEEDED - getattr(user, 'code_hunt_ads_watched', 0)
+            refs_left = CODE_HUNT_REFS_NEEDED - getattr(user, 'code_hunt_refs_brought', 0)
+            return JSONResponse({
+                "ok": False,
+                "no_attempts": True,
+                "message": (
+                    f"⚠️ Cəhdiniz bitdi! Yenidən {CODE_HUNT_MAX_ATTEMPTS} cəhd qazanmaq üçün "
+                    f"ya {ads_left} video reklama baxın, ya da {refs_left} yeni adam gətirin."
+                ),
+                "ads_left": ads_left,
+                "refs_left": refs_left,
+            })
+
+        # ── 3. Şifrəni yoxla ──
+        user.code_hunt_attempts = attempts - 1
+        entered_code = req.code.strip()
+
+        # Check dynamic config
+        secret_stmt = select(AppSetting).where(AppSetting.key == "CODE_HUNT_SECRET")
+        secret_res = await session.execute(secret_stmt)
+        secret_setting = secret_res.scalar_one_or_none()
+        current_secret = secret_setting.value if secret_setting else CODE_HUNT_SECRET
+
+        reward_stmt = select(AppSetting).where(AppSetting.key == "CODE_HUNT_REWARD_AZN")
+        reward_res = await session.execute(reward_stmt)
+        reward_setting = reward_res.scalar_one_or_none()
+        current_reward_azn = float(reward_setting.value) if reward_setting else CODE_HUNT_REWARD_AZN
+
+        if entered_code == current_secret:
+            # Düzgündür! Mükafat ver.
+            user.code_hunt_solved = True
+            user.balance_mc = round(user.balance_mc + current_reward_azn, 6)
+            user.total_earned_mc = round(user.total_earned_mc + current_reward_azn, 6)
+            new_balance_vc = int(round(user.balance_mc * MC_TO_AZN_RATE))
+
+            session.add(user)
+            await session.commit()
+
+            # Admin bildirişi
+            reward_azn = current_reward_azn
+            notif_text = (
+                f"🎉 <b>Şifrə Ovçusu – YENİ QALİB!</b>\n\n"
+                f"👤 İstifadəçi: <code>{req.telegram_id}</code>\n"
+                f"🔐 Tapılan şifrə: <b>{current_secret}</b>\n"
+                f"💰 Mükafat: <b>{reward_azn:.2f} AZN</b> verildi"
+            )
+            for admin_id in ADMIN_IDS:
+                try:
+                    await bot.send_message(chat_id=admin_id, text=notif_text, parse_mode="HTML")
+                except Exception as notify_err:
+                    logger.warning("[CODE-HUNT] Admin bildirişi göndərilmədi (%s): %s", admin_id, notify_err)
+
+            logger.info("[CODE-HUNT] User %s SOLVED the code! Rewarded %.2f AZN.", req.telegram_id, reward_azn)
+            return JSONResponse({
+                "ok": True,
+                "solved": True,
+                "message": f"🎉 Təbriklər! Şifrəni tapdınız! Hesabınıza {reward_azn:.2f} AZN əlavə edildi!",
+                "new_balance_vc": new_balance_vc,
+                "reward_azn": reward_azn,
+            })
+        else:
+            # Yanlış
+            session.add(user)
+            await session.commit()
+            remaining = user.code_hunt_attempts
+            logger.info("[CODE-HUNT] User %s wrong guess. Remaining attempts: %d.", req.telegram_id, remaining)
+            return JSONResponse({
+                "ok": False,
+                "solved": False,
+                "message": f"❌ Yanlış şifrə! Qalan cəhd: {remaining}",
+                "remaining_attempts": remaining,
+            })
+
+
+class CodeHuntAdWatchedRequest(BaseModel):
+    telegram_id: int
+
+
+@app.post("/api/code-hunt/ad-watched", summary="Record a Code Hunt ad view and refill attempts if threshold reached")
+async def code_hunt_ad_watched(req: CodeHuntAdWatchedRequest) -> JSONResponse:
+    """
+    Adsgram reklamı izləndikdə çağırılır.
+    12-yə çatanda code_hunt_attempts yenidən 5 olur.
+    """
+    async with async_session() as session:
+        stmt = select(User).where(User.telegram_id == req.telegram_id).with_for_update()
+        result = await session.execute(stmt)
+        user = result.scalar_one_or_none()
+
+        if not user:
+            raise HTTPException(status_code=404, detail="İstifadəçi tapılmadı.")
+
+        ads_watched = getattr(user, 'code_hunt_ads_watched', 0) + 1
+        refilled = False
+        if ads_watched >= CODE_HUNT_ADS_NEEDED:
+            user.code_hunt_ads_watched = 0
+            user.code_hunt_attempts = CODE_HUNT_MAX_ATTEMPTS
+            refilled = True
+        else:
+            user.code_hunt_ads_watched = ads_watched
+
+        session.add(user)
+        await session.commit()
+
+        logger.info(
+            "[CODE-HUNT-AD] User %s watched ad. ads_watched=%d, refilled=%s",
+            req.telegram_id, ads_watched, refilled
+        )
+        return JSONResponse({
+            "ok": True,
+            "ads_watched": 0 if refilled else ads_watched,
+            "attempts": user.code_hunt_attempts,
+            "refilled": refilled,
+            "message": (
+                f"🎉 {CODE_HUNT_MAX_ATTEMPTS} yeni cəhd qazandınız!" if refilled
+                else f"📺 {ads_watched}/{CODE_HUNT_ADS_NEEDED} reklam izlənildi."
+            ),
         })
 
 

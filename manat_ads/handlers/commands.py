@@ -649,6 +649,14 @@ async def cmd_start_with_referral(message: types.Message) -> None:
                 referrer = ref_result.scalar_one_or_none()
                 if referrer:
                     referrer.referral_count += 1
+                    # ── Code Hunt: Referal sayğacını artır ──
+                    _refs_brought = getattr(referrer, 'code_hunt_refs_brought', 0) + 1
+                    if _refs_brought >= 5:  # CODE_HUNT_REFS_NEEDED
+                        referrer.code_hunt_refs_brought = 0
+                        referrer.code_hunt_attempts = 5  # CODE_HUNT_MAX_ATTEMPTS
+                        logger.info("[CODE-HUNT-REF] User %s unlocked 5 new attempts via referrals.", referrer.telegram_id)
+                    else:
+                        referrer.code_hunt_refs_brought = _refs_brought
                     session.add(referrer)
                     ref_uname = f"@{referrer.username}" if referrer.username else "Namelum"
                     referrer_text = f"{ref_uname} (ID: {referrer.telegram_id})"
@@ -1908,5 +1916,60 @@ async def cmd_wake_preview(message: types.Message) -> None:
         f"• <code>/set_wake_btn</code> — düymə yazısını dəyiş\n"
         f"• <code>/set_wake_greet</code> — salamlama cümləsini dəyiş\n"
         f"• <code>/wake_up</code> — göndər!",
+        parse_mode="HTML"
+    )
+
+@router.message(Command("sethunt"), IsAdminFilter())
+async def cmd_sethunt(message: types.Message, session: AsyncSession) -> None:
+    """Admin command to update Code Hunt secret and reward."""
+    parts = message.text.split()
+    if len(parts) != 3:
+        await message.answer(
+            "ℹ️ <b>Format:</b> <code>/sethunt &lt;5_rəqəmli_şifrə&gt; &lt;mükafat_AZN&gt;</code>\n\n"
+            "Məsələn: <code>/sethunt 74920 0.50</code>",
+            parse_mode="HTML"
+        )
+        return
+    
+    new_secret = parts[1].strip()
+    try:
+        new_reward = float(parts[2].strip())
+    except ValueError:
+        await message.answer("❌ Mükafat məbləği rəqəm olmalıdır (məs: 0.50).")
+        return
+
+    if len(new_secret) != 5 or not new_secret.isdigit():
+        await message.answer("❌ Şifrə tam 5 rəqəmdən ibarət olmalıdır.")
+        return
+
+    from models import AppSetting
+    from sqlalchemy import select
+
+    # Update secret
+    secret_stmt = select(AppSetting).where(AppSetting.key == "CODE_HUNT_SECRET")
+    secret_res = await session.execute(secret_stmt)
+    secret_setting = secret_res.scalar_one_or_none()
+    if not secret_setting:
+        secret_setting = AppSetting(key="CODE_HUNT_SECRET", value=new_secret)
+        session.add(secret_setting)
+    else:
+        secret_setting.value = new_secret
+
+    # Update reward
+    reward_stmt = select(AppSetting).where(AppSetting.key == "CODE_HUNT_REWARD_AZN")
+    reward_res = await session.execute(reward_stmt)
+    reward_setting = reward_res.scalar_one_or_none()
+    if not reward_setting:
+        reward_setting = AppSetting(key="CODE_HUNT_REWARD_AZN", value=str(new_reward))
+        session.add(reward_setting)
+    else:
+        reward_setting.value = str(new_reward)
+
+    await session.commit()
+    await message.answer(
+        f"✅ <b>Şifrə Ovçusu yeniləndi!</b>\n\n"
+        f"🔐 Yeni şifrə: <b>{new_secret}</b>\n"
+        f"💰 Mükafat: <b>{new_reward:.2f} AZN</b>\n\n"
+        f"<i>Qeyd: Dəyişiklik dərhal aktivləşdirildi.</i>",
         parse_mode="HTML"
     )

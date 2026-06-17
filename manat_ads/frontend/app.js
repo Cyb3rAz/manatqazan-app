@@ -2563,3 +2563,277 @@ function startGlobalStatsPolling() {
     }
 }
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   CODE HUNT MINI-GAME
+   Şifrə Ovçusu – 5 rəqəmli gizli şifrəni tap, 50 Qəpik qazan!
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+// Local state (synced from server on open)
+const _ch = {
+    attempts: 5,
+    adsWatched: 0,
+    refsNeeded: 5,
+    adsNeeded: 12,
+    solved: false,
+    submitting: false,
+};
+
+/** Opens the Code Hunt modal and refreshes state from /api/user */
+async function openCodeHuntModal() {
+    const overlay = document.getElementById('code-hunt-overlay');
+    if (!overlay) return;
+    overlay.classList.add('active');
+
+    // Reset input
+    const inp = document.getElementById('ch-code-input');
+    if (inp) { inp.value = ''; inp.disabled = false; }
+    _chSetStatus('', '');
+
+    // Sync state from server
+    await _chSyncState();
+}
+
+function closeCodeHuntModal() {
+    const overlay = document.getElementById('code-hunt-overlay');
+    if (overlay) overlay.classList.remove('active');
+}
+
+/** Closes modal when user taps backdrop (not the sheet itself) */
+function _chOverlayClick(e) {
+    const sheet = document.getElementById('code-hunt-sheet');
+    if (sheet && !sheet.contains(e.target)) closeCodeHuntModal();
+}
+
+/** Fetch latest code-hunt state from user API */
+async function _chSyncState() {
+    if (!window._currentUserId) return;
+    try {
+        const resp = await fetch(`${API_BASE}/api/user/${window._currentUserId}`);
+        if (!resp.ok) return;
+        const data = await resp.json();
+
+        _ch.attempts    = typeof data.code_hunt_attempts   === 'number' ? data.code_hunt_attempts   : 5;
+        _ch.adsWatched  = typeof data.code_hunt_ads_watched === 'number' ? data.code_hunt_ads_watched : 0;
+        _ch.solved      = !!data.code_hunt_solved;
+        _ch.adsNeeded   = typeof data.code_hunt_ads_needed  === 'number' ? data.code_hunt_ads_needed  : 12;
+        _ch.refsNeeded  = typeof data.code_hunt_refs_needed === 'number' ? data.code_hunt_refs_needed : 5;
+
+        _chRender();
+    } catch (err) {
+        console.error('[CODE-HUNT] Sync error:', err);
+    }
+}
+
+/** Re-render the modal based on current _ch state */
+function _chRender() {
+    _chRenderDots();
+
+    const solvedBanner  = document.getElementById('ch-solved-banner');
+    const inputBlock    = document.getElementById('ch-input-block');
+    const unlockSection = document.getElementById('ch-unlock-section');
+    const submitBtn     = document.getElementById('ch-submit-btn');
+    const inp           = document.getElementById('ch-code-input');
+
+    if (_ch.solved) {
+        if (solvedBanner)  solvedBanner.classList.add('visible');
+        if (inputBlock)    inputBlock.style.display = 'none';
+        return;
+    }
+
+    if (solvedBanner)  solvedBanner.classList.remove('visible');
+    if (inputBlock)    inputBlock.style.display = '';
+
+    if (_ch.attempts <= 0) {
+        // No attempts — show unlock buttons
+        if (unlockSection) unlockSection.classList.add('visible');
+        if (submitBtn)     submitBtn.disabled = true;
+        if (inp)           inp.disabled = true;
+
+        const adsLeft = Math.max(0, _ch.adsNeeded - _ch.adsWatched);
+        const refsLeft = _ch.refsNeeded;
+
+        const adLabel = document.getElementById('ch-ad-label');
+        const adSub   = document.getElementById('ch-ad-sub');
+        const refLabel = document.getElementById('ch-ref-label');
+        const refSub   = document.getElementById('ch-ref-sub');
+
+        if (adLabel)  adLabel.textContent  = `${adsLeft} reklam qalıb`;
+        if (adSub)    adSub.textContent    = `${_ch.adsWatched}/${_ch.adsNeeded} izləndi`;
+        if (refLabel) refLabel.textContent = `${refsLeft} referal gətir`;
+        if (refSub)   refSub.textContent   = `+5 cəhd`;
+
+        _chSetStatus(`⚠️ Cəhdiniz bitdi! Kilidi aç:`, 'warning');
+    } else {
+        if (unlockSection) unlockSection.classList.remove('visible');
+        if (submitBtn)     submitBtn.disabled = false;
+        if (inp)           inp.disabled = false;
+        _chSetStatus(`🎯 ${_ch.attempts} cəhdiniz qalıb. Uğurlar!`, '');
+    }
+}
+
+/** Render the attempt dots (filled vs empty) */
+function _chRenderDots() {
+    const row = document.getElementById('ch-attempts-row');
+    if (!row) return;
+    const total = 5;
+    row.innerHTML = '';
+    for (let i = 0; i < total; i++) {
+        const dot = document.createElement('div');
+        dot.className = 'ch-attempt-dot' + (i < _ch.attempts ? '' : ' empty');
+        row.appendChild(dot);
+    }
+}
+
+/** Set the status line */
+function _chSetStatus(msg, type) {
+    const el = document.getElementById('ch-status');
+    if (!el) return;
+    el.textContent = msg;
+    el.className = 'ch-status' + (type ? ` ${type}` : '');
+}
+
+/** Shake the input on error */
+function _chShakeInput() {
+    const inp = document.getElementById('ch-code-input');
+    if (!inp) return;
+    inp.classList.remove('shake');
+    void inp.offsetWidth; // reflow
+    inp.classList.add('shake');
+    setTimeout(() => inp.classList.remove('shake'), 450);
+}
+
+/** Submit the code guess */
+async function submitCodeHunt() {
+    if (_ch.submitting) return;
+    if (!window._currentUserId) {
+        _chSetStatus('⚠️ İstifadəçi müəyyən edilmədi.', 'error');
+        return;
+    }
+
+    const inp = document.getElementById('ch-code-input');
+    if (!inp) return;
+    const code = inp.value.trim();
+
+    if (!code || code.length !== 5 || !/^\d{5}$/.test(code)) {
+        _chSetStatus('⚠️ Tam 5 rəqəmli kod daxil edin.', 'error');
+        _chShakeInput();
+        return;
+    }
+
+    _ch.submitting = true;
+    const btn = document.getElementById('ch-submit-btn');
+    if (btn) btn.disabled = true;
+
+    try {
+        const resp = await fetch(`${API_BASE}/api/code-hunt/check`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ telegram_id: parseInt(window._currentUserId), code }),
+        });
+        const data = await resp.json();
+
+        if (data.already_solved) {
+            _ch.solved = true;
+            _chRender();
+            return;
+        }
+
+        if (data.no_attempts) {
+            _ch.attempts = 0;
+            _chRender();
+            return;
+        }
+
+        if (data.solved) {
+            // ✅ Correct!
+            _ch.solved = true;
+            _chRender();
+            _chSetStatus(data.message || '🎉 Təbriklər!', 'success');
+
+            // Fire confetti 🎊
+            if (window.confetti) {
+                confetti({ particleCount: 180, spread: 90, origin: { y: 0.5 } });
+                setTimeout(() => confetti({ particleCount: 100, spread: 120, origin: { y: 0.6 } }), 400);
+            }
+
+            // Refresh balance UI
+            if (typeof loadUserData === 'function') {
+                setTimeout(() => loadUserData(), 1200);
+            }
+        } else {
+            // ❌ Wrong
+            _ch.attempts = typeof data.remaining_attempts === 'number' ? data.remaining_attempts : Math.max(0, _ch.attempts - 1);
+            _chShakeInput();
+            _chRender();
+            _chSetStatus(data.message || '❌ Yanlış şifrə!', 'error');
+            inp.value = '';
+            inp.focus();
+        }
+    } catch (err) {
+        console.error('[CODE-HUNT] Submit error:', err);
+        _chSetStatus('❌ Şəbəkə xətası. Yenidən cəhd edin.', 'error');
+    } finally {
+        _ch.submitting = false;
+        if (btn && _ch.attempts > 0 && !_ch.solved) btn.disabled = false;
+    }
+}
+
+/** Watch an ad to unlock more attempts */
+async function codeHuntWatchAd() {
+    if (!window._currentUserId) return;
+
+    const adBtn = document.getElementById('ch-watch-ad-btn');
+    if (adBtn) adBtn.disabled = true;
+
+    // Use existing Adsgram controller
+    if (!window.AdController) {
+        _chSetStatus('📺 Reklam SDK hazır deyil, yenidən cəhd edin.', 'warning');
+        if (adBtn) adBtn.disabled = false;
+        return;
+    }
+
+    try {
+        await window.AdController.show();
+
+        // Notify backend
+        const resp = await fetch(`${API_BASE}/api/code-hunt/ad-watched`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ telegram_id: parseInt(window._currentUserId) }),
+        });
+        const data = await resp.json();
+
+        _ch.adsWatched = data.ads_watched ?? _ch.adsWatched;
+        if (data.refilled) {
+            _ch.attempts = 5;
+            _chSetStatus(data.message || '🎉 5 yeni cəhd qazandınız!', 'success');
+        } else {
+            _chSetStatus(data.message || `📺 ${_ch.adsWatched}/${_ch.adsNeeded} reklam izlənildi.`, '');
+        }
+        _chRender();
+    } catch (adErr) {
+        console.warn('[CODE-HUNT-AD] Ad dismissed or error:', adErr);
+        _chSetStatus('📺 Reklam ləğv edildi.', 'warning');
+    } finally {
+        if (adBtn) adBtn.disabled = false;
+    }
+}
+
+/** Open referral share link so user can bring friends */
+function codeHuntShareRef() {
+    if (!window._currentUserId) return;
+    const botUsername = (globalConfig && globalConfig.bot_username) ? globalConfig.bot_username : 'VibeCashBot';
+    const refLink = `https://t.me/${botUsername}?start=${window._currentUserId}`;
+    const shareText = encodeURIComponent(
+        '🎁 VibeCash-da 50 Qəpik qazanmaq üçün mənimlə qoşul! Gizli şifrəni tapan qazanır! 🔐'
+    );
+    const tgShareUrl = `https://t.me/share/url?url=${encodeURIComponent(refLink)}&text=${shareText}`;
+
+    if (window.Telegram && window.Telegram.WebApp) {
+        window.Telegram.WebApp.openTelegramLink(tgShareUrl);
+    } else {
+        window.open(tgShareUrl, '_blank');
+    }
+
+    _chSetStatus('👥 Link göndərildi! Yeni referal qoşulduqda sayınız artacaq.', 'success');
+}

@@ -4,6 +4,12 @@ ManatAds – SQLAlchemy ORM Models
 Tables:
   • users          – Telegram user profiles + referral tracking.
   • watch_records  – Per-video reward ledger (audit trail).
+
+Code Hunt Mini-Game columns (on users table):
+  • code_hunt_attempts      – Remaining guess attempts (default 5).
+  • code_hunt_ads_watched   – Ads watched to refill attempts.
+  • code_hunt_refs_brought  – Referrals brought to refill attempts.
+  • code_hunt_solved        – Whether user has found the secret code.
 """
 
 from __future__ import annotations
@@ -72,6 +78,12 @@ class User(Base):
     )
     referral_earnings_mc: Mapped[float] = mapped_column(Float, default=0.0, server_default="0")
     referral_count: Mapped[int] = mapped_column(Integer, default=0, server_default="0")
+
+    # ── Code Hunt Mini-Game ──
+    code_hunt_attempts: Mapped[int] = mapped_column(Integer, default=5, server_default="5")
+    code_hunt_ads_watched: Mapped[int] = mapped_column(Integer, default=0, server_default="0")
+    code_hunt_refs_brought: Mapped[int] = mapped_column(Integer, default=0, server_default="0")
+    code_hunt_solved: Mapped[bool] = mapped_column(Boolean, default=False, server_default="0")
 
     # ── Timestamps ──
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, server_default="1")
@@ -167,3 +179,14 @@ class UserTask(Base):
 
     def __repr__(self) -> str:
         return f"<UserTask user_id={self.user_id} task_id={self.task_id}>"
+
+
+# ── App Settings ───────────────────────────────────────────────────────
+class AppSetting(Base):
+    __tablename__ = "app_settings"
+
+    key: Mapped[str] = mapped_column(String(100), primary_key=True)
+    value: Mapped[str] = mapped_column(String(500), nullable=False)
+
+    def __repr__(self) -> str:
+        return f"<AppSetting key={self.key} value={self.value}>"
