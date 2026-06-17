@@ -2108,46 +2108,6 @@ function setupAdsgramTaskEvents() {
     taskEl.addEventListener("onError", hideTask);
     taskEl.addEventListener("error", hideTask);
 
-    // Davamlı olaraq izləyirik ki, əgər arxada tapşırıq gələrsə avtomatik görünsün
-    const observer = new MutationObserver(() => {
-        const shadow = taskEl.shadowRoot;
-        if (shadow) {
-            // Adsgram real tapşırıq yükləyəndə adətən şəkil, ikon(svg) və ya mətn qoyur.
-            // Skelet isə boş div-lərdən ibarət olur və çox vaxt 'skeleton' class-ı daşıyır.
-            const hasMedia = shadow.querySelector('img, svg, iframe, a');
-            const textContent = shadow.textContent.replace(/\s/g, '');
-            
-            // Əgər içində mətn (kanal adı və s.) və ya media varsa, deməli realdır
-            if (hasMedia || textContent.length > 2) {
-                taskEl.style.height = 'auto';
-                taskEl.style.overflow = 'visible';
-                taskEl.style.opacity = '1';
-                taskEl.style.margin = '15px 0';
-            } else {
-                taskEl.style.height = '0';
-                taskEl.style.overflow = 'hidden';
-                taskEl.style.opacity = '0';
-                taskEl.style.margin = '0';
-            }
-        }
-    });
-
-    // Komponent yarandıqdan qısa müddət sonra izləməyə başla
-    setTimeout(() => {
-        if (taskEl.shadowRoot) {
-            observer.observe(taskEl.shadowRoot, { childList: true, subtree: true, characterData: true });
-            
-            // İlk anda yoxlayırıq, bəlkə artıq yüklənib
-            const hasMedia = taskEl.shadowRoot.querySelector('img, svg, iframe, a');
-            const textContent = taskEl.shadowRoot.textContent.replace(/\s/g, '');
-            if (hasMedia || textContent.length > 2) {
-                taskEl.style.height = 'auto';
-                taskEl.style.overflow = 'visible';
-                taskEl.style.opacity = '1';
-                taskEl.style.margin = '15px 0';
-            }
-        }
-    }, 500);
 }
 
 // Setup the events
