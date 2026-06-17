@@ -2060,24 +2060,7 @@ function switchTab(tabId) {
         if (navLeaderboard) navLeaderboard.classList.remove("active");
         fetchTasks();
         
-        // Auto-trigger AdsGram Task Wall on tab switch
-        if (window.Adsgram) {
-            try {
-                const taskBlock = window.Adsgram.initTask({ blockId: "35451" });
-                taskBlock.show().then((result) => {
-                    let calcAmount = 250;
-                    if (userData && userData.vip_status) {
-                        if (userData.vip_status === "pro") calcAmount = 310;
-                        else if (userData.vip_status === "elite") calcAmount = 400;
-                    }
-                    showToast(t('rewardSuccess').replace('{amount}', calcAmount), "success");
-                }).catch((result) => {
-                    console.log("AdsGram task failed or closed", result);
-                });
-            } catch (e) {
-                console.error("AdsGram init error:", e);
-            }
-        }
+        // Auto-trigger removed: moved to manual button trigger below
     } else if (tabId === 'store') {
         mainTab.style.display = "none";
         tasksTab.style.display = "none";
@@ -2099,6 +2082,32 @@ function switchTab(tabId) {
         if (navTasks) navTasks.classList.remove("active");
         if (navStore) navStore.classList.remove("active");
         fetchLeaderboard();
+    }
+}
+
+function triggerAdsgramTasks() {
+    if (window.Adsgram) {
+        try {
+            const taskBlock = window.Adsgram.initTask({ blockId: "35451" });
+            taskBlock.show().then((result) => {
+                let calcAmount = 250;
+                if (userData && userData.vip_status) {
+                    if (userData.vip_status === "pro") calcAmount = 310;
+                    else if (userData.vip_status === "elite") calcAmount = 400;
+                }
+                showToast(t('rewardSuccess').replace('{amount}', calcAmount), "success");
+            }).catch((result) => {
+                console.log("AdsGram task failed or closed", result);
+                if (result && result.error) {
+                    showToast("Task error: " + result.error, "error");
+                }
+            });
+        } catch (e) {
+            console.error("AdsGram init error:", e);
+            showToast("Adsgram tapşırıqları aktiv deyil.", "error");
+        }
+    } else {
+        showToast("Reklam SDK-sı yüklənməyib.", "error");
     }
 }
 
