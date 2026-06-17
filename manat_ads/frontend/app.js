@@ -2096,6 +2096,8 @@ function setupAdsgramTaskEvents() {
         showToast(t('rewardSuccess').replace('{amount}', calcAmount), "success");
     });
 
+    let taskSeen = false;
+
     // Qırmızı nöqtə (Smart Observer via Interval)
     setInterval(() => {
         const shadow = taskEl.shadowRoot;
@@ -2106,20 +2108,37 @@ function setupAdsgramTaskEvents() {
             const hasVideo = shadow.querySelector('video');
             const textContent = shadow.textContent.replace(/\s/g, '');
             
-            // Əgər iframe, şəkil, video varsa və ya içindəki daxili mətn 5 hərfdən uzundursa
-            // (Skelet adətən sadəcə rəngli div-lərdən ibarət olur və mətni olmur)
-            if (hasIframe || hasImg || hasVideo || textContent.length > 5) {
-                const dot = document.getElementById("tasks-notification-dot");
-                const navTasks = document.getElementById("nav-tasks");
-                
-                if (dot && navTasks && !navTasks.classList.contains("active")) {
-                    if (dot.style.display !== "block") {
-                        dot.style.display = "block";
+            const isRealTask = hasIframe || hasImg || hasVideo || textContent.length > 5;
+            
+            if (isRealTask) {
+                // Əgər tapşırığı hələ görməyibsə, nöqtəni yandır
+                if (!taskSeen) {
+                    const dot = document.getElementById("tasks-notification-dot");
+                    const navTasks = document.getElementById("nav-tasks");
+                    
+                    if (dot && navTasks && !navTasks.classList.contains("active")) {
+                        if (dot.style.display !== "block") {
+                            dot.style.display = "block";
+                        }
                     }
                 }
+            } else {
+                // Tapşırıq yoxdur (Skeletdir). 
+                // Növbəti dəfə yeni tapşırıq gələndə xəbər etməsi üçün "görüldü" statusunu sıfırlayırıq.
+                taskSeen = false;
             }
         }
     }, 2000);
+
+    // İstifadəçi "Tapşırıqlar" menyusuna basanda nöqtəni söndür və "gördü" kimi işarələ
+    const navTasksBtn = document.getElementById("nav-tasks");
+    if (navTasksBtn) {
+        navTasksBtn.addEventListener('click', () => {
+            const dot = document.getElementById("tasks-notification-dot");
+            if (dot) dot.style.display = "none";
+            taskSeen = true;
+        });
+    }
 }
 
 // Setup the events
