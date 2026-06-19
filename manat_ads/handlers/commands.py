@@ -1266,6 +1266,8 @@ ADMIN_HELP_TEXT = (
     "• /broadcast [Mesaj] — Bazardakı BÜTÜN istifadəçilərə kütləvi bildiriş göndərir.\n"
     "• /setvip [ID] [pro/elite] — 7 Günlük VIP təyin edər.\n"
     "• /setpassive [ID] — 7 Günlük Passiv Qazanc təyin edər.\n"
+    "• /revokevip [ID] — İstifadəçinin PRO/ELITE paketini vaxtından əvvəl ləğv edir.\n"
+    "• /revokepassive [ID] — İstifadəçinin Ultra Boost paketini vaxtından əvvəl ləğv edir.\n"
     "• /find [Ad/Username/ID] — İstifadəçiləri axtarır.\n"
     "• /maintenance [on/off] — Texniki işlər rejimini tənzimləyir.\n"
     "• /sethunt [5_rəqəm] [AZN] — Şifrə Ovçusu oyununun şifrəsini və mükafatını dəyişir.\n\n"
@@ -1683,6 +1685,175 @@ async def cmd_setpassive(message: types.Message) -> None:
             f"İstifadəçi: <code>{tg_id}</code>\n"
             f"Müddət: 7 Gün"
         )
+
+
+@router.message(Command("revokevip"), IsAdminFilter())
+async def cmd_revokevip(message: types.Message) -> None:
+    """Admin: İstifadəçinin PRO/ELITE VIP paketini vaxtından əvvəl ləğv et."""
+    parts = message.text.split()
+    if len(parts) < 2:
+        await message.answer(
+            "⚠️ Format: <code>/revokevip &lt;telegram_id&gt;</code>\n"
+            "Məsələn: <code>/revokevip 1970477419</code>",
+            parse_mode="HTML"
+        )
+        return
+
+    target = parts[1].strip()
+    if not target.isdigit():
+        await message.answer("⚠️ Telegram ID rəqəm olmalıdır.")
+        return
+
+    tg_id = int(target)
+
+    async with async_session() as session:
+        stmt = select(User).where(User.telegram_id == tg_id)
+        res = await session.execute(stmt)
+        user = res.scalar_one_or_none()
+
+        if not user:
+            await message.answer("❌ İstifadəçi tapılmadı!")
+            return
+
+        old_status = user.vip_status or "free"
+
+        if old_status not in ("pro", "elite"):
+            await message.answer(
+                f"⚠️ Bu istifadəçinin aktiv PRO/ELITE paketi yoxdur.\n"
+                f"Cari status: <b>{old_status.upper()}</b>",
+                parse_mode="HTML"
+            )
+            return
+
+        user.vip_status = "free"
+        user.vip_expires_at = None
+        user_lang = user.language if user.language in ("az", "tr", "en", "ru") else "en"
+        await session.commit()
+
+    REVOKE_NOTIFS = {
+        "az": (
+            "⚠️ <b>VIP Paketiniz Ləğv Edildi</b>\n\n"
+            "Hesabınızdakı <b>{tier}</b> paketi admin tərəfindən vaxtından əvvəl ləğv edildi.\n"
+            "Hesabınız standart <b>FREE</b> rejiminə qaytarıldı.\n\n"
+            "Ətraflı məlumat üçün dəstək komandası ilə əlaqə saxlayın."
+        ),
+        "tr": (
+            "⚠️ <b>VIP Paketiniz İptal Edildi</b>\n\n"
+            "Hesabınızdaki <b>{tier}</b> paketi admin tarafından erken iptal edildi.\n"
+            "Hesabınız standart <b>FREE</b> moduna geri döndürüldü.\n\n"
+            "Ayrıntılar için destek ekibiyle iletişime geçin."
+        ),
+        "en": (
+            "⚠️ <b>Your VIP Package Has Been Revoked</b>\n\n"
+            "Your <b>{tier}</b> package was cancelled early by an administrator.\n"
+            "Your account has been reverted to standard <b>FREE</b> mode.\n\n"
+            "Contact support for more details."
+        ),
+        "ru": (
+            "⚠️ <b>Ваш VIP-пакет аннулирован</b>\n\n"
+            "Ваш пакет <b>{tier}</b> был досрочно отменён администратором.\n"
+            "Ваш аккаунт возвращён в стандартный режим <b>FREE</b>.\n\n"
+            "Свяжитесь со службой поддержки для получения подробной информации."
+        ),
+    }
+
+    try:
+        notif_text = REVOKE_NOTIFS[user_lang].format(tier=old_status.upper())
+        await message.bot.send_message(chat_id=tg_id, text=notif_text, parse_mode="HTML")
+    except Exception as e:
+        logger.error("Failed to notify user %s of VIP revoke: %s", tg_id, e)
+
+    await message.answer(
+        f"✅ <b>VIP Paketi Ləğv Edildi!</b>\n\n"
+        f"👤 İstifadəçi: <code>{tg_id}</code>\n"
+        f"❌ Ləğv edilən status: <b>{old_status.upper()}</b>\n"
+        f"🆓 Yeni status: <b>FREE</b>",
+        parse_mode="HTML"
+    )
+
+
+@router.message(Command("revokepassive"), IsAdminFilter())
+async def cmd_revokepassive(message: types.Message) -> None:
+    """Admin: İstifadəçinin Ultra Boost (passiv qazanc) paketini vaxtından əvvəl ləğv et."""
+    parts = message.text.split()
+    if len(parts) < 2:
+        await message.answer(
+            "⚠️ Format: <code>/revokepassive &lt;telegram_id&gt;</code>\n"
+            "Məsələn: <code>/revokepassive 1970477419</code>",
+            parse_mode="HTML"
+        )
+        return
+
+    target = parts[1].strip()
+    if not target.isdigit():
+        await message.answer("⚠️ Telegram ID rəqəm olmalıdır.")
+        return
+
+    tg_id = int(target)
+
+    async with async_session() as session:
+        stmt = select(User).where(User.telegram_id == tg_id)
+        res = await session.execute(stmt)
+        user = res.scalar_one_or_none()
+
+        if not user:
+            await message.answer("❌ İstifadəçi tapılmadı!")
+            return
+
+        if (user.vip_status or "free") != "passive":
+            await message.answer(
+                f"⚠️ Bu istifadəçinin aktiv Ultra Boost paketi yoxdur.\n"
+                f"Cari status: <b>{(user.vip_status or 'free').upper()}</b>",
+                parse_mode="HTML"
+            )
+            return
+
+        user.vip_status = "free"
+        user.vip_expires_at = None
+        user.passive_last_paid_at = None
+        user_lang = user.language if user.language in ("az", "tr", "en", "ru") else "en"
+        await session.commit()
+
+    REVOKE_PASSIVE_NOTIFS = {
+        "az": (
+            "⚠️ <b>Ultra Boost Paketiniz Ləğv Edildi</b>\n\n"
+            "Hesabınızdakı passiv qazanc paketi admin tərəfindən vaxtından əvvəl ləğv edildi.\n"
+            "Artıq avtomatik VC ödənişi dayandırılıb.\n\n"
+            "Ətraflı məlumat üçün dəstək komandası ilə əlaqə saxlayın."
+        ),
+        "tr": (
+            "⚠️ <b>Ultra Boost Paketiniz İptal Edildi</b>\n\n"
+            "Hesabınızdaki pasif kazanç paketi admin tarafından erken iptal edildi.\n"
+            "Otomatik VC ödemeleri durduruldu.\n\n"
+            "Ayrıntılar için destek ekibiyle iletişime geçin."
+        ),
+        "en": (
+            "⚠️ <b>Your Ultra Boost Package Has Been Revoked</b>\n\n"
+            "Your passive income package was cancelled early by an administrator.\n"
+            "Automatic VC payments have been stopped.\n\n"
+            "Contact support for more details."
+        ),
+        "ru": (
+            "⚠️ <b>Ваш Ultra Boost аннулирован</b>\n\n"
+            "Ваш пакет пассивного дохода был досрочно отменён администратором.\n"
+            "Автоматические VC-выплаты остановлены.\n\n"
+            "Свяжитесь со службой поддержки для получения подробной информации."
+        ),
+    }
+
+    try:
+        notif_text = REVOKE_PASSIVE_NOTIFS[user_lang]
+        await message.bot.send_message(chat_id=tg_id, text=notif_text, parse_mode="HTML")
+    except Exception as e:
+        logger.error("Failed to notify user %s of passive revoke: %s", tg_id, e)
+
+    await message.answer(
+        f"✅ <b>Ultra Boost Paketi Ləğv Edildi!</b>\n\n"
+        f"👤 İstifadəçi: <code>{tg_id}</code>\n"
+        f"❌ Passiv qazanc dayandırıldı\n"
+        f"🆓 Yeni status: <b>FREE</b>",
+        parse_mode="HTML"
+    )
 
 
 @router.message(Command("find"), IsAdminFilter())
