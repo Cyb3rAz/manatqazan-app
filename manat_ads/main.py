@@ -174,6 +174,20 @@ async def lifespan(application: FastAPI):
     except Exception as e:
         logger.warning("Auto-migration warning/failed: %s", e)
 
+    # ── Database Migration for Campaign Leaderboard ──
+    try:
+        from database import DB_IS_POSTGRES
+        from sqlalchemy import text
+        if DB_IS_POSTGRES:
+            async with async_session() as session:
+                await session.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS campaign_score FLOAT DEFAULT 0;"))
+                await session.commit()
+            logger.info("PostgreSQL auto-migration done (campaign_score).")
+        else:
+            logger.info("SQLite detected; campaign_score migration handled by SQLAlchemy create_all.")
+    except Exception as e:
+        logger.warning("Campaign leaderboard migration warning/failed: %s", e)
+
     # ── Launch async cooldown notification worker ──
     notification_task = asyncio.create_task(_cooldown_notification_worker())
     application.state.notification_task = notification_task
@@ -694,10 +708,11 @@ async def _credit_user(user_id_val: int | str, event_id: str, source: str = "unk
             # residual race if the application-layer lock is ever bypassed.
             final_reward = round(float(mc_reward) / MC_TO_AZN_RATE, 6)
             old_balance = user.balance_mc
-            user.balance_mc      = round(old_balance + final_reward, 6)
-            user.total_earned_mc = round(user.total_earned_mc + final_reward, 6)
-            user.videos_today    = user.session_1_count + user.session_2_count
-            user.last_watch_date = now
+            user.balance_mc        = round(old_balance + final_reward, 6)
+            user.total_earned_mc   = round(user.total_earned_mc + final_reward, 6)
+            user.campaign_score    = round(user.campaign_score + final_reward, 6)  # ✔ Kampaniya xalı
+            user.videos_today      = user.session_1_count + user.session_2_count
+            user.last_watch_date   = now
 
             # Deyerleri cixmadan yadda saxla
             final_new_balance = user.balance_mc
@@ -730,6 +745,7 @@ async def _credit_user(user_id_val: int | str, event_id: str, source: str = "unk
                         referrer.balance_mc           = round(referrer.balance_mc + referrer_bonus, 6)
                         referrer.total_earned_mc      = round(referrer.total_earned_mc + referrer_bonus, 6)
                         referrer.referral_earnings_mc = round(referrer.referral_earnings_mc + referrer_bonus, 6)
+                        referrer.campaign_score       = round(referrer.campaign_score + referrer_bonus, 6)  # ✔ Referal kampaniya xalı
                         session.add(referrer)
                         print(f"[CREDIT] Referral bonus {referrer_bonus:.6f} AZN -> user {referrer_tg_id}")
                         logger.info("[CREDIT] Referral bonus %.2f MC -> user %s", referrer_bonus, referrer_tg_id)

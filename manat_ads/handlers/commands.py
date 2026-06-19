@@ -1973,3 +1973,66 @@ async def cmd_sethunt(message: types.Message) -> None:
         f"<i>Qeyd: Dəyişiklik dərhal aktivləşdirildi.</i>",
         parse_mode="HTML"
     )
+
+
+# ── Campaign Leaderboard – Admin Commands ──────────────────────────────
+
+@router.message(Command("camp_start", "camp_reset"), IsAdminFilter())
+async def cmd_camp_start(message: types.Message) -> None:
+    """Admin: Bütün istifadəçilərin campaign_score-nu sıfırla və yeni yarışma başlat."""
+    from sqlalchemy import update as sa_update
+    from models import User
+
+    async with async_session() as session:
+        await session.execute(sa_update(User).values(campaign_score=0.0))
+        await session.commit()
+
+    await message.answer(
+        "✅ <b>Bütün kampaniya xalları sıfırlandı.</b>\n"
+        "🏁 Yeni yarışma başladı!\n\n"
+        "<i>Liderlik cədvəlini görmək üçün /camp_top əmrindən istifadə edin.</i>",
+        parse_mode="HTML",
+    )
+
+
+@router.message(Command("camp_top"), IsAdminFilter())
+async def cmd_camp_top(message: types.Message) -> None:
+    """Admin: campaign_score > 0 olan ilk 10 istifadəçini göstər."""
+    from sqlalchemy import select as sa_select, desc
+    from models import User
+
+    async with async_session() as session:
+        stmt = (
+            sa_select(User.telegram_id, User.username, User.first_name, User.campaign_score)
+            .where(User.campaign_score > 0)
+            .order_by(desc(User.campaign_score))
+            .limit(10)
+        )
+        result = await session.execute(stmt)
+        rows = result.fetchall()
+
+    if not rows:
+        await message.answer(
+            "📭 <b>Hələ ki heç bir kampaniya xalı yoxdur.</b>\n"
+            "<i>Kampaniya başlatmaq üçün /camp_start əmrindən istifadə edin.</i>",
+            parse_mode="HTML",
+        )
+        return
+
+    mc_to_azn = int(os.getenv("MC_TO_AZN_RATE", "140000"))
+
+    lines = ["🏆 <b>Cari Kampaniya Liderləri:</b>\n"]
+    medals = ["🥇", "🥈", "🥉"]
+    for rank, row in enumerate(rows, start=1):
+        medal = medals[rank - 1] if rank <= 3 else f"{rank}."
+        uname = f"@{row.username}" if row.username else "N/A"
+        vc_score = int(round(row.campaign_score * mc_to_azn))
+        lines.append(
+            f"{medal} ID: <code>{row.telegram_id}</code> | "
+            f"User: {uname} | "
+            f"Xal: <b>{vc_score:,} VC</b>"
+        )
+
+    lines.append("\n<i>Sıfırlamaq üçün /camp_start əmrindən istifadə edin.</i>")
+
+    await message.answer("\n".join(lines), parse_mode="HTML")

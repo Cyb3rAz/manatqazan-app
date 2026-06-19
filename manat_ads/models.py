@@ -10,6 +10,10 @@ Code Hunt Mini-Game columns (on users table):
   • code_hunt_ads_watched   – Ads watched to refill attempts.
   • code_hunt_refs_brought  – Referrals brought to refill attempts.
   • code_hunt_solved        – Whether user has found the secret code.
+
+Campaign Leaderboard column (on users table):
+  • campaign_score          – Xallar yalnız kampaniya müddətində yığılır (Adsgram
+                              reklamı + referal bonusu). Admin /camp_start ilə sıfırlanır.
 """
 
 from __future__ import annotations
@@ -84,6 +88,11 @@ class User(Base):
     code_hunt_ads_watched: Mapped[int] = mapped_column(Integer, default=0, server_default="0")
     code_hunt_refs_brought: Mapped[int] = mapped_column(Integer, default=0, server_default="0")
     code_hunt_solved: Mapped[bool] = mapped_column(Boolean, default=False, server_default="0")
+
+    # ── Campaign Leaderboard ──
+    # Yalnız istifadəçinin öz aktivliyi ilə qazandığı xallar (Adsgram + referal bonus).
+    # Admin /camp_start əmri ilə sıfırlanır; ümumi balansa toxunmur.
+    campaign_score: Mapped[float] = mapped_column(Float, default=0.0, server_default="0")
 
     # ── Timestamps ──
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, server_default="1")
